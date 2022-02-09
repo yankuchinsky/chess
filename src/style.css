@@ -1,0 +1,50 @@
+.body {
+  margin: 0;
+  padding: 0;
+}
+
+div {
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+}
+
+.field {
+  border: 1px solid #000;
+  width: 640px;
+  height: 640px;
+  transform: translateX(90);
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+}
+
+.cell {
+  width: 80px;
+  height: 80px;
+  font-size: 10px;
+}
+
+.cell-white {
+  color: #000;
+}
+
+.cell-number {
+  position: absolute;
+}
+
+.cell-black {
+  background-color: #52b1dc;
+  color: #fff;
+}
+
+.piece {
+  width: 80px;
+  height: 80px;
+  background-color: transparent;
+}
+
+.piece.piece_dev_mode {
+  width: 70px;
+  height: 70px;
+  background-color: transparent;
+}
