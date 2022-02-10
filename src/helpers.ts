@@ -2,9 +2,6 @@ import { SIZE } from "./field";
 import { state } from "./gameState";
 
 export const checkIsDifferentFiles = (a: number, b: number): boolean => {
-  const a1 = a % SIZE;
-  const b1 = b % SIZE;
-
   if (Math.ceil(a / SIZE) === Math.ceil(b / SIZE)) {
     return false;
   }
@@ -162,7 +159,6 @@ export const bishopMoveCheck = (curr: number, prev: number) => {
 export const canMoveToLastCell = (curr: number, prev: number) => {
   const moveCell = state.boardMap[curr];
   const prevCell = state.boardMap[prev];
-  console.log(curr, prev);
   if (!moveCell) {
     return true;
   }
@@ -176,4 +172,57 @@ export const canMoveToLastCell = (curr: number, prev: number) => {
   }
 
   return false;
+};
+
+export const checkIsCastlingMode = (curr: number, prev: number) => {
+  if (checkIsDifferentFiles(curr, prev)) {
+    return false;
+  }
+
+  if (Math.abs(curr - prev) > 1) {
+    return true;
+  }
+
+  return false;
+};
+
+export const castling = (curr: number, prev: number, color: "w" | "b") => {
+  let newPos = curr > prev ? prev + 2 : prev - 3;
+
+  if (color === "b") {
+    newPos = curr < prev ? prev - 2 : prev + 3;
+  }
+
+  if (!hasHorizontalObstacles(prev, newPos)) {
+    let rookPos = curr > prev ? 7 : 0;
+    let newRookPos = curr > prev ? SIZE - 3 : SIZE - 6;
+
+    if (color === "b") {
+      rookPos = curr < prev ? 56 : 63;
+      newRookPos = curr < prev ? 58 : 61;
+      newPos = curr < prev ? prev - 2 : prev + 3;
+    }
+
+    moveToCell(prev, newPos);
+
+    moveToCell(rookPos, newRookPos);
+  }
+};
+
+export const moveToCell = (curr: number, to: number) => {
+  const currentCell = document.querySelector(`#cell_${curr}`);
+  if (!currentCell) {
+    return;
+  }
+
+  const currentPiece = currentCell.querySelector(".piece");
+  if (!currentPiece) {
+    return;
+  }
+
+  const cellToMove = document.querySelector(`#cell_${to}`);
+  cellToMove?.appendChild(currentPiece);
+
+  state.boardMap[curr] = 0;
+  state.boardMap[to] = currentPiece.id;
 };

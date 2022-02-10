@@ -6,6 +6,8 @@ import {
   rookMoveCheck,
   bishopMoveCheck,
   canMoveToLastCell,
+  checkIsCastlingMode,
+  castling,
 } from "./helpers";
 
 export const handleDrop = (e: any) => {
@@ -143,6 +145,12 @@ export const handleDrop = (e: any) => {
   }
 
   if (pieceType === "k") {
+    if (checkIsCastlingMode(+currentCellId, +piecePrevPosition)) {
+      castling(+currentCellId, +piecePrevPosition, pieceColor);
+
+      return false;
+    }
+
     const diff = Math.abs(currentCellId - piecePrevPosition);
 
     if (diff < 10) {
