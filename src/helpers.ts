@@ -1,5 +1,5 @@
 import { SIZE } from "./field";
-import { state } from "./gameState";
+import { state, changeTheTurn } from "./gameState";
 
 export const checkIsDifferentFiles = (a: number, b: number): boolean => {
   if (Math.ceil(a / SIZE) === Math.ceil(b / SIZE)) {
@@ -204,8 +204,8 @@ export const castling = (curr: number, prev: number, color: "w" | "b") => {
     }
 
     moveToCell(prev, newPos);
-
     moveToCell(rookPos, newRookPos);
+    changeTheTurn();
   }
 };
 
