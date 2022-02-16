@@ -1,5 +1,5 @@
 import { SIZE } from "./field";
-import { state, changeTheTurn } from "./gameState";
+import { state, changeTheTurn, setPiece } from "./gameState";
 
 export const checkIsDifferentFiles = (a: number, b: number): boolean => {
   if (Math.ceil(a / SIZE) === Math.ceil(b / SIZE)) {
@@ -15,7 +15,7 @@ export const checkIsDifferentFiles = (a: number, b: number): boolean => {
 
 export const isPathBlocked = (path: number[]) => {
   for (let cell of path) {
-    if (state.boardMap[cell]) {
+    if (state.boardMap[cell].piece) {
       return true;
     }
   }
@@ -24,12 +24,12 @@ export const isPathBlocked = (path: number[]) => {
 };
 
 export const isVacantCell = (curr: number, prev: number) => {
-  if (!state.boardMap[curr]) {
+  if (!state.boardMap[curr].piece) {
     return true;
   }
 
-  const currentColor = state.boardMap[prev].toString().split("")[0];
-  const movePieceColor = state.boardMap[curr].toString().split("")[0];
+  const currentColor = state.boardMap[prev].piece.toString().split("")[0];
+  const movePieceColor = state.boardMap[curr].piece.toString().split("")[0];
 
   if (currentColor !== movePieceColor) {
     return true;
@@ -157,8 +157,9 @@ export const bishopMoveCheck = (curr: number, prev: number) => {
 };
 
 export const canMoveToLastCell = (curr: number, prev: number) => {
-  const moveCell = state.boardMap[curr];
-  const prevCell = state.boardMap[prev];
+  const moveCell = state.boardMap[curr].piece;
+  const prevCell = state.boardMap[prev].piece;
+
   if (!moveCell) {
     return true;
   }
@@ -223,6 +224,6 @@ export const moveToCell = (curr: number, to: number) => {
   const cellToMove = document.querySelector(`#cell_${to}`);
   cellToMove?.appendChild(currentPiece);
 
-  state.boardMap[curr] = 0;
-  state.boardMap[to] = currentPiece.id;
+  setPiece(curr, 0);
+  setPiece(curr, currentPiece.id);
 };

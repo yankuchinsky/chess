@@ -1,5 +1,10 @@
 import { SIZE } from "./field";
-import { state, changeTheTurn } from "./gameState";
+import {
+  state,
+  changeTheTurn,
+  setPiece,
+  changePiecePosition,
+} from "./gameState";
 import {
   isVacantCell,
   deletePiece,
@@ -41,7 +46,7 @@ export const handleDrop = (e: any) => {
   }
 
   const knightAttack = (prevPosition: number, moveCell: number) => {
-    state.boardMap[prevPosition] = 0;
+    setPiece(prevPosition, 0);
 
     if (!state.boardMap[moveCell]) {
       return false;
@@ -66,7 +71,7 @@ export const handleDrop = (e: any) => {
     const rightPiece = state.boardMap[right];
 
     if (left === moveCell && leftPiece) {
-      state.boardMap[prevPosition] = 0;
+      setPiece(prevPosition, 0);
       deletePiece(moveCell);
       move();
 
@@ -74,7 +79,7 @@ export const handleDrop = (e: any) => {
     }
 
     if (right === moveCell && rightPiece) {
-      state.boardMap[prevPosition] = 0;
+      setPiece(prevPosition, 0);
       deletePiece(moveCell);
       move();
 
@@ -86,13 +91,7 @@ export const handleDrop = (e: any) => {
 
   const movePiece = () => {
     console.log("board", state.boardMap);
-    console.log(
-      "pieces",
-      piecePrevPosition,
-      currentCellId,
-      state.boardMap[currentCellId]
-    );
-    if (!isVacantCell(currentCellId, piecePrevPosition)) {
+    if (!isVacantCell(+currentCellId, +piecePrevPosition)) {
       return;
     }
 
@@ -100,11 +99,7 @@ export const handleDrop = (e: any) => {
   };
 
   const move = () => {
-    const element = document.querySelector(`#${transferId}`);
-    currentMoveSellElement.appendChild(element);
-
-    state.boardMap[piecePrevPosition] = 0;
-    state.boardMap[currentCellId] = pieceTypeInfo;
+    changePiecePosition(+piecePrevPosition, +currentCellId);
     changeTheTurn();
   };
 

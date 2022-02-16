@@ -1,4 +1,4 @@
-import { state, initBoard } from "./gameState";
+import { state } from "./gameState";
 import {
   handleDrop,
   handleDragEnd,
@@ -21,7 +21,7 @@ import whiteKing from "./assets/wk.png";
 
 export const SIZE = 8;
 
-initBoard();
+// initBoard();
 
 export const generateField = (
   element: HTMLElement,
@@ -58,10 +58,30 @@ export const generateField = (
       piece.classList.add("piece_dev_mode");
     }
 
+    piece.addEventListener("dragstart", handleDragStart);
+    piece.addEventListener("dragend", handleDragEnd);
+    cell.addEventListener("drop", handleDrop);
+    cell.addEventListener("dragover", handleDragOver);
+
+    if (isBlack) {
+      cell.classList.add("cell-black");
+
+      isBlack = false;
+    } else {
+      cell.classList.add("cell-white");
+      isBlack = true;
+    }
+
+    state.boardMap[currentId] = {
+      cellRef: cell,
+      piece: 0,
+    };
+
     const createPiece = (id: number, type: string, img: string) => {
       piece.style.backgroundImage = `url(${img})`;
       piece.id = `${type}_${id}`;
-      state.boardMap[id - 1] = type;
+      state.boardMap[id].piece = type;
+      state.boardMap[id].cellRef.appendChild(piece);
     };
 
     if (currentDiagonal === 7) {
@@ -84,18 +104,14 @@ export const generateField = (
       if (currentId === 60) {
         createPiece(currentId, "bq", blackQueen);
       }
-
-      cell.appendChild(piece);
     }
 
     if (currentDiagonal === 6) {
       createPiece(currentId, "bp", blackPawn);
-      cell.appendChild(piece);
     }
 
     if (currentDiagonal === 1) {
       createPiece(currentId, "wp", whitePawn);
-      cell.appendChild(piece);
     }
 
     if (currentDiagonal === 0) {
@@ -118,26 +134,10 @@ export const generateField = (
       if (currentId === 4) {
         createPiece(currentId, "wk", whiteKing);
       }
-
-      cell.appendChild(piece);
     }
 
     piece.style.backgroundSize = "contain";
     piece.draggable = true;
-
-    piece.addEventListener("dragstart", handleDragStart);
-    piece.addEventListener("dragend", handleDragEnd);
-    cell.addEventListener("drop", handleDrop);
-    cell.addEventListener("dragover", handleDragOver);
-
-    if (isBlack) {
-      cell.classList.add("cell-black");
-
-      isBlack = false;
-    } else {
-      cell.classList.add("cell-white");
-      isBlack = true;
-    }
 
     element.appendChild(cell);
   }

@@ -3,4 +3,7 @@ declare module "*.png" {
   export = value;
 }
 
-type TCell = number | string;
+type TCell = {
+  piece: number | string;
+  cellRef: HTMLElement;
+};
