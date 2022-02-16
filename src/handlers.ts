@@ -23,7 +23,6 @@ export const handleDrop = (e: any) => {
     movePlace === "cell"
       ? e.target.id.split("_")[1]
       : e.path[1].id.split("_")[1];
-  const currentMoveSellElement = movePlace === "cell" ? e.target : e.path[1];
   const pieceInfo = JSON.parse(e.dataTransfer.getData("text/plain"));
   const transferId = pieceInfo.piece;
   const piecePrevPosition = pieceInfo.position;

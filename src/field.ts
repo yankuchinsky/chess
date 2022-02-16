@@ -1,3 +1,4 @@
+import { DEV_MODE } from "./index";
 import { state } from "./gameState";
 import {
   handleDrop,
@@ -21,7 +22,93 @@ import whiteKing from "./assets/wk.png";
 
 export const SIZE = 8;
 
-// initBoard();
+enum PieceType {
+  WP = "wp",
+  WN = "wn",
+  WB = "wb",
+  WK = "wk",
+  WQ = "wq",
+  WR = "wr",
+  BP = "bp",
+  BN = "bn",
+  BB = "bb",
+  BK = "bk",
+  BQ = "bq",
+  BR = "br",
+}
+
+const createPiece = (id: number, type: string, img: string) => {
+  const piece = document.createElement("div");
+
+  if (DEV_MODE) {
+    piece.classList.add("piece_dev_mode");
+  }
+
+  piece.classList.add("piece");
+  piece.style.backgroundImage = `url(${img})`;
+  piece.id = `${type}_${id}`;
+  piece.style.backgroundSize = "contain";
+  piece.draggable = true;
+  piece.addEventListener("dragstart", handleDragStart);
+  piece.addEventListener("dragend", handleDragEnd);
+
+  state.boardMap[id].piece = type;
+  state.boardMap[id].cellRef.appendChild(piece);
+};
+
+const setPieceToBoard = (currentId: number, currentFile: number): void => {
+  if (currentFile === 7) {
+    if (currentId === 56 || currentId === 63) {
+      createPiece(currentId, PieceType.BR, blackRook);
+    }
+
+    if (currentId === 57 || currentId === 62) {
+      createPiece(currentId, PieceType.BN, blackKnight);
+    }
+
+    if (currentId === 58 || currentId === 61) {
+      createPiece(currentId, PieceType.BB, blackBishop);
+    }
+
+    if (currentId === 59) {
+      createPiece(currentId, PieceType.BK, blackKing);
+    }
+
+    if (currentId === 60) {
+      createPiece(currentId, PieceType.BQ, blackQueen);
+    }
+  }
+
+  if (currentFile === 6) {
+    createPiece(currentId, PieceType.BP, blackPawn);
+  }
+
+  if (currentFile === 1) {
+    createPiece(currentId, PieceType.WP, whitePawn);
+  }
+
+  if (currentFile === 0) {
+    if (currentId === 0 || currentId === 7) {
+      createPiece(currentId, PieceType.WR, whiteRook);
+    }
+
+    if (currentId === 1 || currentId === 6) {
+      createPiece(currentId, PieceType.WN, whiteKnight);
+    }
+
+    if (currentId === 2 || currentId === 5) {
+      createPiece(currentId, PieceType.WB, whiteBishop);
+    }
+
+    if (currentId === 3) {
+      createPiece(currentId, PieceType.WQ, whiteQueen);
+    }
+
+    if (currentId === 4) {
+      createPiece(currentId, PieceType.WK, whiteKing);
+    }
+  }
+};
 
 export const generateField = (
   element: HTMLElement,
@@ -51,15 +138,6 @@ export const generateField = (
       cell.innerHTML = `${currentId}`;
     }
 
-    const piece = document.createElement("div");
-    piece.classList.add("piece");
-
-    if (isDevMode) {
-      piece.classList.add("piece_dev_mode");
-    }
-
-    piece.addEventListener("dragstart", handleDragStart);
-    piece.addEventListener("dragend", handleDragEnd);
     cell.addEventListener("drop", handleDrop);
     cell.addEventListener("dragover", handleDragOver);
 
@@ -77,67 +155,7 @@ export const generateField = (
       piece: 0,
     };
 
-    const createPiece = (id: number, type: string, img: string) => {
-      piece.style.backgroundImage = `url(${img})`;
-      piece.id = `${type}_${id}`;
-      state.boardMap[id].piece = type;
-      state.boardMap[id].cellRef.appendChild(piece);
-    };
-
-    if (currentDiagonal === 7) {
-      if (currentId === 56 || currentId === 63) {
-        createPiece(currentId, "br", blackRook);
-      }
-
-      if (currentId === 57 || currentId === 62) {
-        createPiece(currentId, "bn", blackKnight);
-      }
-
-      if (currentId === 58 || currentId === 61) {
-        createPiece(currentId, "bb", blackBishop);
-      }
-
-      if (currentId === 59) {
-        createPiece(currentId, "bk", blackKing);
-      }
-
-      if (currentId === 60) {
-        createPiece(currentId, "bq", blackQueen);
-      }
-    }
-
-    if (currentDiagonal === 6) {
-      createPiece(currentId, "bp", blackPawn);
-    }
-
-    if (currentDiagonal === 1) {
-      createPiece(currentId, "wp", whitePawn);
-    }
-
-    if (currentDiagonal === 0) {
-      if (currentId === 0 || currentId === 7) {
-        createPiece(currentId, "wr", whiteRook);
-      }
-
-      if (currentId === 1 || currentId === 6) {
-        createPiece(currentId, "wn", whiteKnight);
-      }
-
-      if (currentId === 2 || currentId === 5) {
-        createPiece(currentId, "wb", whiteBishop);
-      }
-
-      if (currentId === 3) {
-        createPiece(currentId, "wq", whiteQueen);
-      }
-
-      if (currentId === 4) {
-        createPiece(currentId, "wk", whiteKing);
-      }
-    }
-
-    piece.style.backgroundSize = "contain";
-    piece.draggable = true;
+    setPieceToBoard(currentId, currentDiagonal);
 
     element.appendChild(cell);
   }

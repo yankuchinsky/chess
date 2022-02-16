@@ -1,7 +1,7 @@
 import "./style.css";
 import { generateField } from "./field";
 
-const DEV_MODE = true;
+export const DEV_MODE = true;
 
 const bootstrap = () => {
   const body = document.querySelector("body");
@@ -12,7 +12,7 @@ const bootstrap = () => {
   const field = document.createElement("div");
   field.className = "field";
 
-  generateField(field, DEV_MODE);
+  generateField(field);
 
   body.appendChild(field);
 };
