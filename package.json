@@ -1,7 +1,7 @@
 {
   "name": "chess",
   "version": "1.0.0",
-  "description": "Typescript boilerplate for projects",
+  "description": "Chess",
   "scripts": {
     "dev": "webpack serve --config webpack.config.js --progress",
     "build": "cross-env NODE_ENV=production webpack"
