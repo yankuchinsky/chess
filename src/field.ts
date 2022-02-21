@@ -1,5 +1,5 @@
 import { DEV_MODE } from "./index";
-import { state } from "./gameState";
+import { state, turn } from "./gameState";
 import {
   handleDrop,
   handleDragEnd,
@@ -54,6 +54,14 @@ const createPiece = (id: number, type: string, img: string) => {
 
   state.boardMap[id].piece = type;
   state.boardMap[id].cellRef.appendChild(piece);
+
+  const color = type.split("")[0];
+
+  if (color === "w") {
+    state.whitePieces.push({ type, cellId: id, availableCells: [] });
+  } else {
+    state.blackPieces.push({ type, cellId: id, availableCells: [] });
+  }
 };
 
 const setPieceToBoard = (currentId: number, currentFile: number): void => {
@@ -110,6 +118,8 @@ const setPieceToBoard = (currentId: number, currentFile: number): void => {
   }
 };
 
+export const files: number[][] = [];
+
 export const generateField = (
   element: HTMLElement,
   isDevMode: boolean = true
@@ -125,7 +135,11 @@ export const generateField = (
       span = 7;
       spanPlus = 0;
       currentDiagonal -= 1;
+
+      files.push([]);
     }
+
+    files[files.length - 1].push(i);
 
     const cell = document.createElement("div");
     cell.classList.add("cell");
@@ -159,4 +173,6 @@ export const generateField = (
 
     element.appendChild(cell);
   }
+
+  turn();
 };

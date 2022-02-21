@@ -1,4 +1,4 @@
-import { SIZE } from "./field";
+import { SIZE, files } from "./field";
 import { state, changeTheTurn, setPiece } from "./gameState";
 
 export const checkIsDifferentFiles = (a: number, b: number): boolean => {
@@ -13,11 +13,40 @@ export const checkIsDifferentFiles = (a: number, b: number): boolean => {
   return true;
 };
 
+export const absVerticalShift = (a: number, b: number) => {
+  const a1 = files.find((file) => ~file.indexOf(a));
+  const b1 = files.find((file) => ~file.indexOf(b));
+
+  const i1 = a1!.indexOf(a);
+  const i2 = b1!.indexOf(b);
+
+  return Math.abs(i1 - i2);
+};
+
 export const isPathBlocked = (path: number[]) => {
   for (let cell of path) {
     if (state.boardMap[cell].piece) {
       return true;
     }
+  }
+
+  return false;
+};
+
+export const isOnFirstFile = (a: number) => !!~files[0].indexOf(a);
+
+export const isOnLastFile = (a: number) => !!~files[7].indexOf(a);
+
+export const isCellCanBeAttacked = (curr: number, next: number) => {
+  if (!state.boardMap[next].piece) {
+    return false;
+  }
+
+  const currentColor = state.boardMap[curr].piece.toString().split("")[0];
+  const movePieceColor = state.boardMap[next].piece.toString().split("")[0];
+
+  if (currentColor !== movePieceColor) {
+    return true;
   }
 
   return false;
