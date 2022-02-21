@@ -31,20 +31,6 @@ export const state: IGameState = {
   blackState: undefined,
 };
 
-// cells under control
-
-export const calculateCellsUnderControl = (color: "w" | "b") => {
-  const obj = color === "w" ? "whitePieces" : "blackPieces";
-
-  // state[obj] = state[obj]
-};
-
-export const caculateCellsToAttack = (color: "w" | "b") => {
-  const obj = color === "w" ? "whitePieces" : "blackPieces";
-
-  // state[obj] = state[obj]
-};
-
 export const caculateCellsToMove = (color: "w" | "b") => {
   const obj = color === "w" ? "whitePieces" : "blackPieces";
   for (let piece of state[obj]) {
