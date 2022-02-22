@@ -82,6 +82,10 @@ export const caculateCellsToMove = (color: "w" | "b") => {
         piece.availableCells.push(right);
       }
     }
+
+    if (pieceType === "b") {
+      //
+    }
   }
 };
 
