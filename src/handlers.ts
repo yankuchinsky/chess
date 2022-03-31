@@ -194,18 +194,29 @@ export const handleDragEnd = (e: any) => {
 };
 
 export const handleDragStart = (e: any) => {
+  const piece = e.target.id;
+  const position = e.path[1].id.split("_")[1];
+
+  const pieceObject = {
+    piece,
+    position,
+  };
+
   e.target.style.opacity = 0.1;
   e.dataTransfer.effectAllowed = "move";
-  e.dataTransfer.setData(
-    "text/plain",
-    JSON.stringify({ piece: e.target.id, position: e.path[1].id.split("_")[1] })
-  );
+  e.dataTransfer.setData("text/plain", JSON.stringify(pieceObject));
+
+  state.currentPiece = pieceObject;
+
+  console.log("___", state.currentPiece);
 };
 
 export const handleDragOver = (e: any) => {
   if (e.preventDefault) {
     e.preventDefault();
   }
+
+  state.currentPiece = null;
 
   return false;
 };

@@ -18,6 +18,7 @@ interface IGameState {
   blackPieces: TPiece[];
   whiteState: any;
   blackState: any;
+  currentPiece: any;
 }
 
 export const state: IGameState = {
@@ -29,6 +30,7 @@ export const state: IGameState = {
   blackPieces: [],
   whiteState: undefined,
   blackState: undefined,
+  currentPiece: undefined,
 };
 
 export const caculateCellsToMove = (color: "w" | "b") => {
@@ -84,7 +86,13 @@ export const caculateCellsToMove = (color: "w" | "b") => {
     }
 
     if (pieceType === "b") {
-      //
+      console.log("position b", position);
+
+      let isCellOccupied = false;
+
+      while (isCellOccupied) {
+        // const left = position + colorModifier * SIZE - 1;
+      }
     }
   }
 };
