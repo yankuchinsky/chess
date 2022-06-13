@@ -2,15 +2,15 @@ import {
   checkIsDifferentFiles,
   isVacantCell,
   absVerticalShift,
-  isOnFirstFile,
-  isOnLastFile,
   isCellCanBeAttacked,
 } from "./helpers";
+import { SIZE } from './index'
 
-import { SIZE } from "./field";
+import Board from "./Board";
+import Piece from "./Piece";
 
 interface IGameState {
-  boardMap: TCell[];
+  board: Board | undefined,
   isWhiteMove: boolean;
   whiteCapturedPieces: string[];
   blackCapturedPieces: string[];
@@ -22,7 +22,7 @@ interface IGameState {
 }
 
 export const state: IGameState = {
-  boardMap: [],
+  board: undefined,
   isWhiteMove: true,
   whiteCapturedPieces: [],
   blackCapturedPieces: [],
@@ -32,6 +32,35 @@ export const state: IGameState = {
   blackState: undefined,
   currentPiece: undefined,
 };
+
+class GameState {
+  private board: Board;
+  private isWhiteMove = true;
+  private whiteCapturedPieces: Piece[] = [];
+  private blackCapturedPieces: Piece[] = [];
+
+  constructor(board: Board) {
+    this.board = board;
+  }
+
+  getGameState() {
+    return this;
+  }
+
+  changeTheTurn() {
+    this.isWhiteMove = !this.isWhiteMove;
+  }
+
+  getIsWhiteMove() {
+    return this.isWhiteMove;
+  }
+
+  getBoard() {
+    return this.board;
+  }
+}
+
+export default GameState;
 
 export const caculateCellsToMove = (color: "w" | "b") => {
   const obj = color === "w" ? "whitePieces" : "blackPieces";
@@ -47,8 +76,8 @@ export const caculateCellsToMove = (color: "w" | "b") => {
           newPos >= 0 &&
           newPos < 64 &&
           checkIsDifferentFiles(position, newPos) &&
-          isVacantCell(position, newPos) &&
-          absVerticalShift(position, newPos) < 3
+          isVacantCell(position, newPos)
+          // absVerticalShift(position, newPos) < 3
         ) {
           piece.availableCells.push(newPos);
         }
@@ -59,30 +88,30 @@ export const caculateCellsToMove = (color: "w" | "b") => {
       const colorModifier = color === "w" ? 1 : -1;
       piece.availableCells.push(position + colorModifier * SIZE);
 
-      const lastOrFirstFileCheck = color === "w" ? isOnFirstFile : isOnLastFile;
+      // const lastOrFirstFileCheck = color === "w" ? isOnFirstFile : isOnLastFile;
 
-      if (lastOrFirstFileCheck(position)) {
-        piece.availableCells.push(position + colorModifier * SIZE * 2);
-      }
+      // if (lastOrFirstFileCheck(position)) {
+      //   piece.availableCells.push(position + colorModifier * SIZE * 2);
+      // }
 
       const left = position + colorModifier * SIZE - 1;
       const right = position + colorModifier * SIZE + 1;
 
-      if (
-        state.boardMap[left] &&
-        isCellCanBeAttacked(position, left) &&
-        absVerticalShift(position, left) === 1
-      ) {
-        piece.availableCells.push(left);
-      }
+      // if (
+      //   state.boardMap[left] &&
+      //   isCellCanBeAttacked(position, left) &&
+      //   absVerticalShift(position, left) === 1
+      // ) {
+      //   piece.availableCells.push(left);
+      // }
 
-      if (
-        state.boardMap[right] &&
-        isCellCanBeAttacked(position, right) &&
-        absVerticalShift(position, right) === 1
-      ) {
-        piece.availableCells.push(right);
-      }
+      // if (
+      //   state.boardMap[right] &&
+      //   isCellCanBeAttacked(position, right) &&
+      //   absVerticalShift(position, right) === 1
+      // ) {
+      //   piece.availableCells.push(right);
+      // }
     }
 
     if (pieceType === "b") {
@@ -94,40 +123,4 @@ export const caculateCellsToMove = (color: "w" | "b") => {
       }
     }
   }
-};
-
-export const turn = () => {
-  caculateCellsToMove(state.isWhiteMove ? "w" : "b");
-};
-
-export const changeTheTurn = () => {
-  state.isWhiteMove = !state.isWhiteMove;
-  turn();
-  console.log("current move is", state.isWhiteMove ? "white" : "black");
-};
-
-export const setPiece = (position: number, piece: string | 0) => {
-  state.boardMap[position].piece = piece;
-};
-
-export const changePiecePosition = (prev: number, curr: number) => {
-  const prevCell = state.boardMap[prev];
-  const piece = prevCell.cellRef.children[0];
-  const currCell = state.boardMap[curr];
-
-  const pieceId = piece.id.split("_")[0];
-
-  const obj = state.isWhiteMove ? "whitePieces" : "blackPieces";
-
-  const pieceInArray = state[obj].find((p) => p.cellId === prev);
-
-  setPiece(curr, pieceId);
-  setPiece(prev, 0);
-
-  currCell.cellRef.appendChild(piece);
-  if (!pieceInArray) {
-    return;
-  }
-
-  pieceInArray.cellId = curr;
 };

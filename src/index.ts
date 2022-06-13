@@ -1,5 +1,5 @@
 import "./style.css";
-import { generateField } from "./field";
+import GameState from './gameState'
 import Board from "./Board";
 import {
   handleDrop,
@@ -9,23 +9,19 @@ import {
 } from "./handlers";
 
 export const DEV_MODE = true;
+export const SIZE = 8;
 
-const bootstrap = () => {
-  const body = document.querySelector("body");
-  if (!body) {
-    return;
-  }
+const body = document.querySelector("body");
 
-  const field = document.createElement("div");
-  field.className = "field";
-  const board = new Board(field, 8);
+const field = document.createElement("div");
+field.className = "field";
+const board = new Board(field, SIZE);
 
-  body.appendChild(field);
+export const globalGameState = new GameState(board);
 
-  field.addEventListener("dragstart", handleDragStart);
-  field.addEventListener("dragend", handleDragEnd);
-  field.addEventListener("drop", (e) => handleDrop(e, board));
-  field.addEventListener("dragover", handleDragOver);
-};
+body?.appendChild(field);
 
-bootstrap();
+field.addEventListener("dragstart", handleDragStart);
+field.addEventListener("dragend", handleDragEnd);
+field.addEventListener("drop", (e) => handleDrop(e, board));
+field.addEventListener("dragover", handleDragOver);

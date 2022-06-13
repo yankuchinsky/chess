@@ -1,11 +1,5 @@
 import Board from "./Board";
-import { SIZE } from "./field";
-import {
-  state,
-  changeTheTurn,
-  setPiece,
-  changePiecePosition,
-} from "./gameState";
+import { SIZE, globalGameState } from "./index";
 import {
   deletePiece,
 } from "./helpers";
@@ -28,8 +22,10 @@ export const handleDrop = (e: any, board: Board) => {
   if (+piecePrevPosition === +currentCellId) {
     return;
   }
+  const gameState = globalGameState.getGameState();
+  const isWhiteMove = gameState.getIsWhiteMove();
 
-  if (state.isWhiteMove) {
+  if (isWhiteMove) {
     if (pieceColor !== "w") return;
   } else {
     if (pieceColor !== "b") return;
@@ -40,14 +36,13 @@ export const handleDrop = (e: any, board: Board) => {
   }
 
   const knightAttack = (prevPosition: number, moveCell: number) => {
-    setPiece(prevPosition, 0);
+    // setPiece(prevPosition, 0);
 
-    if (!state.boardMap[moveCell]) {
-      return false;
-    }
+    // if (!state.boardMap[moveCell]) {
+    //   return false;
+    // }
 
     deletePiece(moveCell);
-    move();
 
     return true;
   };
@@ -61,32 +56,30 @@ export const handleDrop = (e: any, board: Board) => {
     const m = pieceColor === "w" ? SIZE : -SIZE;
     const left = prevPosition + m - 1;
     const right = prevPosition + m + 1;
-    const leftPiece = state.boardMap[left];
-    const rightPiece = state.boardMap[right];
+
+    const state = gameState.getGameState()
+    const board = state.getBoard();
+    const boardMap = board.getBoardMap();
+
+    const leftPiece = boardMap[left];
+    const rightPiece = boardMap[right];
 
     if (left === moveCell && leftPiece) {
-      setPiece(prevPosition, 0);
+      // setPiece(prevPosition, 0);
       deletePiece(moveCell);
-      move();
 
       return true;
     }
 
     if (right === moveCell && rightPiece) {
-      setPiece(prevPosition, 0);
+      // setPiece(prevPosition, 0);
       deletePiece(moveCell);
-      move();
-
       return true;
     }
 
     return false;
   };
 
-  const move = () => {
-    changePiecePosition(+piecePrevPosition, +currentCellId);
-    changeTheTurn();
-  };
   board.movePiece(+currentCellId, +piecePrevPosition);
 
   return false;
@@ -109,7 +102,7 @@ export const handleDragStart = (e: any) => {
   e.dataTransfer.effectAllowed = "move";
   e.dataTransfer.setData("text/plain", JSON.stringify(pieceObject));
 
-  state.currentPiece = pieceObject;
+  // state.currentPiece = pieceObject;
 };
 
 export const handleDragOver = (e: any) => {
@@ -117,7 +110,7 @@ export const handleDragOver = (e: any) => {
     e.preventDefault();
   }
 
-  state.currentPiece = null;
+  // state.currentPiece = null;
 
   return false;
 };

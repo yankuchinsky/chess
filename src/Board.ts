@@ -1,6 +1,5 @@
-import { DEV_MODE } from "./index";
+import { DEV_MODE, globalGameState } from "./index";
 import Piece from "./Piece";
-import { state } from './gameState'
 
 import blackBishop from "./assets/bb.png";
 import whitePawn from "./assets/wp.png";
@@ -14,7 +13,6 @@ import blackQueen from "./assets/bq.png";
 import blackKing from "./assets/bk.png";
 import whiteQueen from "./assets/wq.png";
 import whiteKing from "./assets/wk.png";
-
 
 export const SIZE = 8;
 
@@ -193,6 +191,7 @@ class Board {
     const piece = this.getPieceByPosition(prev);
     if (this.isVacantCell(curr, prev) && piece?.isCanBeMoved(curr)) {
       this.changePiecePosition(curr, prev);
+      globalGameState.changeTheTurn();
     }
   }
 
@@ -225,7 +224,7 @@ class Board {
 
     const pieceId = piece.id.split("_")[0];
 
-    const obj = state.isWhiteMove ? "whitePieces" : "blackPieces";
+    const obj = globalGameState.getIsWhiteMove() ? "whitePieces" : "blackPieces";
 
     const pieceInArray = this[obj].find((p) => p.getId() === prev);
 
