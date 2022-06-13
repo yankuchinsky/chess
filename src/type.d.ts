@@ -13,3 +13,5 @@ type TPiece = {
   type: string;
   cellId: number;
 };
+
+type TColor = "w" | "b";

@@ -1,3 +1,4 @@
+import Board from "./Board";
 import { SIZE } from "./field";
 import {
   state,
@@ -6,16 +7,10 @@ import {
   changePiecePosition,
 } from "./gameState";
 import {
-  isVacantCell,
   deletePiece,
-  rookMoveCheck,
-  bishopMoveCheck,
-  canMoveToLastCell,
-  checkIsCastlingMode,
-  castling,
 } from "./helpers";
 
-export const handleDrop = (e: any) => {
+export const handleDrop = (e: any, board: Board) => {
   e.stopPropagation();
 
   const movePlace = e.target.id.split("_")[0];
@@ -88,103 +83,11 @@ export const handleDrop = (e: any) => {
     return false;
   };
 
-  const movePiece = () => {
-    console.log("board", state.boardMap);
-    if (!isVacantCell(+currentCellId, +piecePrevPosition)) {
-      return;
-    }
-
-    move();
-  };
-
   const move = () => {
     changePiecePosition(+piecePrevPosition, +currentCellId);
     changeTheTurn();
   };
-
-  // rook move
-  if (pieceType === "r") {
-    if (rookMoveCheck(+currentCellId, +piecePrevPosition)) {
-      movePiece();
-    }
-  }
-
-  // bishop move
-  if (pieceType === "b") {
-    if (bishopMoveCheck(+currentCellId, +piecePrevPosition)) {
-      movePiece();
-    }
-  }
-
-  // queen move
-  if (pieceType === "q") {
-    if (
-      rookMoveCheck(+currentCellId, +piecePrevPosition) ||
-      bishopMoveCheck(+currentCellId, +piecePrevPosition)
-    ) {
-      movePiece();
-    }
-  }
-
-  if (pieceType === "n") {
-    const diff = Math.abs(currentCellId - piecePrevPosition);
-
-    if (diff === 6 || diff === 10 || diff === 15 || diff === 17) {
-      if (knightAttack(+piecePrevPosition, +currentCellId)) {
-        return false;
-      }
-
-      movePiece();
-    }
-  }
-
-  if (pieceType === "k") {
-    if (checkIsCastlingMode(+currentCellId, +piecePrevPosition)) {
-      castling(+currentCellId, +piecePrevPosition, pieceColor);
-
-      return false;
-    }
-
-    const diff = Math.abs(currentCellId - piecePrevPosition);
-
-    if (diff < 10) {
-      canMoveToLastCell(+currentCellId, +piecePrevPosition);
-      movePiece();
-    }
-  }
-
-  // pawn move
-  if (pieceType === "p") {
-    if (pawnAttack(+piecePrevPosition, +currentCellId, pieceTypeInfo)) {
-      return false;
-    }
-
-    if (pieceColor === "w") {
-      if (
-        +currentCellId - 2 * SIZE === +piecePrevPosition &&
-        +piecePrevPosition < 16
-      ) {
-        movePiece();
-      }
-
-      if (+currentCellId - SIZE === +piecePrevPosition) {
-        movePiece();
-      }
-    }
-
-    if (pieceColor === "b") {
-      if (
-        +currentCellId + 2 * SIZE === +piecePrevPosition &&
-        piecePrevPosition > 46
-      ) {
-        movePiece();
-      }
-
-      if (+currentCellId + SIZE === +piecePrevPosition) {
-        movePiece();
-      }
-    }
-  }
+  board.movePiece(+currentCellId, +piecePrevPosition);
 
   return false;
 };
@@ -195,7 +98,7 @@ export const handleDragEnd = (e: any) => {
 
 export const handleDragStart = (e: any) => {
   const piece = e.target.id;
-  const position = e.path[1].id.split("_")[1];
+  const position = piece.split("_")[1];
 
   const pieceObject = {
     piece,
@@ -207,8 +110,6 @@ export const handleDragStart = (e: any) => {
   e.dataTransfer.setData("text/plain", JSON.stringify(pieceObject));
 
   state.currentPiece = pieceObject;
-
-  console.log("___", state.currentPiece);
 };
 
 export const handleDragOver = (e: any) => {

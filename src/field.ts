@@ -1,11 +1,6 @@
 import { DEV_MODE } from "./index";
 import { state, turn } from "./gameState";
-import {
-  handleDrop,
-  handleDragEnd,
-  handleDragStart,
-  handleDragOver,
-} from "./handlers";
+import Piece from './Piece';
 
 import blackBishop from "./assets/bb.png";
 import whitePawn from "./assets/wp.png";
@@ -19,6 +14,7 @@ import blackQueen from "./assets/bq.png";
 import blackKing from "./assets/bk.png";
 import whiteQueen from "./assets/wq.png";
 import whiteKing from "./assets/wk.png";
+
 
 export const SIZE = 8;
 
@@ -38,30 +34,20 @@ enum PieceType {
 }
 
 const createPiece = (id: number, type: string, img: string) => {
-  const piece = document.createElement("div");
+  const pieceElement = new Piece(id, type, img);
+  const piece = pieceElement.getElement();
 
-  if (DEV_MODE) {
-    piece.classList.add("piece_dev_mode");
-  }
-
-  piece.classList.add("piece");
-  piece.style.backgroundImage = `url(${img})`;
-  piece.id = `${type}_${id}`;
-  piece.style.backgroundSize = "contain";
-  piece.draggable = true;
-  piece.addEventListener("dragstart", handleDragStart);
-  piece.addEventListener("dragend", handleDragEnd);
 
   state.boardMap[id].piece = type;
   state.boardMap[id].cellRef.appendChild(piece);
 
-  const color = type.split("")[0];
+  const color = pieceElement.getColor();
 
-  if (color === "w") {
-    state.whitePieces.push({ type, cellId: id, availableCells: [] });
-  } else {
-    state.blackPieces.push({ type, cellId: id, availableCells: [] });
-  }
+  // if (color === "w") {
+  //   state.whitePieces.push({ type, cellId: id, availableCells: [] });
+  // } else {
+  //   state.blackPieces.push({ type, cellId: id, availableCells: [] });
+  // }
 };
 
 const setPieceToBoard = (currentId: number, currentFile: number): void => {
@@ -151,9 +137,6 @@ export const generateField = (
     if (isDevMode) {
       cell.innerHTML = `${currentId}`;
     }
-
-    cell.addEventListener("drop", handleDrop);
-    cell.addEventListener("dragover", handleDragOver);
 
     if (isBlack) {
       cell.classList.add("cell-black");

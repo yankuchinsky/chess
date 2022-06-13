@@ -86,7 +86,6 @@ export const caculateCellsToMove = (color: "w" | "b") => {
     }
 
     if (pieceType === "b") {
-      console.log("position b", position);
 
       let isCellOccupied = false;
 
