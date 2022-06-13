@@ -87,9 +87,22 @@ export const handleDrop = (e: any, board: Board) => {
 
 export const handleDragEnd = (e: any) => {
   e.target.style.opacity = 1;
+  const piece = e.target.id;
+  const position = piece.split("_")[1];
+  const board = globalGameState.getBoard()
+
+  const pieceElement = board.getPieceById(+position);
+  if (pieceElement) {
+    pieceElement?.calculateAvailableCels();
+
+    const availableCells = pieceElement.getAvailableCells();
+    const board = globalGameState.getBoard();
+    board.showPath(availableCells, true);
+  }
 };
 
 export const handleDragStart = (e: any) => {
+  const board = globalGameState.getBoard()
   const piece = e.target.id;
   const position = piece.split("_")[1];
 
@@ -98,11 +111,18 @@ export const handleDragStart = (e: any) => {
     position,
   };
 
+  const pieceElement = board.getPieceById(+position);
+  if (pieceElement) {
+    pieceElement?.calculateAvailableCels();
+
+    const availableCells = pieceElement.getAvailableCells();
+    const board = globalGameState.getBoard();
+    board.showPath(availableCells);
+  }
+
   e.target.style.opacity = 0.1;
   e.dataTransfer.effectAllowed = "move";
   e.dataTransfer.setData("text/plain", JSON.stringify(pieceObject));
-
-  // state.currentPiece = pieceObject;
 };
 
 export const handleDragOver = (e: any) => {

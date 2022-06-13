@@ -1,5 +1,28 @@
 import { SIZE } from "./index";
 
+export enum PieceType {
+  WP = "wp",
+  WN = "wn",
+  WB = "wb",
+  WK = "wk",
+  WQ = "wq",
+  WR = "wr",
+  BP = "bp",
+  BN = "bn",
+  BB = "bb",
+  BK = "bk",
+  BQ = "bq",
+  BR = "br",
+}
+
+export const upMove = (position: number, color: TColor, cells = 1) => {
+  if (color === 'w') {
+    return position + SIZE * cells;
+  }
+
+  return position - SIZE * cells;
+}
+
 export const checkIsDifferentFiles = (a: number, b: number): boolean => {
   if (Math.ceil(a / SIZE) === Math.ceil(b / SIZE)) {
     return false;

@@ -22,6 +22,7 @@ div {
   width: 80px;
   height: 80px;
   font-size: 10px;
+  position: relative;
 }
 
 .cell-white {
@@ -35,6 +36,17 @@ div {
 .cell-black {
   background-color: #52b1dc;
   color: #fff;
+}
+
+.cell.path::after {
+  content: "";
+  width: 20%;
+  height: 20%;
+  position: absolute;
+  left: 40%;
+  top: 40%;
+  background-color: #999;
+  border-radius: 50%;
 }
 
 .piece {

@@ -1,35 +1,9 @@
 import { DEV_MODE, globalGameState } from "./index";
 import Piece from "./Piece";
-
-import blackBishop from "./assets/bb.png";
-import whitePawn from "./assets/wp.png";
-import blackPawn from "./assets/bp.png";
-import blackRook from "./assets/br.png";
-import whiteRook from "./assets/wr.png";
-import blackKnight from "./assets/bn.png";
-import whiteBishop from "./assets/wb.png";
-import whiteKnight from "./assets/wn.png";
-import blackQueen from "./assets/bq.png";
-import blackKing from "./assets/bk.png";
-import whiteQueen from "./assets/wq.png";
-import whiteKing from "./assets/wk.png";
+import { PieceType } from './helpers'
+import PieceFactory from './PieceFactory'
 
 export const SIZE = 8;
-
-enum PieceType {
-  WP = "wp",
-  WN = "wn",
-  WB = "wb",
-  WK = "wk",
-  WQ = "wq",
-  WR = "wr",
-  BP = "bp",
-  BN = "bn",
-  BB = "bb",
-  BK = "bk",
-  BQ = "bq",
-  BR = "br",
-}
 
 type BoeardMapCell = TCell & {
   cellPiece: Piece | undefined;
@@ -95,53 +69,53 @@ class Board {
     let piece;
     if (currentFile === 7) {
       if (currentId === 56 || currentId === 63) {
-        piece = new Piece(currentId, PieceType.BR, blackRook);
+        piece = PieceFactory.createPiece(currentId, PieceType.BR);
       }
   
       if (currentId === 57 || currentId === 62) {
-        piece = new Piece(currentId, PieceType.BN, blackKnight);
+        piece = PieceFactory.createPiece(currentId, PieceType.BN);
       }
   
       if (currentId === 58 || currentId === 61) {
-        piece = new Piece(currentId, PieceType.BB, blackBishop);
+        piece = PieceFactory.createPiece(currentId, PieceType.BB);
       }
   
       if (currentId === 59) {
-        piece = new Piece(currentId, PieceType.BK, blackKing);
+        piece = PieceFactory.createPiece(currentId, PieceType.BK);
       }
   
       if (currentId === 60) {
-        piece = new Piece(currentId, PieceType.BQ, blackQueen);
+        piece = PieceFactory.createPiece(currentId, PieceType.BQ);
       }
     }
   
     if (currentFile === 6) {
-      piece = new Piece(currentId, PieceType.BP, blackPawn);
+      piece = PieceFactory.createPiece(currentId, PieceType.BP);
     }
   
     if (currentFile === 1) {
-      piece = new Piece(currentId, PieceType.WP, whitePawn);
+      piece = PieceFactory.createPiece(currentId, PieceType.WP);
     }
   
     if (currentFile === 0) {
       if (currentId === 0 || currentId === 7) {
-        piece = new Piece(currentId, PieceType.WR, whiteRook);
+        piece = PieceFactory.createPiece(currentId, PieceType.WR);
       }
   
       if (currentId === 1 || currentId === 6) {
-        piece = new Piece(currentId, PieceType.WN, whiteKnight);
+        piece = PieceFactory.createPiece(currentId, PieceType.WN);
       }
   
       if (currentId === 2 || currentId === 5) {
-        piece = new Piece(currentId, PieceType.WB, whiteBishop);
+        piece = PieceFactory.createPiece(currentId, PieceType.WB);
       }
   
       if (currentId === 3) {
-        piece = new Piece(currentId, PieceType.WQ, whiteQueen);
+        piece = PieceFactory.createPiece(currentId, PieceType.WQ);
       }
   
       if (currentId === 4) {
-        piece = new Piece(currentId, PieceType.WK, whiteKing);
+        piece = PieceFactory.createPiece(currentId, PieceType.WK);
       }
     }
 
@@ -174,6 +148,16 @@ class Board {
     return this.boardMap[id].cellRef
   };
 
+  showPath(cells: number[], clear = false) {
+    cells.forEach(cell => {
+      if (clear) {
+        this.boardMap[cell].cellRef.classList.remove('path');
+      } else {
+        this.boardMap[cell].cellRef.classList.add('path');
+      }
+    });
+  }
+
 
   getBoardMap() {
     return this.boardMap;
@@ -186,6 +170,14 @@ class Board {
 
     return piece?.cellPiece;
   };
+
+  getPieceById(id: number) {
+    const piece = this.boardMap.find(cell => {
+      return cell.cellPiece?.getId() === id;
+    })
+
+    return piece?.cellPiece;
+  }
 
   movePiece(curr: number, prev: number) {
     const piece = this.getPieceByPosition(prev);
@@ -236,7 +228,7 @@ class Board {
       return;
     }
 
-    pieceInArray.setId(curr);
+    pieceInArray.setCurrentPosition(curr);
   }
 
   deletePiece(position: number) {

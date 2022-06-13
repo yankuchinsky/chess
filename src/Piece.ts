@@ -7,6 +7,9 @@ import {
   castling,
 } from "./helpers";
 
+const getImage = (type: string) => {
+  return require(`./assets/${type}.png`).default;
+}
 
 class Piece {
   private element: HTMLDivElement;
@@ -15,17 +18,17 @@ class Piece {
   private type: string;
   private pieceType: string;
   private currentPosition: number;
-  private availableCellsToMove: [] = [];
-  constructor(id: number, type: string, img: string) {
+  protected availableCellsToMove: number[] = [];
+
+  constructor(id: number, type: string) {
     this.element = document.createElement("div");
-  
     if (DEV_MODE) {
       this.element.classList.add("piece_dev_mode");
     }
     this.type = type;
     this.pieceType = type.split('')[1];
     this.element.classList.add("piece");
-    this.element.style.backgroundImage = `url(${img})`;
+    this.element.style.backgroundImage = `url(${getImage(type)})`;
     this.element.id = `${type}_${id}`;
     this.id = id;
     this.currentPosition = id;
@@ -33,6 +36,10 @@ class Piece {
     this.element.draggable = true;
     this.color = <TColor>type.split("")[0];
   };
+
+  calculateAvailableCels() {
+    //
+  }
 
   getId() {
     return this.id;
@@ -62,6 +69,14 @@ class Piece {
     this.currentPosition = position;
   }
 
+  clearAvailableCells() {
+    this.availableCellsToMove = [];
+  }
+
+  getAvailableCells() {
+    return this.availableCellsToMove;
+  }
+  
   isCanBeMoved (positionToMove: number): boolean {
     const prev = this.currentPosition
     const curr = positionToMove;
