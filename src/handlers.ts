@@ -18,7 +18,7 @@ export const handleDrop = (e: any, board: Board) => {
   const [pieceTypeInfo, pieceCurrentPosition] = transferId.split("_");
   const pieceType = pieceTypeInfo.split("")[1];
   const pieceColor = pieceTypeInfo.split("")[0];
-
+  
   if (+piecePrevPosition === +currentCellId) {
     return;
   }
@@ -79,7 +79,7 @@ export const handleDrop = (e: any, board: Board) => {
 
     return false;
   };
-
+  
   board.movePiece(+currentCellId, +piecePrevPosition);
 
   return false;

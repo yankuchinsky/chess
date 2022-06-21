@@ -143,19 +143,22 @@ class Board {
   };
 
   getCellRef(id: number) {
-    if (!this.boardMap[id]) {
+    const boardMap = this.getFlatBoard();
+
+    if (!boardMap[id]) {
       return;
     }
 
-    return this.boardMap[id].cellRef
+    return boardMap[id].cellRef
   };
 
   showPath(cells: number[], clear = false) {
+    const boardMap = this.getFlatBoard(); 
     cells.forEach(cell => {
       if (clear) {
-        this.boardMap[cell].cellRef.classList.remove('path');
+        boardMap[cell].cellRef.classList.remove('path');
       } else {
-        this.boardMap[cell].cellRef.classList.add('path');
+        boardMap[cell].cellRef.classList.add('path');
       }
     });
   }
@@ -169,19 +172,19 @@ class Board {
   };
 
   getPieceByPosition(position: number) {
-    const piece = this.boardMap.find(cell => {
-      return cell.cellPiece?.getCurrentPosition() === position;
+    const piece = this.getFlatBoard().find(cell => {
+      return cell.piece?.getCurrentPosition() === position;
     })
 
-    return piece?.cellPiece;
+    return piece?.piece;
   };
 
   getPieceById(id: number) {
-    const piece = this.boardMap.find(cell => {
-      return cell.cellPiece?.getId() === id;
+    const piece = this.getFlatBoard().find(cell => {
+      return cell.piece?.getId() === id;
     })
 
-    return piece?.cellPiece;
+    return piece?.piece;
   }
 
   movePiece(curr: number, prev: number) {
@@ -209,12 +212,13 @@ class Board {
   };
 
   changePiecePosition(curr: number, prev: number) {
-    const prevCell = this.boardMap[prev];
+    const boardMap = this.getFlatBoard();
+    const prevCell = boardMap[prev];
     if (!prevCell) {
       return;
     }
     const piece = prevCell.cellRef.children[0];
-    const currCell = this.boardMap[curr];
+    const currCell = boardMap[curr];
 
     if (!currCell) {
       return;
@@ -226,8 +230,8 @@ class Board {
 
     const pieceInArray = this[obj].find((p) => p.getId() === prev);
 
-    this.boardMap[curr].piece = pieceId;
-    this.boardMap[prev].piece = 0;
+    // boardMap[curr].piece = pieceId;
+    // boardMap[prev].piece = 0;
 
     currCell.cellRef.appendChild(piece);
     if (!pieceInArray) {
