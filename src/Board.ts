@@ -22,82 +22,42 @@ class Board {
   private blackPieces: Piece[] = [];
 
   constructor(element: HTMLDivElement, size: number) {
-    let isBlack = true;
-    let span = 7;
-    let spanPlus = 0;
-    let currentDiagonal = 8;
-    let idx = 0;
+    let isBlack = false;
+    let idx = size * size;
+    let regularId = 0;
     let fileIdx = 0;
 
     this.newBoardMap = Array.from(new Array(size), () => []);
 
     for (let i = 0; i < size; i ++) {
       for (let j = 0; j < size; j ++) {
-        this.setPieceToBoard(idx, fileIdx);
-        const piece = this.createPiece(idx, fileIdx);
+        idx -= 1;
+        const currentFileIdx = idx - size + j * 2 + 1;
+        const currentFileBoardMapIdx = size - fileIdx - 1;
+        const cellElement = this.createCellElement(currentFileIdx, isBlack ? "black" : "white");
+        const piece = this.createPiece(currentFileIdx, currentFileBoardMapIdx);
 
-        const cellElement = this.createCellElement(idx, isBlack ? "black" : "white");
-        this.newBoardMap[i][j] = {
+        this.newBoardMap[currentFileBoardMapIdx][j] = {
           cellRef: cellElement,
           piece: undefined,
         };
 
         if (piece) {
-          this.newBoardMap[i][j] = {
+          this.newBoardMap[currentFileBoardMapIdx][j] = {
             cellRef: cellElement,
             piece,
           };
+
+          this.newBoardMap[currentFileBoardMapIdx][j].cellRef.appendChild(piece.getElement());
         }
 
         isBlack = !isBlack;
-        idx += 1;
+        element.appendChild(cellElement);
+        regularId += 1;
       }
+      isBlack = !isBlack;
       fileIdx += 1;
     }
-
-    for (let i = 0; i < size * size; i++) {
-      if (i % 8 === 0) {
-        isBlack = !isBlack;
-        span = 7;
-        spanPlus = 0;
-        currentDiagonal -= 1;
-
-        this.files.push([]);
-      }
-
-      this.files[this.files.length - 1].push(i);
-
-      const cell = document.createElement("div");
-      cell.classList.add("cell");
-      const currentId = +(size * size - i - span + spanPlus - 1);
-      span -= 1;
-      spanPlus += 1;
-      cell.id = `cell_${currentId}`;
-
-      if (DEV_MODE) {
-        cell.innerHTML = `${currentId}`;
-      }
-
-      if (isBlack) {
-        cell.classList.add("cell-black");
-
-        isBlack = false;
-      } else {
-        cell.classList.add("cell-white");
-        isBlack = true;
-      }
-
-      this.boardMap[currentId] = {
-        cellRef: cell,
-        piece: 0,
-        cellPiece: undefined,
-      };
-
-      this.setPieceToBoard(currentId, currentDiagonal);
-
-      element.appendChild(cell);
-    }
-
   };
 
   createCellElement(id: number, color: "white" | "black") {
@@ -174,24 +134,6 @@ class Board {
     return undefined;
   }
 
-  setPieceToBoard(currentId: number, currentFile: number) {
-    const piece = this.createPiece(currentId, currentFile);
-
-
-    if (piece) {
-      if (piece.getColor() === "w") {
-        this.whitePieces.push(piece);
-      } else {
-        this.blackPieces.push(piece);
-      }
-      if (this.boardMap[currentId]) {
-        this.boardMap[currentId].cellPiece = piece;
-        this.boardMap[currentId].piece = piece.getType();
-        this.renderPieceToCell(piece, currentId);
-      }
-    }
-  };
-
   renderPieceToCell(piece: Piece, id: number) {
     const cellRef = this.getCellRef(id);
 
@@ -251,12 +193,13 @@ class Board {
   }
 
   isVacantCell = (curr: number, prev: number) => {
-    if (!this.boardMap[curr].piece) {
+    const boardMap = this.getFlatBoard()
+    if (!boardMap[curr].piece) {
       return true;
     }
-  
-    const currentColor = this.boardMap[prev].piece.toString().split("")[0];
-    const movePieceColor = this.boardMap[curr].piece.toString().split("")[0];
+
+    const currentColor = boardMap[prev].piece?.toString().split("")[0];
+    const movePieceColor = boardMap[curr].piece?.toString().split("")[0];
   
     if (currentColor !== movePieceColor) {
       return true;
