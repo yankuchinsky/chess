@@ -5,20 +5,55 @@ import PieceFactory from './PieceFactory'
 
 export const SIZE = 8;
 
-type BoeardMapCell = TCell & {
+type BoardMapCell = TCell & {
   cellPiece: Piece | undefined;
 }
 
+type newBoardMapCell = {
+  cellRef: HTMLElement,
+  piece: Piece | undefined,
+}
+
 class Board {
-  private boardMap: BoeardMapCell[] = [];
+  private boardMap: BoardMapCell[] = [];
+  private newBoardMap: newBoardMapCell[][] = [];
   private files: number[][] = [];
   private whitePieces: Piece[] = [];
   private blackPieces: Piece[] = [];
+
   constructor(element: HTMLDivElement, size: number) {
     let isBlack = true;
     let span = 7;
     let spanPlus = 0;
     let currentDiagonal = 8;
+    let idx = 0;
+    let fileIdx = 0;
+
+    this.newBoardMap = Array.from(new Array(size), () => []);
+
+    for (let i = 0; i < size; i ++) {
+      for (let j = 0; j < size; j ++) {
+        this.setPieceToBoard(idx, fileIdx);
+        const piece = this.createPiece(idx, fileIdx);
+
+        const cellElement = this.createCellElement(idx, isBlack ? "black" : "white");
+        this.newBoardMap[i][j] = {
+          cellRef: cellElement,
+          piece: undefined,
+        };
+
+        if (piece) {
+          this.newBoardMap[i][j] = {
+            cellRef: cellElement,
+            piece,
+          };
+        }
+
+        isBlack = !isBlack;
+        idx += 1;
+      }
+      fileIdx += 1;
+    }
 
     for (let i = 0; i < size * size; i++) {
       if (i % 8 === 0) {
@@ -65,59 +100,83 @@ class Board {
 
   };
 
-  setPieceToBoard(currentId: number, currentFile: number) {
-    let piece;
+  createCellElement(id: number, color: "white" | "black") {
+    const cell = document.createElement("div");
+    cell.classList.add("cell");
+    cell.id = `cell_${id}`;
+
+    if (DEV_MODE) {
+      cell.innerHTML = `${id}`;
+    }
+
+    if (color === "black") {
+      cell.classList.add("cell-black");
+    } else {
+      cell.classList.add("cell-white");
+    }
+
+    return cell;
+  };
+
+  createPiece(currentId: number, currentFile: number) {
     if (currentFile === 7) {
       if (currentId === 56 || currentId === 63) {
-        piece = PieceFactory.createPiece(currentId, PieceType.BR);
+        return PieceFactory.createPiece(currentId, PieceType.BR);
       }
   
       if (currentId === 57 || currentId === 62) {
-        piece = PieceFactory.createPiece(currentId, PieceType.BN);
+        return PieceFactory.createPiece(currentId, PieceType.BN);
       }
   
       if (currentId === 58 || currentId === 61) {
-        piece = PieceFactory.createPiece(currentId, PieceType.BB);
+        return PieceFactory.createPiece(currentId, PieceType.BB);
       }
   
       if (currentId === 59) {
-        piece = PieceFactory.createPiece(currentId, PieceType.BK);
+        return PieceFactory.createPiece(currentId, PieceType.BK);
       }
   
       if (currentId === 60) {
-        piece = PieceFactory.createPiece(currentId, PieceType.BQ);
+        return PieceFactory.createPiece(currentId, PieceType.BQ);
       }
     }
   
     if (currentFile === 6) {
-      piece = PieceFactory.createPiece(currentId, PieceType.BP);
+      return PieceFactory.createPiece(currentId, PieceType.BP);
     }
   
     if (currentFile === 1) {
-      piece = PieceFactory.createPiece(currentId, PieceType.WP);
+      return PieceFactory.createPiece(currentId, PieceType.WP);
     }
   
     if (currentFile === 0) {
       if (currentId === 0 || currentId === 7) {
-        piece = PieceFactory.createPiece(currentId, PieceType.WR);
+        return PieceFactory.createPiece(currentId, PieceType.WR);
       }
   
       if (currentId === 1 || currentId === 6) {
-        piece = PieceFactory.createPiece(currentId, PieceType.WN);
+        return PieceFactory.createPiece(currentId, PieceType.WN);
       }
   
       if (currentId === 2 || currentId === 5) {
-        piece = PieceFactory.createPiece(currentId, PieceType.WB);
+        return PieceFactory.createPiece(currentId, PieceType.WB);
       }
   
       if (currentId === 3) {
-        piece = PieceFactory.createPiece(currentId, PieceType.WQ);
+        return PieceFactory.createPiece(currentId, PieceType.WQ);
       }
   
       if (currentId === 4) {
-        piece = PieceFactory.createPiece(currentId, PieceType.WK);
+        return PieceFactory.createPiece(currentId, PieceType.WK);
       }
     }
+
+    return undefined;
+  }
+
+  setPieceToBoard(currentId: number, currentFile: number) {
+    const piece = this.createPiece(currentId, currentFile);
+
 
     if (piece) {
       if (piece.getColor() === "w") {
@@ -125,10 +184,11 @@ class Board {
       } else {
         this.blackPieces.push(piece);
       }
-
-      this.boardMap[currentId].piece = piece.getType();
-      this.boardMap[currentId].cellPiece = piece;
-      this.renderPieceToCell(piece, currentId);
+      if (this.boardMap[currentId]) {
+        this.boardMap[currentId].cellPiece = piece;
+        this.boardMap[currentId].piece = piece.getType();
+        this.renderPieceToCell(piece, currentId);
+      }
     }
   };
 
@@ -158,6 +218,9 @@ class Board {
     });
   }
 
+  getFiles() {
+    return this.files;
+  }
 
   getBoardMap() {
     return this.boardMap;
@@ -229,6 +292,10 @@ class Board {
     }
 
     pieceInArray.setCurrentPosition(curr);
+  }
+
+  getFlatBoard() {
+    return this.newBoardMap.flat();
   }
 
   deletePiece(position: number) {

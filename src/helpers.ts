@@ -1,4 +1,4 @@
-import { SIZE } from "./index";
+import { globalGameState, SIZE } from "./index";
 
 export enum PieceType {
   WP = "wp",
@@ -21,6 +21,28 @@ export const upMove = (position: number, color: TColor, cells = 1) => {
   }
 
   return position - SIZE * cells;
+}
+
+export const absUpMove = (position: number, cells = 1) => {
+  const pos = position + SIZE * cells;
+
+  if (pos >= 0 && pos <= 64) {
+    return pos
+  } else {
+    return null
+  }
+}
+
+export const horizontalMove = (position: number, cells = 1) => {
+  const board = globalGameState.getBoard();
+  const pos = position + cells;
+  const files = board.getFiles();
+  const file = files.find(f => ~f.indexOf(position));
+  if (file?.indexOf(pos) !== -1) {
+    return pos;
+  } else {
+    return null;
+  }
 }
 
 export const checkIsDifferentFiles = (a: number, b: number): boolean => {
@@ -46,10 +68,12 @@ export const absVerticalShift = (a: number, b: number) => {
 };
 
 export const isPathBlocked = (path: number[]) => {
+  const board = globalGameState.getBoard();
+  const boardMap = board.getBoardMap();
   for (let cell of path) {
-    // if (state.boardMap[cell].piece) {
-    //   return true;
-    // }
+    if (boardMap[cell].cellPiece) {
+      return true;
+    }
   }
 
   return false;

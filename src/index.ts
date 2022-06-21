@@ -16,7 +16,6 @@ const body = document.querySelector("body");
 const field = document.createElement("div");
 field.className = "field";
 const board = new Board(field, SIZE);
-
 export const globalGameState = new GameState(board);
 
 body?.appendChild(field);

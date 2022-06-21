@@ -93,11 +93,10 @@ export const handleDragEnd = (e: any) => {
 
   const pieceElement = board.getPieceById(+position);
   if (pieceElement) {
-    pieceElement?.calculateAvailableCels();
-
     const availableCells = pieceElement.getAvailableCells();
     const board = globalGameState.getBoard();
     board.showPath(availableCells, true);
+    pieceElement.clearAvailableCells();
   }
 };
 
