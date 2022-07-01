@@ -112,10 +112,14 @@ export const handleDragStart = (e: any) => {
 
   const pieceElement = board.getPieceById(+position);
   if (pieceElement) {
-    pieceElement?.calculateAvailableCels();
+    
+    const coord = board.getCoordinates(pieceElement.getId());
+    if (!coord) {
+      return;
+    }
 
+    pieceElement?.calculateAvailableCels(coord);
     const availableCells = pieceElement.getAvailableCells();
-    const board = globalGameState.getBoard();
     board.showPath(availableCells);
   }
 

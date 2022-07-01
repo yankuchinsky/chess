@@ -203,13 +203,26 @@ class Board {
 
     const currentColor = boardMap[prev].piece?.toString().split("")[0];
     const movePieceColor = boardMap[curr].piece?.toString().split("")[0];
-  
+   
     if (currentColor !== movePieceColor) {
       return true;
     }
   
     return false;
   };
+
+  getCoordinates(position) {
+    for (const fileId in this.newBoardMap) {
+      for (const posId in this.newBoardMap[fileId]) {
+        const cell = this.newBoardMap[fileId][posId]
+        if (cell.piece?.getId() === position) {
+          return [+fileId, +posId];
+        }
+      } 
+    }
+
+    return null;
+  }
 
   changePiecePosition(curr: number, prev: number) {
     const boardMap = this.getFlatBoard();

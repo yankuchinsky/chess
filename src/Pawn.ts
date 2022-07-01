@@ -5,7 +5,7 @@ class Pawn extends Piece {
   private isMoved = false;
   override availableCellsToMove: number[] = []; 
 
-  calculateAvailableCels() {
+  calculateAvailableCels(postion: number[]) {
     const upCell = upMove(this.getCurrentPosition(), this.getColor());
     this.availableCellsToMove.push(upCell);
 

@@ -37,7 +37,7 @@ class Piece {
     this.color = <TColor>type.split("")[0];
   };
 
-  calculateAvailableCels() {
+  calculateAvailableCels(postion: number[]) {
     //
   }
 

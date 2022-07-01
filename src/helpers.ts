@@ -69,9 +69,10 @@ export const absVerticalShift = (a: number, b: number) => {
 
 export const isPathBlocked = (path: number[]) => {
   const board = globalGameState.getBoard();
-  const boardMap = board.getBoardMap();
+  const boardMap = board.getFlatBoard();
+  
   for (let cell of path) {
-    if (boardMap[cell].cellPiece) {
+    if (boardMap[cell].piece) {
       return true;
     }
   }
