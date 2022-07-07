@@ -77,6 +77,7 @@ class Piece {
     return this.availableCellsToMove;
   }
   
+  // obsolete
   isCanBeMoved (positionToMove: number): boolean {
     const prev = this.currentPosition
     const curr = positionToMove;
@@ -86,7 +87,7 @@ class Piece {
     }
 
     // bishop move
-    if (this.pieceType === "b" && bishopMoveCheck(curr, prev)) {
+    if (this.pieceType === "b") {
         return true;
     }
 

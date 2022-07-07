@@ -3,7 +3,6 @@ import { upMove } from './helpers';
 
 class Pawn extends Piece {
   private isMoved = false;
-  override availableCellsToMove: number[] = []; 
 
   calculateAvailableCels(postion: number[]) {
     const upCell = upMove(this.getCurrentPosition(), this.getColor());

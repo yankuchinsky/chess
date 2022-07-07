@@ -1,13 +1,15 @@
 import Piece from './Piece';
-import { getDiagonalRange, getCoordinatesByPosition, getPositionByCoordinates } from './helpers'
-class Bishop extends Piece {
+import { Position, getPositionByCoordinates, getCoordinatesByPosition, getVerticalRange, getHorizontalRange } from './helpers';
+
+class Rook extends Piece {
 
   calculateAvailableCels() {
     const curr = this.getCurrentPosition();
     const coordinates = getCoordinatesByPosition(curr);
 
     const newCoordinates = [
-      ...getDiagonalRange(coordinates),
+      ...getVerticalRange(coordinates),
+      ...getHorizontalRange(coordinates),
     ];
 
     const filteredCoordinates = <[number, number][]>newCoordinates.filter(c => c !== null)
@@ -17,4 +19,4 @@ class Bishop extends Piece {
   };
 };
 
-export default Bishop;
+export default Rook;

@@ -143,14 +143,18 @@ class Board {
   };
 
   getCellRef(id: number) {
+    return this.getCellById(id)?.cellRef;
+  };
+
+  getCellById(id: number) {
     const boardMap = this.getFlatBoard();
 
     if (!boardMap[id]) {
       return;
     }
 
-    return boardMap[id].cellRef
-  };
+    return boardMap[id];
+  }
 
   showPath(cells: number[], clear = false) {
     const boardMap = this.getFlatBoard(); 
@@ -189,7 +193,11 @@ class Board {
 
   movePiece(curr: number, prev: number) {
     const piece = this.getPieceByPosition(prev);
-    if (this.isVacantCell(curr, prev) && piece?.isCanBeMoved(curr)) {
+    if (!piece) {
+      return;
+    }
+
+    if (piece.getAvailableCells().indexOf(curr) !== -1) {
       this.changePiecePosition(curr, prev);
       globalGameState.changeTheTurn();
     }
@@ -224,38 +232,39 @@ class Board {
     return null;
   }
 
+  getByCoordinates(pos: [number, number]) {
+    const [x, y] = pos;
+    return this.newBoardMap[x][y];
+  }
+
   changePiecePosition(curr: number, prev: number) {
     const boardMap = this.getFlatBoard();
     const prevCell = boardMap[prev];
     if (!prevCell) {
       return;
     }
-    const piece = prevCell.cellRef.children[0];
+    const piece = prevCell.piece!;
     const currCell = boardMap[curr];
-
+    
     if (!currCell) {
       return;
     }
 
-    const pieceId = piece.id.split("_")[0];
+    currCell.cellRef.appendChild(piece.getElement());
+    currCell.piece = piece;
 
-    const obj = globalGameState.getIsWhiteMove() ? "whitePieces" : "blackPieces";
-
-    const pieceInArray = this[obj].find((p) => p.getId() === prev);
-
-    // boardMap[curr].piece = pieceId;
-    // boardMap[prev].piece = 0;
-
-    currCell.cellRef.appendChild(piece);
-    if (!pieceInArray) {
-      return;
-    }
-
-    pieceInArray.setCurrentPosition(curr);
+    piece.setCurrentPosition(curr);
+    this.clearCell(prevCell.piece!.getId());
   }
 
   getFlatBoard() {
     return this.newBoardMap.flat();
+  }
+
+  clearCell(id: number) {
+    const board = this.getFlatBoard();
+
+    board[id].piece = undefined;
   }
 
   deletePiece(position: number) {

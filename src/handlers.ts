@@ -11,7 +11,7 @@ export const handleDrop = (e: any, board: Board) => {
   const currentCellId =
     movePlace === "cell"
       ? e.target.id.split("_")[1]
-      : e.path[1].id.split("_")[1];
+      : e.target.parentElement.id.split("_")[1];
   const pieceInfo = JSON.parse(e.dataTransfer.getData("text/plain"));
   const transferId = pieceInfo.piece;
   const piecePrevPosition = pieceInfo.position;
@@ -30,55 +30,6 @@ export const handleDrop = (e: any, board: Board) => {
   } else {
     if (pieceColor !== "b") return;
   }
-
-  if (e.target.id.split("_")[0].split("")[0] === pieceColor) {
-    return;
-  }
-
-  const knightAttack = (prevPosition: number, moveCell: number) => {
-    // setPiece(prevPosition, 0);
-
-    // if (!state.boardMap[moveCell]) {
-    //   return false;
-    // }
-
-    deletePiece(moveCell);
-
-    return true;
-  };
-
-  const pawnAttack = (
-    prevPosition: number,
-    moveCell: number,
-    piece: string
-  ) => {
-    const pieceColor = piece.split("")[0];
-    const m = pieceColor === "w" ? SIZE : -SIZE;
-    const left = prevPosition + m - 1;
-    const right = prevPosition + m + 1;
-
-    const state = gameState.getGameState()
-    const board = state.getBoard();
-    const boardMap = board.getBoardMap();
-
-    const leftPiece = boardMap[left];
-    const rightPiece = boardMap[right];
-
-    if (left === moveCell && leftPiece) {
-      // setPiece(prevPosition, 0);
-      deletePiece(moveCell);
-
-      return true;
-    }
-
-    if (right === moveCell && rightPiece) {
-      // setPiece(prevPosition, 0);
-      deletePiece(moveCell);
-      return true;
-    }
-
-    return false;
-  };
   
   board.movePiece(+currentCellId, +piecePrevPosition);
 
@@ -93,11 +44,11 @@ export const handleDragEnd = (e: any) => {
 
   const pieceElement = board.getPieceById(+position);
   if (pieceElement) {
-    const availableCells = pieceElement.getAvailableCells();
     const board = globalGameState.getBoard();
-    board.showPath(availableCells, true);
-    pieceElement.clearAvailableCells();
-  }
+    const availableCells = pieceElement.getAvailableCells();
+      board.showPath(availableCells, true);
+      pieceElement.clearAvailableCells();
+    }
 };
 
 export const handleDragStart = (e: any) => {
@@ -119,7 +70,15 @@ export const handleDragStart = (e: any) => {
     }
 
     pieceElement?.calculateAvailableCels(coord);
-    const availableCells = pieceElement.getAvailableCells();
+    const availableCells = pieceElement.getAvailableCells().filter(cell => {
+      const boardCell = board.getCellById(cell);
+      const boardPiece = boardCell?.piece;
+      if (boardPiece && boardPiece.getColor() === pieceElement.getColor()) {
+        return null;
+      }
+
+      return cell;
+    });
     board.showPath(availableCells);
   }
 
