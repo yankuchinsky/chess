@@ -13,7 +13,7 @@ export const handleDrop = (e: any, board: Board) => {
       ? e.target.id.split("_")[1]
       : e.target.parentElement.id.split("_")[1];
   const pieceInfo = JSON.parse(e.dataTransfer.getData("text/plain"));
-  const transferId = pieceInfo.piece;
+  const transferId = pieceInfo.pieceId;
   const piecePrevPosition = pieceInfo.position;
   const [pieceTypeInfo, pieceCurrentPosition] = transferId.split("_");
   const pieceType = pieceTypeInfo.split("")[1];
@@ -30,7 +30,6 @@ export const handleDrop = (e: any, board: Board) => {
   } else {
     if (pieceColor !== "b") return;
   }
-  
   board.movePiece(+currentCellId, +piecePrevPosition);
 
   return false;
@@ -53,15 +52,16 @@ export const handleDragEnd = (e: any) => {
 
 export const handleDragStart = (e: any) => {
   const board = globalGameState.getBoard()
-  const piece = e.target.id;
-  const position = piece.split("_")[1];
+  const pieceId = e.target.id;
+  const position = e.target.parentElement.id.split("_")[1];
+  const pieceIdx = pieceId.split("_")[1];
 
   const pieceObject = {
-    piece,
+    pieceId,
     position,
   };
 
-  const pieceElement = board.getPieceById(+position);
+  const pieceElement = board.getPieceById(+pieceIdx);
   if (pieceElement) {
     
     const coord = board.getCoordinates(pieceElement.getId());

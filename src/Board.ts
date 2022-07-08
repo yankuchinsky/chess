@@ -198,6 +198,7 @@ class Board {
     }
 
     if (piece.getAvailableCells().indexOf(curr) !== -1) {
+
       this.changePiecePosition(curr, prev);
       globalGameState.changeTheTurn();
     }
@@ -238,17 +239,10 @@ class Board {
   }
 
   changePiecePosition(curr: number, prev: number) {
-    const boardMap = this.getFlatBoard();
-    const prevCell = boardMap[prev];
-    if (!prevCell) {
-      return;
-    }
+    const prevCell =  this.getCellById(prev)!;
+   
     const piece = prevCell.piece!;
-    const currCell = boardMap[curr];
-    
-    if (!currCell) {
-      return;
-    }
+    const currCell = this.getCellById(curr)!;
 
     currCell.cellRef.appendChild(piece.getElement());
     currCell.piece = piece;
