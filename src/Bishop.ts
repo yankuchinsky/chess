@@ -1,5 +1,5 @@
 import Piece from './Piece';
-import { getDiagonalRange, getCoordinatesByPosition, getPositionByCoordinates } from './helpers'
+import { getLeftDiagonalRange, getRightDiagonalRange, getCoordinatesByPosition, getPositionByCoordinates } from './helpers'
 class Bishop extends Piece {
 
   calculateAvailableCels() {
@@ -7,7 +7,8 @@ class Bishop extends Piece {
     const coordinates = getCoordinatesByPosition(curr);
 
     const newCoordinates = [
-      ...getDiagonalRange(coordinates),
+      ...getLeftDiagonalRange(coordinates),
+      ...getRightDiagonalRange(coordinates),
     ];
 
     const filteredCoordinates = <[number, number][]>newCoordinates.filter(c => c !== null)
