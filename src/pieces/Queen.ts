@@ -1,6 +1,6 @@
 import Piece from './Piece';
-import { getLeftDiagonalRange, getRightDiagonalRange, getCoordinatesByPosition, getPositionByCoordinates } from './helpers'
-class Bishop extends Piece {
+import { getLeftDiagonalRange, getRightDiagonalRange, getCoordinatesByPosition, getPositionByCoordinates, getVerticalRange, getHorizontalRange  } from '../helpers'
+class Queen extends Piece {
 
   calculateAvailableCels() {
     const curr = this.getCurrentPosition();
@@ -9,6 +9,8 @@ class Bishop extends Piece {
     const newCoordinates = [
       ...getLeftDiagonalRange(coordinates),
       ...getRightDiagonalRange(coordinates),
+      ...getVerticalRange(coordinates),
+      ...getHorizontalRange(coordinates),
     ];
 
     const filteredCoordinates = <[number, number][]>newCoordinates.filter(c => c !== null)
@@ -18,4 +20,4 @@ class Bishop extends Piece {
   };
 };
 
-export default Bishop;
+export default Queen;

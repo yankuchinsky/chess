@@ -1,5 +1,5 @@
 import { DEV_MODE, globalGameState } from "./index";
-import Piece from "./Piece";
+import Piece from './pieces/Piece';
 import { PieceType } from './helpers'
 import PieceFactory from './PieceFactory'
 

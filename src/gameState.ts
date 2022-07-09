@@ -1,5 +1,5 @@
 import Board from "./Board";
-import Piece from "./Piece";
+import Piece from "./pieces/Piece";
 
 interface IGameState {
   board: Board | undefined,

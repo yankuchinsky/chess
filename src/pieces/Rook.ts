@@ -1,14 +1,13 @@
 import Piece from './Piece';
-import { getLeftDiagonalRange, getRightDiagonalRange, getCoordinatesByPosition, getPositionByCoordinates, getVerticalRange, getHorizontalRange  } from './helpers'
-class Queen extends Piece {
+import { getPositionByCoordinates, getCoordinatesByPosition, getVerticalRange, getHorizontalRange } from '../helpers';
+
+class Rook extends Piece {
 
   calculateAvailableCels() {
     const curr = this.getCurrentPosition();
     const coordinates = getCoordinatesByPosition(curr);
 
     const newCoordinates = [
-      ...getLeftDiagonalRange(coordinates),
-      ...getRightDiagonalRange(coordinates),
       ...getVerticalRange(coordinates),
       ...getHorizontalRange(coordinates),
     ];
@@ -20,4 +19,4 @@ class Queen extends Piece {
   };
 };
 
-export default Queen;
+export default Rook;
