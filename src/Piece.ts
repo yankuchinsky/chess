@@ -1,6 +1,5 @@
 import { DEV_MODE } from "./index";
 import {
-  rookMoveCheck,
   bishopMoveCheck,
   canMoveToLastCell,
   checkIsCastlingMode,
@@ -81,10 +80,6 @@ class Piece {
   isCanBeMoved (positionToMove: number): boolean {
     const prev = this.currentPosition
     const curr = positionToMove;
-    // rook move
-    if (this.pieceType === "r" && rookMoveCheck(curr, prev)) {
-        return true;
-    }
 
     // bishop move
     if (this.pieceType === "b") {
@@ -94,7 +89,6 @@ class Piece {
     // queen move
     if (this.pieceType === "q") {
       if (
-        rookMoveCheck(curr, prev) ||
         bishopMoveCheck(curr, prev)
       ) {
         return true;
@@ -114,11 +108,6 @@ class Piece {
     }
 
     if (this.pieceType === "k") {
-      if (checkIsCastlingMode(curr, prev)) {
-        castling(curr, prev, this.color);
-
-        return false;
-      }
 
       const diff = Math.abs(curr - prev);
 

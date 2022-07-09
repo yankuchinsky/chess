@@ -141,21 +141,6 @@ export class Position {
   }
 }
 
-// export const diagonalShift = (currPos: [number, number], horizontal, vertical) => {
-//   const position = new Position(currPos);
-//   return position.verticalShift(vertical).horizontalShift(horizontal).position;
-// }
-
-export const absUpMove = (position: number, cells = 1) => {
-  const pos = position + SIZE * cells;
-
-  if (pos >= 0 && pos <= 64) {
-    return pos
-  } else {
-    return null
-  }
-}
-
 export const horizontalMove = (position: number, cells = 1) => {
   const board = globalGameState.getBoard();
   const pos = position + cells;
@@ -167,18 +152,6 @@ export const horizontalMove = (position: number, cells = 1) => {
     return null;
   }
 }
-
-export const checkIsDifferentFiles = (a: number, b: number): boolean => {
-  if (Math.ceil(a / SIZE) === Math.ceil(b / SIZE)) {
-    return false;
-  }
-
-  if (Math.floor(a / SIZE) === Math.floor(b / SIZE)) {
-    return false;
-  }
-
-  return true;
-};
 
 export const absVerticalShift = (a: number, b: number) => {
   // const a1 = files.find((file) => ~file.indexOf(a));
@@ -201,40 +174,6 @@ export const isPathBlocked = (path: number[]) => {
   }
 
   return false;
-};
-
-// export const isOnFirstFile = (a: number) => !!~files[0].indexOf(a);
-
-// export const isOnLastFile = (a: number) => !!~files[7].indexOf(a);
-
-export const isCellCanBeAttacked = (curr: number, next: number) => {
-  // if (!state.boardMap[next].piece) {
-  //   return false;
-  // }
-
-  // const currentColor = state.boardMap[curr].piece.toString().split("")[0];
-  // const movePieceColor = state.boardMap[next].piece.toString().split("")[0];
-
-  // if (currentColor !== movePieceColor) {
-  //   return true;
-  // }
-
-  // return false;
-};
-
-export const isVacantCell = (curr: number, prev: number) => {
-  // if (!state.boardMap[curr].piece) {
-  //   return true;
-  // }
-
-  // const currentColor = state.boardMap[prev].piece.toString().split("")[0];
-  // const movePieceColor = state.boardMap[curr].piece.toString().split("")[0];
-
-  // if (currentColor !== movePieceColor) {
-  //   return true;
-  // }
-
-  // return false;
 };
 
 export const deletePiece = (id: number) => {
@@ -314,29 +253,6 @@ export const hasHorizontalObstacles = (curr: number, prev: number) => {
   return false;
 };
 
-export const rookMoveCheck = (curr: number, prev: number) => {
-  if (
-    !(!checkIsDifferentFiles(curr, prev) || Math.abs(curr - prev) % SIZE === 0)
-  ) {
-    return false;
-  }
-
-  if (Math.abs(curr - prev) < 8) {
-    if (hasHorizontalObstacles(curr, prev)) {
-      return false;
-    }
-  } else {
-    if (hasVerticalObstacles(curr, prev)) {
-      return false;
-    }
-  }
-  // if (!canMoveToLastCell(curr, prev)) {
-  //   return false;
-  // }
-
-  return true;
-};
-
 export const bishopMoveCheck = (curr: number, prev: number) => {
   const diff = Math.abs(curr - prev);
 
@@ -375,15 +291,7 @@ export const canMoveToLastCell = (curr: number, prev: number) => {
 };
 
 export const checkIsCastlingMode = (curr: number, prev: number) => {
-  if (checkIsDifferentFiles(curr, prev)) {
-    return false;
-  }
 
-  if (Math.abs(curr - prev) > 1) {
-    return true;
-  }
-
-  return false;
 };
 
 export const castling = (curr: number, prev: number, color: "w" | "b") => {
