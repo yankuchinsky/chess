@@ -2,8 +2,6 @@ import { DEV_MODE } from "./index";
 import {
   bishopMoveCheck,
   canMoveToLastCell,
-  checkIsCastlingMode,
-  castling,
 } from "./helpers";
 
 const getImage = (type: string) => {
