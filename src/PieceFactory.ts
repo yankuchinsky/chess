@@ -4,7 +4,8 @@ import Knight from './pieces/Knight';
 import Piece from './pieces/Piece';
 import Bishop from './pieces/Bishop';
 import Rook from './pieces/Rook';
-import Queen from './pieces/Queen'
+import Queen from './pieces/Queen';
+import King from './pieces/King';
 
 class PieceFactory {
   static createPiece(id: number, type: string): Piece {
@@ -26,6 +27,10 @@ class PieceFactory {
 
     if (type === PieceType.WQ  || type === PieceType.BQ) {
       return new Queen(id, type);
+    }
+
+    if (type === PieceType.WK  || type === PieceType.BK) {
+      return new King(id, type);
     }
 
     return new Piece(id, type);
