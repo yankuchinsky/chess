@@ -1,5 +1,5 @@
 import Piece from './Piece';
-import { Position, getPositionByCoordinates, getCoordinatesByPosition } from './helpers';
+import { Position, getPositionByCoordinates, getCoordinatesByPosition } from '../helpers';
 
 class Knight extends Piece {
 

@@ -1,5 +1,5 @@
 import Piece from './Piece';
-import { upMove } from './helpers';
+import { upMove } from '../helpers';
 
 class Pawn extends Piece {
   private isMoved = false;

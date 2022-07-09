@@ -5,7 +5,7 @@ import {
 } from "../helpers";
 
 const getImage = (type: string) => {
-  return require(`./assets/${type}.png`).default;
+  return require(`../assets/${type}.png`).default;
 }
 
 class Piece {
