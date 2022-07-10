@@ -18,9 +18,9 @@ const body = document.querySelector("body");
 const field = document.createElement("div");
 field.className = "field";
 
-const pieces = new Pieces();
 const board = new Board(field, SIZE);
-pieces.setupPiecesByJSON(jsonSetup, board);
+export const pieces = new Pieces(board);
+pieces.setupPiecesByJSON(jsonSetup);
 console.log('board', pieces);
 export const globalGameState = new GameState(board);
 

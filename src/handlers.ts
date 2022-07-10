@@ -1,8 +1,6 @@
 import Board from "./Board";
-import { SIZE, globalGameState } from "./index";
-import {
-  deletePiece,
-} from "./helpers";
+import { globalGameState, pieces } from "./index";
+import { getCoordinatesByPosition } from './helpers';
 
 export const handleDrop = (e: any, board: Board) => {
   e.stopPropagation();
@@ -16,7 +14,6 @@ export const handleDrop = (e: any, board: Board) => {
   const transferId = pieceInfo.pieceId;
   const piecePrevPosition = pieceInfo.position;
   const [pieceTypeInfo, pieceCurrentPosition] = transferId.split("_");
-  const pieceType = pieceTypeInfo.split("")[1];
   const pieceColor = pieceTypeInfo.split("")[0];
   
   if (+piecePrevPosition === +currentCellId) {
@@ -30,7 +27,8 @@ export const handleDrop = (e: any, board: Board) => {
   } else {
     if (pieceColor !== "b") return;
   }
-  board.movePiece(+currentCellId, +piecePrevPosition);
+
+  pieces.move(+piecePrevPosition, +currentCellId);
 
   return false;
 };
@@ -41,7 +39,7 @@ export const handleDragEnd = (e: any) => {
   const position = piece.split("_")[1];
   const board = globalGameState.getBoard()
 
-  const pieceElement = board.getPieceById(+position);
+  const pieceElement = pieces.getPieceById(+position);
   if (pieceElement) {
     const board = globalGameState.getBoard();
     const availableCells = pieceElement.getAvailableCells();
@@ -61,10 +59,10 @@ export const handleDragStart = (e: any) => {
     position,
   };
 
-  const pieceElement = board.getPieceById(+pieceIdx);
+  const pieceElement = pieces.getPieceById(+pieceIdx);
   if (pieceElement) {
     
-    const coord = board.getCoordinates(pieceElement.getId());
+    const coord = getCoordinatesByPosition(pieceElement.getId());
     if (!coord) {
       return;
     }
@@ -91,8 +89,6 @@ export const handleDragOver = (e: any) => {
   if (e.preventDefault) {
     e.preventDefault();
   }
-
-  // state.currentPiece = null;
 
   return false;
 };
