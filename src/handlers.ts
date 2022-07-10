@@ -6,7 +6,7 @@ export const handleDrop = (e: any, board: Board) => {
   e.stopPropagation();
 
   const movePlace = e.target.id.split("_")[0];
-  const currentCellId =
+  const movePiecePosition =
     movePlace === "cell"
       ? e.target.id.split("_")[1]
       : e.target.parentElement.id.split("_")[1];
@@ -16,7 +16,7 @@ export const handleDrop = (e: any, board: Board) => {
   const [pieceTypeInfo, pieceCurrentPosition] = transferId.split("_");
   const pieceColor = pieceTypeInfo.split("")[0];
   
-  if (+piecePrevPosition === +currentCellId) {
+  if (+piecePrevPosition === +movePiecePosition) {
     return;
   }
   const gameState = globalGameState.getGameState();
@@ -28,7 +28,7 @@ export const handleDrop = (e: any, board: Board) => {
     if (pieceColor !== "b") return;
   }
 
-  pieces.move(+piecePrevPosition, +currentCellId);
+  pieces.move(+piecePrevPosition, +movePiecePosition);
 
   return false;
 };
@@ -36,10 +36,9 @@ export const handleDrop = (e: any, board: Board) => {
 export const handleDragEnd = (e: any) => {
   e.target.style.opacity = 1;
   const piece = e.target.id;
-  const position = piece.split("_")[1];
-  const board = globalGameState.getBoard()
+  const pieceId = +piece.split("_")[1];
+  const pieceElement = pieces.getPieceById(pieceId);
 
-  const pieceElement = pieces.getPieceById(+position);
   if (pieceElement) {
     const board = globalGameState.getBoard();
     const availableCells = pieceElement.getAvailableCells();

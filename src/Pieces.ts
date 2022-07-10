@@ -42,7 +42,7 @@ export class Pieces {
   }
 
   move(currId: number, cellToMoveId: number) {
-    const piece = this.getPieceById(currId);
+    const piece = this.getPieceByPosition(currId);
     if (piece && piece.getAvailableCells().indexOf(cellToMoveId) !== -1) {
       const cell = this.board.getCellById(cellToMoveId)!.cellRef;
       piece.setCellElement(cell);

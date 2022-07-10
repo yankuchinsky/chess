@@ -80,7 +80,7 @@ export const getRightDiagonalRange = (currPos: [number, number]) => {
   for(let i = 0; i < SIZE; i++) {
     const x = startCoords[0] + i;
     const y = startCoords[1] + i;
-
+    
     if (x >= 0 && x < SIZE && y >= 0 && y < SIZE) {
       res.push([startCoords[0] + i, startCoords[1] + i]);
     }
@@ -92,12 +92,12 @@ export const getRightDiagonalRange = (currPos: [number, number]) => {
 export const getLeftDiagonalRange = (currPos: [number, number]) => {
   const res: [number, number][] = [];
   const verticalShift = Math.floor(getPositionByCoordinates(currPos) / SIZE);
-  const startCoords = [currPos[0] - verticalShift, currPos[1] + verticalShift]
+  const startCoords = [currPos[0] + verticalShift, currPos[1] - verticalShift]
 
   for(let i = 0; i < SIZE; i++) {
     const x = startCoords[0] - i;
     const y = startCoords[1] + i;
-
+    
     if (x >= 0 && x < SIZE && y >= 0 && y < SIZE) {
       res.push([startCoords[0] - i, startCoords[1] + i]);
     }

@@ -1,8 +1,4 @@
 import { DEV_MODE } from "../index";
-import {
-  bishopMoveCheck,
-  canMoveToLastCell,
-} from "../helpers";
 
 const getImage = (type: string) => {
   return require(`../assets/${type}.png`).default;
