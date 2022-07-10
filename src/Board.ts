@@ -3,27 +3,20 @@ import Piece from './pieces/Piece';
 
 export const SIZE = 8;
 
-type BoardMapCell = TCell & {
-  cellPiece: Piece | undefined;
-}
-
-type newBoardMapCell = {
+type BoardMapCell = {
   cellRef: HTMLDivElement,
-  piece: Piece | undefined,
 }
 
 class Board {
-  private boardMap: BoardMapCell[] = [];
-  private newBoardMap: newBoardMapCell[][] = [];
+  private boardMap: BoardMapCell[][] = [];
   private files: number[][] = [];
 
   constructor(element: HTMLDivElement, size: number) {
     let isBlack = false;
     let idx = size * size;
-    let regularId = 0;
     let fileIdx = 0;
 
-    this.newBoardMap = Array.from(new Array(size), () => []);
+    this.boardMap = Array.from(new Array(size), () => []);
 
     for (let i = 0; i < size; i ++) {
       for (let j = 0; j < size; j ++) {
@@ -32,14 +25,10 @@ class Board {
         const currentFileBoardMapIdx = size - fileIdx - 1;
         const cellElement = this.createCellElement(currentFileIdx, isBlack ? "black" : "white");
 
-        this.newBoardMap[currentFileBoardMapIdx][j] = {
-          cellRef: cellElement,
-          piece: undefined,
-        };
+        this.boardMap[currentFileBoardMapIdx][j] = { cellRef: cellElement };
 
         isBlack = !isBlack;
         element.appendChild(cellElement);
-        regularId += 1;
       }
       isBlack = !isBlack;
       fileIdx += 1;
@@ -101,20 +90,8 @@ class Board {
     return this.files;
   }
 
-  getBoardMap() {
-    return this.boardMap;
-  };
-
-  getPieceByPosition(position: number) {
-    const piece = this.getFlatBoard().find(cell => {
-      return cell.piece?.getCurrentPosition() === position;
-    })
-
-    return piece?.piece;
-  };
-
   getFlatBoard() {
-    return this.newBoardMap.flat();
+    return this.boardMap.flat();
   }
 }
 
