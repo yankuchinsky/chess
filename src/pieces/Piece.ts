@@ -15,9 +15,10 @@ class Piece {
   private type: string;
   private pieceType: string;
   private currentPosition: number;
+  private currentCell: HTMLDivElement;
   protected availableCellsToMove: number[] = [];
 
-  constructor(id: number, type: string) {
+  constructor(id: number, type: string, currentCell: HTMLDivElement) {
     this.element = document.createElement("div");
     if (DEV_MODE) {
       this.element.classList.add("piece_dev_mode");
@@ -32,6 +33,7 @@ class Piece {
     this.element.style.backgroundSize = "contain";
     this.element.draggable = true;
     this.color = <TColor>type.split("")[0];
+    this.currentCell = currentCell;
   };
 
   calculateAvailableCels(postion: number[]) {
@@ -60,6 +62,10 @@ class Piece {
 
   getCurrentPosition() {
     return this.currentPosition;
+  }
+
+  render() {
+    this.currentCell.appendChild(this.getElement());
   }
 
   setCurrentPosition(position: number) {

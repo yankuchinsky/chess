@@ -2,6 +2,7 @@ import { DEV_MODE, globalGameState } from "./index";
 import Piece from './pieces/Piece';
 import { PieceType } from './helpers'
 import PieceFactory from './PieceFactory'
+import Pieces from './Pieces';
 
 export const SIZE = 8;
 
@@ -10,7 +11,7 @@ type BoardMapCell = TCell & {
 }
 
 type newBoardMapCell = {
-  cellRef: HTMLElement,
+  cellRef: HTMLDivElement,
   piece: Piece | undefined,
 }
 
@@ -35,21 +36,22 @@ class Board {
         const currentFileIdx = idx - size + j * 2 + 1;
         const currentFileBoardMapIdx = size - fileIdx - 1;
         const cellElement = this.createCellElement(currentFileIdx, isBlack ? "black" : "white");
-        const piece = this.createPiece(currentFileIdx, currentFileBoardMapIdx);
+        const piece = this.createPiece(currentFileIdx, currentFileBoardMapIdx, cellElement)!;
+        // this.piecesArray.addPiece(piece);
 
         this.newBoardMap[currentFileBoardMapIdx][j] = {
           cellRef: cellElement,
           piece: undefined,
         };
 
-        if (piece) {
-          this.newBoardMap[currentFileBoardMapIdx][j] = {
-            cellRef: cellElement,
-            piece,
-          };
+        // if (piece) {
+        //   this.newBoardMap[currentFileBoardMapIdx][j] = {
+        //     cellRef: cellElement,
+        //     piece,
+        //   };
 
-          this.newBoardMap[currentFileBoardMapIdx][j].cellRef.appendChild(piece.getElement());
-        }
+        //   this.newBoardMap[currentFileBoardMapIdx][j].cellRef.appendChild(piece.getElement());
+        // }
 
         isBlack = !isBlack;
         element.appendChild(cellElement);
@@ -78,56 +80,56 @@ class Board {
     return cell;
   };
 
-  createPiece(currentId: number, currentFile: number) {
+  createPiece(currentId: number, currentFile: number, cell) {
     if (currentFile === 7) {
       if (currentId === 56 || currentId === 63) {
-        return PieceFactory.createPiece(currentId, PieceType.BR);
+        return PieceFactory.createPiece(currentId, PieceType.BR, cell);
       }
   
       if (currentId === 57 || currentId === 62) {
-        return PieceFactory.createPiece(currentId, PieceType.BN);
+        return PieceFactory.createPiece(currentId, PieceType.BN, cell);
       }
   
       if (currentId === 58 || currentId === 61) {
-        return PieceFactory.createPiece(currentId, PieceType.BB);
+        return PieceFactory.createPiece(currentId, PieceType.BB, cell);
       }
   
       if (currentId === 59) {
-        return PieceFactory.createPiece(currentId, PieceType.BK);
+        return PieceFactory.createPiece(currentId, PieceType.BK, cell);
       }
   
       if (currentId === 60) {
-        return PieceFactory.createPiece(currentId, PieceType.BQ);
+        return PieceFactory.createPiece(currentId, PieceType.BQ, cell);
       }
     }
   
     if (currentFile === 6) {
-      return PieceFactory.createPiece(currentId, PieceType.BP);
+      return PieceFactory.createPiece(currentId, PieceType.BP, cell);
     }
   
     if (currentFile === 1) {
-      return PieceFactory.createPiece(currentId, PieceType.WP);
+      return PieceFactory.createPiece(currentId, PieceType.WP, cell);
     }
   
     if (currentFile === 0) {
       if (currentId === 0 || currentId === 7) {
-        return PieceFactory.createPiece(currentId, PieceType.WR);
+        return PieceFactory.createPiece(currentId, PieceType.WR, cell);
       }
   
       if (currentId === 1 || currentId === 6) {
-        return PieceFactory.createPiece(currentId, PieceType.WN);
+        return PieceFactory.createPiece(currentId, PieceType.WN, cell);
       }
   
       if (currentId === 2 || currentId === 5) {
-        return PieceFactory.createPiece(currentId, PieceType.WB);
+        return PieceFactory.createPiece(currentId, PieceType.WB, cell);
       }
   
       if (currentId === 3) {
-        return PieceFactory.createPiece(currentId, PieceType.WQ);
+        return PieceFactory.createPiece(currentId, PieceType.WQ, cell);
       }
   
       if (currentId === 4) {
-        return PieceFactory.createPiece(currentId, PieceType.WK);
+        return PieceFactory.createPiece(currentId, PieceType.WK, cell);
       }
     }
 
