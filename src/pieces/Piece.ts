@@ -15,9 +15,10 @@ class Piece {
   private type: string;
   private pieceType: string;
   private currentPosition: number;
+  private currentCell: HTMLDivElement;
   protected availableCellsToMove: number[] = [];
 
-  constructor(id: number, type: string) {
+  constructor(id: number, type: string, currentCell: HTMLDivElement) {
     this.element = document.createElement("div");
     if (DEV_MODE) {
       this.element.classList.add("piece_dev_mode");
@@ -32,6 +33,7 @@ class Piece {
     this.element.style.backgroundSize = "contain";
     this.element.draggable = true;
     this.color = <TColor>type.split("")[0];
+    this.currentCell = currentCell;
   };
 
   calculateAvailableCels(postion: number[]) {
@@ -62,6 +64,10 @@ class Piece {
     return this.currentPosition;
   }
 
+  render() {
+    this.currentCell.appendChild(this.getElement());
+  }
+
   setCurrentPosition(position: number) {
     this.currentPosition = position;
   }
@@ -74,79 +80,8 @@ class Piece {
     return this.availableCellsToMove;
   }
   
-  // obsolete
-  isCanBeMoved (positionToMove: number): boolean {
-    const prev = this.currentPosition
-    const curr = positionToMove;
-
-    // bishop move
-    if (this.pieceType === "b") {
-        return true;
-    }
-
-    // queen move
-    if (this.pieceType === "q") {
-      if (
-        bishopMoveCheck(curr, prev)
-      ) {
-        return true;
-      }
-    }
-
-    if (this.pieceType === "n") {
-      const diff = Math.abs(curr - prev);
-
-      if (diff === 6 || diff === 10 || diff === 15 || diff === 17) {
-        // if (knightAttack(+curr, +currentCellId)) {
-        //   return false;
-        // }
-
-        return true;
-      }
-    }
-
-    if (this.pieceType === "k") {
-
-      const diff = Math.abs(curr - prev);
-
-      if (diff < 10) {
-        canMoveToLastCell(curr, prev);
-        return true;
-      }
-    }
-    // pawn move
-    if (this.pieceType === "p") {
-      // if (pawnAttack(+piecePrevPosition, +currentCellId, pieceTypeInfo)) {
-      //   return false;
-      // }
-      if (this.color === "w") {
-        if (
-          curr - 16 === prev &&
-          prev < 16
-        ) {
-          return true;
-        }
-
-        if (curr - 8 === prev) {
-          return true;
-        }
-      }
-
-      if (this.color === "b") {
-        if (
-          curr + 16 === prev &&
-          prev > 46
-        ) {
-          return true;
-        }
-
-        if (curr + 8 === prev) {
-          return true;
-        }
-      }
-    }
-
-    return false;
+  setCellElement(cell: HTMLDivElement) {
+    this.currentCell = cell;
   }
 }
 

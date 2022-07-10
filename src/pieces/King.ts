@@ -1,6 +1,6 @@
 import Piece from './Piece';
 import { Position, getPositionByCoordinates, getCoordinatesByPosition } from '../helpers';
-import { globalGameState } from '../index';
+import { pieces } from '../index';
 
 class King extends Piece {
   private hasCastled = false;
@@ -44,9 +44,8 @@ class King extends Piece {
 
     const firstPiecePosition = getPositionByCoordinates(firstPieceCoordinates);
     const secondPiecePosition = getPositionByCoordinates(secondPieceCoordinates);
-    const board = globalGameState.getBoard();
-    const firstPiece = board.getPieceByPosition(firstPiecePosition);
-    const secondPiece = board.getPieceByPosition(secondPiecePosition);
+    const firstPiece = pieces.getPieceByPosition(firstPiecePosition);
+    const secondPiece = pieces.getPieceByPosition(secondPiecePosition);
 
     if (!firstPiece && !secondPiece) {
       return true;
@@ -67,10 +66,9 @@ class King extends Piece {
     const secondPiecePosition = getPositionByCoordinates(secondPieceCoordinates);
     const thirdPiecePosition = getPositionByCoordinates(thirdPieceCoordinates);
 
-    const board = globalGameState.getBoard();
-    const firstPiece = board.getPieceByPosition(firstPiecePosition);
-    const secondPiece = board.getPieceByPosition(secondPiecePosition);
-    const thirdPiece = board.getPieceByPosition(thirdPiecePosition);
+    const firstPiece = pieces.getPieceByPosition(firstPiecePosition);
+    const secondPiece = pieces.getPieceByPosition(secondPiecePosition);
+    const thirdPiece = pieces.getPieceByPosition(thirdPiecePosition);
     
 
     if (!firstPiece && !secondPiece && !thirdPiece) {
