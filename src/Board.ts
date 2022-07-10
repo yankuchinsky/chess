@@ -116,10 +116,6 @@ class Board {
   getFlatBoard() {
     return this.newBoardMap.flat();
   }
-
-  deletePiece(position: number) {
-    //
-  }
 }
 
 export default Board;
