@@ -9,6 +9,8 @@ import {
   handleDragOver,
 } from "./handlers";
 import jsonSetup from './templates/standart.json';
+import test from './templates/test.json';
+
 
 export const DEV_MODE = true;
 export const SIZE = 8;

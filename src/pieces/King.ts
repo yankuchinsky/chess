@@ -1,6 +1,5 @@
 import Piece from './Piece';
 import { Position, getPositionByCoordinates, getCoordinatesByPosition } from '../helpers';
-import { pieces } from '../index';
 
 class King extends Piece {
   private hasCastled = false;
@@ -44,8 +43,8 @@ class King extends Piece {
 
     const firstPiecePosition = getPositionByCoordinates(firstPieceCoordinates);
     const secondPiecePosition = getPositionByCoordinates(secondPieceCoordinates);
-    const firstPiece = pieces.getPieceByPosition(firstPiecePosition);
-    const secondPiece = pieces.getPieceByPosition(secondPiecePosition);
+    const firstPiece = this.pieces.getPieceByPosition(firstPiecePosition);
+    const secondPiece = this.pieces.getPieceByPosition(secondPiecePosition);
 
     if (!firstPiece && !secondPiece) {
       return true;
@@ -66,9 +65,9 @@ class King extends Piece {
     const secondPiecePosition = getPositionByCoordinates(secondPieceCoordinates);
     const thirdPiecePosition = getPositionByCoordinates(thirdPieceCoordinates);
 
-    const firstPiece = pieces.getPieceByPosition(firstPiecePosition);
-    const secondPiece = pieces.getPieceByPosition(secondPiecePosition);
-    const thirdPiece = pieces.getPieceByPosition(thirdPiecePosition);
+    const firstPiece = this.pieces.getPieceByPosition(firstPiecePosition);
+    const secondPiece = this.pieces.getPieceByPosition(secondPiecePosition);
+    const thirdPiece = this.pieces.getPieceByPosition(thirdPiecePosition);
     
 
     if (!firstPiece && !secondPiece && !thirdPiece) {

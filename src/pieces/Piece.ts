@@ -1,4 +1,4 @@
-import { DEV_MODE } from "../index";
+import { DEV_MODE, pieces } from "../index";
 
 const getImage = (type: string) => {
   return require(`../assets/${type}.png`).default;
@@ -13,6 +13,7 @@ class Piece {
   private currentPosition: number;
   private currentCell: HTMLDivElement;
   protected availableCellsToMove: number[] = [];
+  protected readonly pieces = pieces;
 
   constructor(id: number, type: string, currentCell: HTMLDivElement) {
     this.element = document.createElement("div");

@@ -82,11 +82,15 @@ export const getRightDiagonalRange = (currPos: [number, number]) => {
     const y = startCoords[1] + i;
     
     if (x >= 0 && x < SIZE && y >= 0 && y < SIZE) {
-      res.push([startCoords[0] + i, startCoords[1] + i]);
+      const coords: [number, number] = [x, y];
+
+      if (coords.join() !== currPos.join()) {
+        res.push(coords);
+      }
     }
   }
 
-  return res
+  return res.filter(c => c !== currPos);
 }
 
 export const getLeftDiagonalRange = (currPos: [number, number]) => {
@@ -99,11 +103,14 @@ export const getLeftDiagonalRange = (currPos: [number, number]) => {
     const y = startCoords[1] + i;
     
     if (x >= 0 && x < SIZE && y >= 0 && y < SIZE) {
-      res.push([startCoords[0] - i, startCoords[1] + i]);
+      const coords: [number, number] = [x, y];
+      if (coords.join() !== currPos.join()) {
+        res.push(coords);
+      }
     }
   }
 
-  return res
+  return res;
 }
 
 export class Position {
