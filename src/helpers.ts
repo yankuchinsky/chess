@@ -1,4 +1,4 @@
-import { globalGameState, SIZE } from "./index";
+import { pieces, SIZE } from "./index";
 
 export enum PieceType {
   WP = "wp",
@@ -141,6 +141,58 @@ export class Position {
   constructor(val: [number, number]) {
     this.position = val;
   }
+}
+
+export const calculateDiagonalAvailableCells = (coordinates: [number, number]) => {
+  const leftRange = getLeftDiagonalRange(coordinates).filter(c => !!c);
+  const rightRange = getRightDiagonalRange(coordinates).filter(c => !!c);
+
+  const tlBlockerCoords = new Position(coordinates).horizontalShift(-1).verticalShift(1).getPostition()!;
+  const trBlockerCoords = new Position(coordinates).horizontalShift(1).verticalShift(1).getPostition()!;
+  const blBlockerCoords = new Position(coordinates).horizontalShift(-1).verticalShift(-1).getPostition()!;
+  const brBlockerCoords = new Position(coordinates).horizontalShift(1).verticalShift(-1).getPostition()!;
+
+
+  const tlBlocker = tlBlockerCoords && pieces.getPieceByPosition(getPositionByCoordinates(tlBlockerCoords));
+  const trBlocker = trBlockerCoords && pieces.getPieceByPosition(getPositionByCoordinates(trBlockerCoords));
+  const blBlocker = blBlockerCoords && pieces.getPieceByPosition(getPositionByCoordinates(blBlockerCoords));
+  const brBlocker = brBlockerCoords && pieces.getPieceByPosition(getPositionByCoordinates(brBlockerCoords));
+
+  const idxLeft = leftRange.findIndex(c => c[0] === coordinates[0] && c[1] === coordinates[1]);
+  const idxRight = rightRange.findIndex(c => c[0] === coordinates[0] && c[1] === coordinates[1]);
+
+  const tlRange = leftRange.slice(idxLeft, leftRange.length);
+  const brRange = leftRange.slice(0, idxLeft);
+  const blRange = rightRange.slice(0, idxRight);
+  const trRange = rightRange.slice(idxRight, rightRange.length);
+
+  const newCoordinates: [number, number][] = [];
+
+  if (!tlBlocker) {
+    tlRange.forEach(c => {
+      newCoordinates.push(c);
+    });
+  }
+
+  if (!trBlocker) {
+    trRange.forEach(c => {
+      newCoordinates.push(c);
+    });
+  }
+
+  if (!blBlocker) {
+    blRange.forEach(c => {
+      newCoordinates.push(c);
+    });
+  }
+
+  if (!brBlocker) {
+    brRange.forEach(c => {
+      newCoordinates.push(c);
+    });
+  }
+
+  return newCoordinates;
 }
 
 const calcPath = (
