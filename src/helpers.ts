@@ -195,6 +195,57 @@ export const calculateDiagonalAvailableCells = (coordinates: [number, number]) =
   return newCoordinates;
 }
 
+export const calculateVerticalAvailableCells = (coordinates: [number, number]) => {
+  const tBlockerCoords = new Position(coordinates).verticalShift(1).getPostition()!;
+  const lBlockerCoords = new Position(coordinates).horizontalShift(-1).getPostition()!;
+  const rBlockerCoords = new Position(coordinates).horizontalShift(1).getPostition()!;
+  const bBlockerCoords = new Position(coordinates).verticalShift(-1).getPostition()!;
+
+  const tBlocker = tBlockerCoords && pieces.getPieceByPosition(getPositionByCoordinates(tBlockerCoords));
+  const lBlocker = lBlockerCoords && pieces.getPieceByPosition(getPositionByCoordinates(lBlockerCoords));
+  const rBlocker = rBlockerCoords && pieces.getPieceByPosition(getPositionByCoordinates(rBlockerCoords));
+  const bBlocker = bBlockerCoords && pieces.getPieceByPosition(getPositionByCoordinates(bBlockerCoords));
+
+  const horizontalRange = getHorizontalRange(coordinates);
+  const verticalRange = getVerticalRange(coordinates);
+
+  const idxHorizontal = horizontalRange.findIndex(c => c[0] === coordinates[0] && c[1] === coordinates[1]);
+  const idxVertical = verticalRange.findIndex(c => c[0] === coordinates[0] && c[1] === coordinates[1]);
+
+  const lRange = horizontalRange.slice(0, idxHorizontal);
+  const rRange = horizontalRange.slice(idxHorizontal, horizontalRange.length);
+  const tRange = verticalRange.slice(idxVertical, verticalRange.length);
+  const bRange = verticalRange.slice(0, idxVertical);
+
+  const newCoordinates: [number, number][] = [];
+
+  if (!tBlocker) {
+    tRange.forEach(c => {
+      newCoordinates.push(c);
+    });
+  }
+
+  if (!lBlocker) {
+    lRange.forEach(c => {
+      newCoordinates.push(c);
+    });
+  }
+
+  if (!rBlocker) {
+    rRange.forEach(c => {
+      newCoordinates.push(c);
+    });
+  }
+
+  if (!bBlocker) {
+    bRange.forEach(c => {
+      newCoordinates.push(c);
+    });
+  }
+
+  return newCoordinates;
+}
+
 const calcPath = (
   accFn: (idx: number) => number,
   decFn: (idx: number) => number,

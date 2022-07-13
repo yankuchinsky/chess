@@ -6,9 +6,7 @@ class Bishop extends Piece {
   calculateAvailableCels() {
     const curr = this.getCurrentPosition();
     const coordinates = getCoordinatesByPosition(curr);
-   
     const newCoordinates = calculateDiagonalAvailableCells(coordinates);
-
     const filteredCoordinates = <[number, number][]>newCoordinates;
     const positions = filteredCoordinates.map(c => getPositionByCoordinates(c));
 
