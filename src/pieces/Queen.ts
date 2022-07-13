@@ -1,5 +1,5 @@
 import Piece from './Piece';
-import { getLeftDiagonalRange, getRightDiagonalRange, getCoordinatesByPosition, getPositionByCoordinates, getVerticalRange, getHorizontalRange  } from '../helpers'
+import { calculateVerticalAvailableCells, getCoordinatesByPosition, getPositionByCoordinates, calculateDiagonalAvailableCells  } from '../helpers'
 class Queen extends Piece {
 
   calculateAvailableCels() {
@@ -7,10 +7,8 @@ class Queen extends Piece {
     const coordinates = getCoordinatesByPosition(curr);
 
     const newCoordinates = [
-      ...getLeftDiagonalRange(coordinates),
-      ...getRightDiagonalRange(coordinates),
-      ...getVerticalRange(coordinates),
-      ...getHorizontalRange(coordinates),
+      ...calculateDiagonalAvailableCells(coordinates),
+      ...calculateVerticalAvailableCells(coordinates),
     ];
 
     const filteredCoordinates = <[number, number][]>newCoordinates.filter(c => c !== null)
