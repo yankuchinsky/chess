@@ -54,7 +54,6 @@ class Bishop extends Piece {
       });
     }
 
-
     const filteredCoordinates = <[number, number][]>newCoordinates;
     const positions = filteredCoordinates.map(c => getPositionByCoordinates(c));
 
