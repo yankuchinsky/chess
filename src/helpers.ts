@@ -143,27 +143,6 @@ export class Position {
   }
 }
 
-export const horizontalMove = (position: number, cells = 1) => {
-  const board = globalGameState.getBoard();
-  const pos = position + cells;
-  const files = board.getFiles();
-  const file = files.find(f => ~f.indexOf(position));
-  if (file?.indexOf(pos) !== -1) {
-    return pos;
-  } else {
-    return null;
-  }
-}
-
-export const deletePiece = (id: number) => {
-  const element = document.querySelector(`#cell_${id}`);
-  const child = element?.querySelector(".piece");
-
-  if (child) {
-    element?.removeChild(child);
-  }
-};
-
 const calcPath = (
   accFn: (idx: number) => number,
   decFn: (idx: number) => number,
