@@ -45,9 +45,7 @@ export class Pieces {
     const piece = this.getPieceByPosition(currId);
     if (piece && piece.getAvailableCells().indexOf(cellToMoveId) !== -1) {
       const cell = this.board.getCellById(cellToMoveId)!.cellRef;
-      piece.setCellElement(cell);
-      piece.setCurrentPosition(cellToMoveId);
-      piece.render();
+      piece.move({ cellToMoveId, cell });
       globalGameState.changeTheTurn();
     }
   }

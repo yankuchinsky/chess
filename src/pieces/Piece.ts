@@ -80,6 +80,16 @@ class Piece {
   setCellElement(cell: HTMLDivElement) {
     this.currentCell = cell;
   }
+
+  move({ cellToMoveId, cell }: { cellToMoveId: number, cell: HTMLDivElement }, callback?: Function) {
+    this.setCellElement(cell);
+    this.setCurrentPosition(cellToMoveId);
+    this.render();
+
+    if (callback) {
+      callback();
+    }
+  }
 }
 
 export default Piece;
