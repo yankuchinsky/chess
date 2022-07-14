@@ -196,6 +196,14 @@ export const calculateDiagonalAvailableCells = (coordinates: [number, number]) =
 }
 
 export const calculateVerticalAvailableCells = (coordinates: [number, number]) => {
+  const piecePosition = getPositionByCoordinates(coordinates);
+  const piece = pieces.getPieceByPosition(piecePosition);
+
+  if (!piece) {
+    return [];
+  }
+
+  const pieceColor = piece?.getColor();
   const tBlockerCoords = new Position(coordinates).verticalShift(1).getPostition()!;
   const lBlockerCoords = new Position(coordinates).horizontalShift(-1).getPostition()!;
   const rBlockerCoords = new Position(coordinates).horizontalShift(1).getPostition()!;
@@ -212,36 +220,33 @@ export const calculateVerticalAvailableCells = (coordinates: [number, number]) =
   const idxHorizontal = horizontalRange.findIndex(c => c[0] === coordinates[0] && c[1] === coordinates[1]);
   const idxVertical = verticalRange.findIndex(c => c[0] === coordinates[0] && c[1] === coordinates[1]);
 
-  const lRange = horizontalRange.slice(0, idxHorizontal);
-  const rRange = horizontalRange.slice(idxHorizontal, horizontalRange.length);
-  const tRange = verticalRange.slice(idxVertical, verticalRange.length);
-  const bRange = verticalRange.slice(0, idxVertical);
-
+  const rRange = horizontalRange.slice(idxHorizontal + 1, horizontalRange.length);
+  const tRange = verticalRange.slice(idxVertical + 1, verticalRange.length);
+  const lRange = horizontalRange.slice(0, idxHorizontal).reverse();
+  const bRange = verticalRange.slice(0, idxVertical).reverse();
   const newCoordinates: [number, number][] = [];
 
-  if (!tBlocker) {
-    tRange.forEach(c => {
-      newCoordinates.push(c);
-    });
+  const filterPath = (range: [number, number][], arrayForResults: [number, number][]) => {
+    for (let i = 0; i < range.length; i++) {
+      const c = range[i];
+      const position = getPositionByCoordinates(c);
+      const blockerPositionPiece = pieces.getPieceByPosition(position);
+
+      if (!blockerPositionPiece) {
+        arrayForResults.push(c);
+      } else if(blockerPositionPiece.getColor() !== pieceColor) {
+        arrayForResults.push(c);
+        break;
+      } else {
+        break;
+      }
+    }
   }
 
-  if (!lBlocker) {
-    lRange.forEach(c => {
-      newCoordinates.push(c);
-    });
-  }
-
-  if (!rBlocker) {
-    rRange.forEach(c => {
-      newCoordinates.push(c);
-    });
-  }
-
-  if (!bBlocker) {
-    bRange.forEach(c => {
-      newCoordinates.push(c);
-    });
-  }
+  filterPath(tRange, newCoordinates);
+  filterPath(lRange, newCoordinates);
+  filterPath(rRange, newCoordinates);
+  filterPath(bRange, newCoordinates);
 
   return newCoordinates;
 }
