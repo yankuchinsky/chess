@@ -3,8 +3,14 @@ import { upMove } from '../helpers';
 
 class Pawn extends Piece {
   private isMoved = false;
+  
+  move(cell: { cellToMoveId: number, cell: HTMLDivElement }, callback?: Function) {
+    super.move(cell, callback);
 
-  calculateAvailableCels(postion: number[]) {
+    this.isMoved = true;
+  }
+
+  calculateAvailableCels() {
     const upCell = upMove(this.getCurrentPosition(), this.getColor());
     this.availableCellsToMove.push(upCell);
 
