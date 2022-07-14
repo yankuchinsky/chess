@@ -81,6 +81,10 @@ class Piece {
     this.currentCell = cell;
   }
 
+  remove() {
+    this.currentCell.removeChild(this.element);
+  }
+
   move({ cellToMoveId, cell }: { cellToMoveId: number, cell: HTMLDivElement }, callback?: Function) {
     this.setCellElement(cell);
     this.setCurrentPosition(cellToMoveId);

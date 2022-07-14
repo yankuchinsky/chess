@@ -44,10 +44,20 @@ export class Pieces {
   move(currId: number, cellToMoveId: number) {
     const piece = this.getPieceByPosition(currId);
     if (piece && piece.getAvailableCells().indexOf(cellToMoveId) !== -1) {
+      const pieceColor = piece?.getColor();
+      const pieceToCapture = this.getPieceByPosition(cellToMoveId);
+      if (pieceToCapture && pieceColor !== pieceToCapture.getColor()) {
+        this.pieceCapture(pieceToCapture);
+      }
       const cell = this.board.getCellById(cellToMoveId)!.cellRef;
       piece.move({ cellToMoveId, cell });
       globalGameState.changeTheTurn();
     }
+  }
+
+  pieceCapture(piece: Piece) {
+    piece.remove();
+    this.piecesArray = this.piecesArray.filter(p => p.getId() !== piece.getId());
   }
 
   render() {
