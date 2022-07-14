@@ -218,36 +218,3 @@ export const calculateVerticalAvailableCells = (coordinates: [number, number]) =
 
   return newCoordinates;
 }
-
-const calcPath = (
-  accFn: (idx: number) => number,
-  decFn: (idx: number) => number,
-  cellsToMove: number,
-  isAccending: boolean
-) => {
-  return [
-    ...Array.from(Array(cellsToMove), (_, idx) => {
-      if (isAccending) {
-        return accFn(idx);
-      }
-
-      return decFn(idx);
-    }),
-  ];
-};
-
-export const moveToCell = (curr: number, to: number) => {
-  const currentCell = document.querySelector(`#cell_${curr}`);
-  if (!currentCell) {
-    return;
-  }
-
-  const currentPiece = currentCell.querySelector(".piece");
-  if (!currentPiece) {
-    return;
-  }
-
-  const cellToMove = document.querySelector(`#cell_${to}`);
-  cellToMove?.appendChild(currentPiece);
-
-};

@@ -41,8 +41,14 @@ export class Pieces {
     this.render();
   }
 
-  move(currId: number, cellToMoveId: number) {
-    const piece = this.getPieceByPosition(currId);
+  move(currCell: number, cellToMoveId: number) {
+    const piece = this.getPieceByPosition(currCell);
+    const pieceType = piece?.getType();
+    const pieceId = piece?.getId();
+    const onCompleteMove = () => {
+      globalGameState.addMove(`${pieceType}_${pieceId}_${currCell}_${cellToMoveId}`)
+    }
+    
     if (piece && piece.getAvailableCells().indexOf(cellToMoveId) !== -1) {
       const pieceColor = piece?.getColor();
       const pieceToCapture = this.getPieceByPosition(cellToMoveId);
@@ -50,7 +56,7 @@ export class Pieces {
         this.pieceCapture(pieceToCapture);
       }
       const cell = this.board.getCellById(cellToMoveId)!.cellRef;
-      piece.move({ cellToMoveId, cell });
+      piece.move({ cellToMoveId, cell }, onCompleteMove);
       globalGameState.changeTheTurn();
     }
   }

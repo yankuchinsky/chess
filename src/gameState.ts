@@ -1,35 +1,12 @@
 import Board from "./Board";
 import Piece from "./pieces/Piece";
 
-interface IGameState {
-  board: Board | undefined,
-  isWhiteMove: boolean;
-  whiteCapturedPieces: string[];
-  blackCapturedPieces: string[];
-  whitePieces: TPiece[];
-  blackPieces: TPiece[];
-  whiteState: any;
-  blackState: any;
-  currentPiece: any;
-}
-
-export const state: IGameState = {
-  board: undefined,
-  isWhiteMove: true,
-  whiteCapturedPieces: [],
-  blackCapturedPieces: [],
-  whitePieces: [],
-  blackPieces: [],
-  whiteState: undefined,
-  blackState: undefined,
-  currentPiece: undefined,
-};
-
 class GameState {
   private board: Board;
   private isWhiteMove = true;
   private whiteCapturedPieces: Piece[] = [];
   private blackCapturedPieces: Piece[] = [];
+  private moves: string[] = [];
 
   constructor(board: Board) {
     this.board = board;
@@ -49,6 +26,26 @@ class GameState {
 
   getBoard() {
     return this.board;
+  }
+
+  capture(piece: Piece) {
+    if (piece.getColor() === 'w') {
+      this.whiteCapturedPieces.push(piece);
+    } else {
+      this.blackCapturedPieces.push(piece);
+    }
+  }
+
+  addMove(move: string) {
+    this.moves.push(move);
+  }
+
+  getLastMoveAndRemove() {
+    return this.moves.pop();
+  }
+
+  getMoves() {
+    return this.moves;
   }
 }
 
