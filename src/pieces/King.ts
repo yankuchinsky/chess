@@ -44,7 +44,10 @@ class King extends Piece {
       new Position(coordinates).horizontalShift(-1).getPostition(),
     ];
 
-    if (!this.hasCastled && !this.isKingMoved) {
+    // @TODO remove hardcoded values
+    const kingStartingPosition = this.getColor() === 'w' ? 4 : 59;
+
+    if (!this.hasCastled && !this.isKingMoved && this.getCurrentPosition() === kingStartingPosition) {
       if (this.castleShort()) {
         newCoordinates.push(new Position(coordinates).horizontalShift(2).getPostition());
       }
