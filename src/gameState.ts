@@ -17,7 +17,8 @@ class GameState {
 
   changeTheTurn() {
     this.isWhiteMove = !this.isWhiteMove;
-    // recalculate path
+    this.white.calcPath();
+    this.black.calcPath();
   }
 
   getIsWhiteMove() {

@@ -44,6 +44,12 @@ export class Pieces {
     return this.piecesArray.filter(piece => piece.getColor() === color);
   }
 
+  getAllAvailablesCellsByColor(color: TColor) {
+    return this.getAllPiecesByColor(color).reduce((res: number[], curr) => {
+      return [...res, ...curr.getAvailableCells()];
+    }, []);
+  }
+
   move(currCell: number, cellToMoveId: number) {
     const piece = this.getPieceByPosition(currCell);
     const pieceType = piece?.getType();

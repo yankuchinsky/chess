@@ -39,5 +39,5 @@ body?.appendChild(field);
 
 field.addEventListener("dragstart", handleDragStart);
 field.addEventListener("dragend", handleDragEnd);
-field.addEventListener("drop", (e) => handleDrop(e, board));
+field.addEventListener("drop", handleDrop);
 field.addEventListener("dragover", handleDragOver);

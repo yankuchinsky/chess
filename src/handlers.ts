@@ -2,7 +2,7 @@ import Board from "./Board";
 import { globalGameState, pieces } from "./index";
 import { getCoordinatesByPosition } from './helpers';
 
-export const handleDrop = (e: any, board: Board) => {
+export const handleDrop = (e: any) => {
   e.stopPropagation();
 
   const movePlace = e.target.id.split("_")[0];
@@ -66,7 +66,6 @@ export const handleDragStart = (e: any) => {
       return;
     }
 
-    // pieceElement?.calculateAvailableCels();
     const availableCells = pieceElement.getAvailableCells().filter(cell => {
       const boardPiece = pieces.getPieceByPosition(cell);
       if (boardPiece && boardPiece.getColor() === pieceElement.getColor()) {
