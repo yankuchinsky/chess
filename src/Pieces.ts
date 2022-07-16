@@ -1,11 +1,10 @@
 import Piece from './pieces/Piece';
 import PieceFactory from './PieceFactory';
 import Board from './Board';
-import { globalGameState } from './index'
 export class Pieces {
   private piecesArray: Piece[] = [];
 
-  constructor(private readonly board: Board) {}
+  constructor(private readonly board: Board, private readonly gameState) {}
 
   addPiece(piece: Piece) {
     this.piecesArray.push(piece);
@@ -41,12 +40,16 @@ export class Pieces {
     this.render();
   }
 
+  getAllPiecesByColor(color: TColor) {
+    return this.piecesArray.filter(piece => piece.getColor() === color);
+  }
+
   move(currCell: number, cellToMoveId: number) {
     const piece = this.getPieceByPosition(currCell);
     const pieceType = piece?.getType();
     const pieceId = piece?.getId();
     const onCompleteMove = () => {
-      globalGameState.addMove(`${pieceType}_${pieceId}_${currCell}_${cellToMoveId}`)
+      this.gameState.addMove(`${pieceType}_${pieceId}_${currCell}_${cellToMoveId}`)
     }
     
     if (piece && piece.getAvailableCells().indexOf(cellToMoveId) !== -1) {
@@ -57,7 +60,7 @@ export class Pieces {
       }
       const cell = this.board.getCellById(cellToMoveId)!.cellRef;
       piece.move({ cellToMoveId, cell }, onCompleteMove);
-      globalGameState.changeTheTurn();
+      this.gameState.changeTheTurn();
     }
   }
 

@@ -1,15 +1,14 @@
 import Board from "./Board";
 import Piece from "./pieces/Piece";
+import Player from "./Player";
 
 class GameState {
-  private board: Board;
   private isWhiteMove = true;
   private whiteCapturedPieces: Piece[] = [];
   private blackCapturedPieces: Piece[] = [];
   private moves: string[] = [];
 
-  constructor(board: Board) {
-    this.board = board;
+  constructor(private board: Board, private white: Player, private black: Player) {
   }
 
   getGameState() {
@@ -18,6 +17,7 @@ class GameState {
 
   changeTheTurn() {
     this.isWhiteMove = !this.isWhiteMove;
+    // recalculate path
   }
 
   getIsWhiteMove() {

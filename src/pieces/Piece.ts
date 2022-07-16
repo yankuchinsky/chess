@@ -33,7 +33,7 @@ class Piece {
     this.currentCell = currentCell;
   };
 
-  calculateAvailableCels(postion: number[]) {
+  calculateAvailableCels() {
     //
   }
 

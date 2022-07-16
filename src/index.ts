@@ -2,6 +2,7 @@ import "./style.css";
 import GameState from './gameState'
 import Board from "./Board";
 import Pieces from './Pieces';
+import Player from './Player';
 import {
   handleDrop,
   handleDragEnd,
@@ -9,7 +10,6 @@ import {
   handleDragOver,
 } from "./handlers";
 import jsonSetup from './templates/standart.json';
-import test from './templates/test.json';
 
 
 export const DEV_MODE = true;
@@ -21,11 +21,20 @@ const field = document.createElement("div");
 field.className = "field";
 
 const board = new Board(field, SIZE);
-export const pieces = new Pieces(board);
-pieces.setupPiecesByJSON(jsonSetup);
-console.log('board', pieces);
-export const globalGameState = new GameState(board);
+const playerWhite = new Player('w');
+const playerBlack = new Player('w');
+export const globalGameState = new GameState(board, playerWhite, playerBlack);
 
+export const pieces = new Pieces(board, globalGameState);
+pieces.setupPiecesByJSON(jsonSetup);
+
+playerWhite.setPieces(pieces.getAllPiecesByColor('w'));
+playerBlack.setPieces(pieces.getAllPiecesByColor('b'));
+
+playerWhite.calcPath();
+
+
+console.log('board', pieces);
 body?.appendChild(field);
 
 field.addEventListener("dragstart", handleDragStart);
