@@ -10,7 +10,7 @@ class Bishop extends Piece {
     const filteredCoordinates = <[number, number][]>newCoordinates;
     const positions = filteredCoordinates.map(c => getPositionByCoordinates(c));
 
-    this.availableCellsToMove.push(...positions);
+    this.availableCellsToMove = positions
   };
 };
 

@@ -4,6 +4,7 @@ import { globalGameState } from '../index';
 class King extends Piece {
   private hasCastled = false;
   private isKingMoved = false;
+  private isCheck = false;
 
   move(cell: { cellToMoveId: number, cell: HTMLDivElement }, callback?: Function) {
     super.move(cell, callback);
@@ -36,6 +37,10 @@ class King extends Piece {
     const opponentColor = color === 'w' ? 'b' : 'w';
     const opponentPaths = this.pieces.getAllAvailablesCellsByColor(opponentColor);
 
+    if (~opponentPaths.indexOf(curr)) {
+      this.isCheck = true;
+    }
+
     const newCoordinates = [
       new Position(coordinates).verticalShift(1).getPostition(),
       new Position(coordinates).verticalShift(1).horizontalShift(1).getPostition(),
@@ -47,7 +52,6 @@ class King extends Piece {
       new Position(coordinates).horizontalShift(-1).getPostition(),
     ];
 
-    // @TODO remove hardcoded values
     const kingStartingPosition = this.getColor() === 'w' ? 4 : 59;
 
     if (!this.hasCastled && !this.isKingMoved && this.getCurrentPosition() === kingStartingPosition) {
@@ -73,8 +77,11 @@ class King extends Piece {
       }
     })
     const positions = filteredCoordinates.map(c => getPositionByCoordinates(c));
-
-    this.availableCellsToMove.push(...positions);
+    if (this.isCheck) {
+      this.availableCellsToMove = positions.filter(c => !~opponentPaths.indexOf(c));
+    } else {
+      this.availableCellsToMove = positions;
+    }
   };
 
   castleShort() {

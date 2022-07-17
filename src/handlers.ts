@@ -8,15 +8,15 @@ export const handleDrop = (e: any) => {
   const movePlace = e.target.id.split("_")[0];
   const movePiecePosition =
     movePlace === "cell"
-      ? e.target.id.split("_")[1]
-      : e.target.parentElement.id.split("_")[1];
+      ? +e.target.id.split("_")[1]
+      : +e.target.parentElement.id.split("_")[1];
   const pieceInfo = JSON.parse(e.dataTransfer.getData("text/plain"));
-  const transferId = pieceInfo.pieceId;
-  const piecePrevPosition = pieceInfo.position;
-  const [pieceTypeInfo, pieceCurrentPosition] = transferId.split("_");
-  const pieceColor = pieceTypeInfo.split("")[0];
-  
-  if (+piecePrevPosition === +movePiecePosition) {
+  const currentPiecePosition = +pieceInfo.position;
+  const piece = pieces.getPieceByPosition(currentPiecePosition)!;
+  const pieceColor = piece.getColor();
+  const board = globalGameState.getBoard();
+
+  if (currentPiecePosition === movePiecePosition) {
     return;
   }
   const gameState = globalGameState.getGameState();
@@ -28,7 +28,12 @@ export const handleDrop = (e: any) => {
     if (pieceColor !== "b") return;
   }
 
-  pieces.move(+piecePrevPosition, +movePiecePosition);
+  const afterMove = () => {
+    const availableCells = piece.getAvailableCells();
+    board.showPath(availableCells, true);
+  }
+
+  pieces.move(currentPiecePosition, movePiecePosition, afterMove);
 
   return false;
 };
@@ -42,9 +47,9 @@ export const handleDragEnd = (e: any) => {
   if (pieceElement) {
     const board = globalGameState.getBoard();
     const availableCells = pieceElement.getAvailableCells();
-      board.showPath(availableCells, true);
-      pieceElement.clearAvailableCells();
-    }
+    board.showPath(availableCells, true);
+    pieceElement.clearAvailableCells();
+  }
 };
 
 export const handleDragStart = (e: any) => {

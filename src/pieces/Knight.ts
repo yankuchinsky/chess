@@ -33,7 +33,7 @@ class Knight extends Piece {
     });
     const positions = filteredCoordinates.map(c => getPositionByCoordinates(c));
 
-    this.availableCellsToMove.push(...positions);
+    this.availableCellsToMove = positions;
   };
 };
 

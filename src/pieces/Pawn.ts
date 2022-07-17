@@ -12,7 +12,8 @@ class Pawn extends Piece {
 
   calculateAvailableCels() {
     const upCell = upMove(this.getCurrentPosition(), this.getColor());
-    this.availableCellsToMove.push(upCell);
+    const cellsToMove: number[] = []
+    cellsToMove.push(upCell);
 
     const color = this.getColor();
     const position = this.getCurrentPosition();
@@ -26,7 +27,7 @@ class Pawn extends Piece {
       const leftPiece = this.pieces.getPieceByPosition(leftPosition);
 
       if (leftPiece && leftPiece.getColor() !== color) {
-        this.availableCellsToMove.push(leftPiece.getCurrentPosition());
+        cellsToMove.push(leftPiece.getCurrentPosition());
       } 
     }
 
@@ -35,14 +36,16 @@ class Pawn extends Piece {
       const rightPiece = this.pieces.getPieceByPosition(rightPosition);
 
       if (rightPiece && rightPiece.getColor() !== color) {
-        this.availableCellsToMove.push(rightPiece.getCurrentPosition());
+        cellsToMove.push(rightPiece.getCurrentPosition());
       } 
     }
 
     if (!this.isMoved) {
       const cell = upMove(this.getCurrentPosition(), this.getColor(), 2);
-      this.availableCellsToMove.push(cell);
+      cellsToMove.push(cell);
     }
+
+    this.availableCellsToMove = cellsToMove;
   };
 };
 

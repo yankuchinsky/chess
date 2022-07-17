@@ -16,9 +16,16 @@ class GameState {
   }
 
   changeTheTurn() {
-    this.isWhiteMove = !this.isWhiteMove;
-    this.white.calcPath();
-    this.black.calcPath();
+
+    if (this.isWhiteMove) {
+      this.white.calcPath();
+      this.black.calcPath();
+    } else {
+      this.black.calcPath();
+      this.white.calcPath();
+    }
+    
+    this.isWhiteMove = !this.isWhiteMove;    
   }
 
   getIsWhiteMove() {

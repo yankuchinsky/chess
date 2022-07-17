@@ -10,7 +10,7 @@ class Rook extends Piece {
     const filteredCoordinates = <[number, number][]>newCoordinates.filter(c => c !== null)
     const positions = filteredCoordinates.map(c => getPositionByCoordinates(c));
 
-    this.availableCellsToMove.push(...positions);
+    this.availableCellsToMove = positions;
   };
 };
 
