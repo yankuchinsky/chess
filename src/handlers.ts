@@ -1,8 +1,10 @@
-import Board from "./Board";
 import { globalGameState, pieces } from "./index";
 import { getCoordinatesByPosition } from './helpers';
 
+let tmpCells: number[] = [];
+
 export const handleDrop = (e: any) => {
+  e.target.style.opacity = 1;
   e.stopPropagation();
 
   const movePlace = e.target.id.split("_")[0];
@@ -29,8 +31,8 @@ export const handleDrop = (e: any) => {
   }
 
   const afterMove = () => {
-    const availableCells = piece.getAvailableCells();
-    board.showPath(availableCells, true);
+    board.showPath(tmpCells, true);
+    gameState.addMove(`${piece.getType()}_${piece.getId()}_${currentPiecePosition}_${movePiecePosition}`);
   }
 
   pieces.move(currentPiecePosition, movePiecePosition, afterMove);
@@ -40,16 +42,6 @@ export const handleDrop = (e: any) => {
 
 export const handleDragEnd = (e: any) => {
   e.target.style.opacity = 1;
-  const piece = e.target.id;
-  const pieceId = +piece.split("_")[1];
-  const pieceElement = pieces.getPieceById(pieceId);
-
-  if (pieceElement) {
-    const board = globalGameState.getBoard();
-    const availableCells = pieceElement.getAvailableCells();
-    board.showPath(availableCells, true);
-    pieceElement.clearAvailableCells();
-  }
 };
 
 export const handleDragStart = (e: any) => {
@@ -71,8 +63,8 @@ export const handleDragStart = (e: any) => {
       return;
     }
 
-    const availableCells = pieceElement.getAvailableCells();
-    board.showPath(availableCells);
+    tmpCells = pieceElement.getAvailableCells();
+    board.showPath(tmpCells);
   }
 
   e.target.style.opacity = 0.1;
