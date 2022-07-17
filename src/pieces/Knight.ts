@@ -18,7 +18,19 @@ class Knight extends Piece {
       new Position(coordinates).verticalShift(-1).horizontalShift(2).getPostition(),
     ];
 
-    const filteredCoordinates = <[number, number][]>newCoordinates.filter(c => c !== null)
+    const filteredCoordinates = <[number, number][]>newCoordinates.filter(c => {
+      if (c === null) {
+        return null;
+      }
+
+      const position = getPositionByCoordinates(c);
+      const piece = this.pieces.getPieceByPosition(position);
+      if (piece?.getColor() === this.getColor()) {
+        return null;
+      } else {
+        return c;
+      }
+    });
     const positions = filteredCoordinates.map(c => getPositionByCoordinates(c));
 
     this.availableCellsToMove.push(...positions);

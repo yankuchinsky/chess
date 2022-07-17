@@ -66,14 +66,7 @@ export const handleDragStart = (e: any) => {
       return;
     }
 
-    const availableCells = pieceElement.getAvailableCells().filter(cell => {
-      const boardPiece = pieces.getPieceByPosition(cell);
-      if (boardPiece && boardPiece.getColor() === pieceElement.getColor()) {
-        return null;
-      }
-
-      return cell;
-    });
+    const availableCells = pieceElement.getAvailableCells();
     board.showPath(availableCells);
   }
 
