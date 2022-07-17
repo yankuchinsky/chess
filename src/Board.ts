@@ -1,5 +1,4 @@
 import { DEV_MODE } from "./index";
-import Piece from './pieces/Piece';
 
 export const SIZE = 8;
 
@@ -9,7 +8,6 @@ type BoardMapCell = {
 
 class Board {
   private boardMap: BoardMapCell[][] = [];
-  private files: number[][] = [];
 
   constructor(element: HTMLDivElement, size: number) {
     let isBlack = false;
@@ -53,14 +51,6 @@ class Board {
     return cell;
   };
 
-  renderPieceToCell(piece: Piece, id: number) {
-    const cellRef = this.getCellRef(id);
-
-    if (cellRef) {
-      cellRef.appendChild(piece.getElement());
-    }
-  };
-
   getCellRef(id: number) {
     return this.getCellById(id)?.cellRef;
   };
@@ -84,10 +74,6 @@ class Board {
         boardMap[cell].cellRef.classList.add('path');
       }
     });
-  }
-
-  getFiles() {
-    return this.files;
   }
 
   getFlatBoard() {
