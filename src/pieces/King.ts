@@ -32,6 +32,9 @@ class King extends Piece {
   calculateAvailableCels() {
     const curr = this.getCurrentPosition();
     const coordinates = getCoordinatesByPosition(curr);
+    const color = this.getColor();
+    const opponentColor = color === 'w' ? 'b' : 'w';
+    const opponentPaths = this.pieces.getAllAvailablesCellsByColor(opponentColor);
 
     const newCoordinates = [
       new Position(coordinates).verticalShift(1).getPostition(),
@@ -56,7 +59,19 @@ class King extends Piece {
       }
     }
 
-    const filteredCoordinates = <[number, number][]>newCoordinates.filter(c => c !== null)
+    const filteredCoordinates = <[number, number][]>newCoordinates.filter(c =>{
+      if (c === null) {
+        return null;
+      }
+
+      const position = getPositionByCoordinates(c);
+      const piece = this.pieces.getPieceByPosition(position);
+      if (piece?.getColor() === this.getColor()) {
+        return null;
+      } else {
+        return c;
+      }
+    })
     const positions = filteredCoordinates.map(c => getPositionByCoordinates(c));
 
     this.availableCellsToMove.push(...positions);
