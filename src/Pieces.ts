@@ -52,8 +52,6 @@ export class Pieces {
 
   move(currCell: number, cellToMoveId: number, onCompleteMove: Function) {
     const piece = this.getPieceByPosition(currCell);
-    const pieceType = piece?.getType();
-    const pieceId = piece?.getId();
     
     if (piece && piece.getAvailableCells().indexOf(cellToMoveId) !== -1) {
       const pieceColor = piece?.getColor();
