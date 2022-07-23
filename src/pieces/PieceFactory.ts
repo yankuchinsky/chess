@@ -1,11 +1,11 @@
-import { PieceType } from './helpers';
-import Pawn from './pieces/Pawn';
-import Knight from './pieces/Knight';
-import Piece from './pieces/Piece';
-import Bishop from './pieces/Bishop';
-import Rook from './pieces/Rook';
-import Queen from './pieces/Queen';
-import King from './pieces/King';
+import { PieceType } from '../helpers';
+import Pawn from './Pawn';
+import Knight from './Knight';
+import Piece from './Piece';
+import Bishop from './Bishop';
+import Rook from './Rook';
+import Queen from './Queen';
+import King from './King';
 
 class PieceFactory {
   static createPiece(id: number, type: string, cell: HTMLDivElement): Piece {

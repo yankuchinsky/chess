@@ -5,11 +5,12 @@ import Pieces from './Pieces';
 import Player from './Player';
 import {
   handleDrop,
-  handleDragEnd,
   handleDragStart,
   handleDragOver,
+  handleDragEnd
 } from "./handlers";
 import jsonSetup from './templates/standart.json';
+import test from './templates/test.json'
 
 
 export const DEV_MODE = true;
@@ -26,11 +27,11 @@ const playerBlack = new Player('w');
 export const globalGameState = new GameState(board, playerWhite, playerBlack);
 
 export const pieces = new Pieces(board, globalGameState);
-pieces.setupPiecesByJSON(jsonSetup);
+pieces.setupPiecesByJSON(test);
 
 playerWhite.setPieces(pieces.getAllPiecesByColor('w'));
 playerBlack.setPieces(pieces.getAllPiecesByColor('b'));
-
+playerBlack.calcPath();
 playerWhite.calcPath();
 
 

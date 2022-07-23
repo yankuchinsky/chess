@@ -1,5 +1,5 @@
 import Piece from './pieces/Piece';
-import PieceFactory from './PieceFactory';
+import PieceFactory from './pieces/PieceFactory';
 import Board from './Board';
 export class Pieces {
   private piecesArray: Piece[] = [];
