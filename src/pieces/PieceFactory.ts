@@ -9,9 +9,6 @@ import King from './King';
 
 class PieceFactory {
   static createPiece(id: number, type: string, cell: HTMLDivElement): Piece {
-    if (type === PieceType.WP  || type === PieceType.BP) {
-      return new Pawn(id, type, cell);
-    }
 
     if (type === PieceType.WN  || type === PieceType.BN) {
       return new Knight(id, type, cell);
@@ -33,7 +30,7 @@ class PieceFactory {
       return new King(id, type, cell);
     }
 
-    return new Piece(id, type, cell);
+    return new Pawn(id, type, cell);
   }
 }
 

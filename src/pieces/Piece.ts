@@ -4,7 +4,7 @@ const getImage = (type: string) => {
   return require(`../assets/${type}.png`).default;
 }
 
-class Piece {
+abstract class Piece {
   private element: HTMLDivElement;
   private color: TColor;
   private id: number;
@@ -33,9 +33,7 @@ class Piece {
     this.currentCell = currentCell;
   };
 
-  calculateAvailableCels() {
-    //
-  }
+  abstract calculateAvailableCels();
 
   getId() {
     return this.id;
