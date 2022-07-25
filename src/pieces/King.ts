@@ -89,14 +89,20 @@ class King extends Piece {
     const coordinates = getCoordinatesByPosition(position);
     const color = this.getColor();
     const d = color === 'w' ? 1 : -1;
-    const firstPieceCoordinates = new Position(coordinates).horizontalShift(1 * d).getPostition()!;
-    const secondPieceCoordinates = new Position(coordinates).horizontalShift(2 * d).getPostition()!;
+    const firstPieceCoordinates = new Position(coordinates).horizontalShift(d).getPostition()!;
+    const secondPieceCoordinates = new Position(coordinates).horizontalShift(d * 2).getPostition()!;
+    const thirdPieceCoordinates = new Position(coordinates).horizontalShift(d * 3).getPostition()!;
+   
     const firstPiecePosition = getPositionByCoordinates(firstPieceCoordinates);
     const secondPiecePosition = getPositionByCoordinates(secondPieceCoordinates);
+    const rookPosition = getPositionByCoordinates(thirdPieceCoordinates);
+
+
     const firstPiece = this.pieces.getPieceByPosition(firstPiecePosition);
     const secondPiece = this.pieces.getPieceByPosition(secondPiecePosition);
+    const rook = this.pieces.getPieceByPosition(rookPosition);
 
-    if (!firstPiece && !secondPiece) {
+    if (!firstPiece && !secondPiece && rook) {
       return true;
     }
 
@@ -108,21 +114,22 @@ class King extends Piece {
     const coordinates = getCoordinatesByPosition(position);
     const color = this.getColor();
     const d = color === 'w' ? -1 : 1;
-    const firstPieceCoordinates = new Position(coordinates).horizontalShift(d * 1).getPostition()!;
+    const firstPieceCoordinates = new Position(coordinates).horizontalShift(d).getPostition()!;
     const secondPieceCoordinates = new Position(coordinates).horizontalShift(d * 2).getPostition()!;
     const thirdPieceCoordinates = new Position(coordinates).horizontalShift(d * 3).getPostition()!;
-
+    const fourthPieceCoordinates = new Position(coordinates).horizontalShift(d * 3).getPostition()!;
 
     const firstPiecePosition = getPositionByCoordinates(firstPieceCoordinates);
     const secondPiecePosition = getPositionByCoordinates(secondPieceCoordinates);
     const thirdPiecePosition = getPositionByCoordinates(thirdPieceCoordinates);
+    const rookPosition = getPositionByCoordinates(fourthPieceCoordinates);
 
     const firstPiece = this.pieces.getPieceByPosition(firstPiecePosition);
     const secondPiece = this.pieces.getPieceByPosition(secondPiecePosition);
     const thirdPiece = this.pieces.getPieceByPosition(thirdPiecePosition);
-    
+    const rook = this.pieces.getPieceByPosition(rookPosition);
 
-    if (!firstPiece && !secondPiece && !thirdPiece) {
+    if (!firstPiece && !secondPiece && !thirdPiece && rook) {
       return true;
     }
 
