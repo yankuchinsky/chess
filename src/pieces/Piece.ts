@@ -55,6 +55,10 @@ abstract class Piece {
     return this.type;
   }
 
+  getPiecetype() {
+    return this.pieceType;
+  }
+
   getCurrentPosition() {
     return this.currentPosition;
   }

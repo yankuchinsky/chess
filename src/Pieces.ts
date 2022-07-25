@@ -31,10 +31,19 @@ export class Pieces {
   }
 
   setupPiecesByJSON(json: JSON) {
+    let kings: Piece[] = [];
     for (let id of Object.keys(json)) {
       const cell = this.board.getCellById(+id)!;
       const piece = PieceFactory.createPiece(+id, json[id], cell.cellRef);
-      this.piecesArray.push(piece);
+      if (piece.getPiecetype() === 'k') {
+        kings.push(piece);
+      } else {
+        this.piecesArray.push(piece);
+      }
+    }
+
+    if (kings.length) {
+      this.piecesArray.push(...kings);
     }
 
     this.render();
