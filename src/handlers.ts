@@ -17,6 +17,7 @@ export const handleDrop = (e: any) => {
   const piece = pieces.getPieceByPosition(currentPiecePosition)!;
   const pieceColor = piece.getColor();
   const board = globalGameState.getBoard();
+  board.showPath(tmpCells, true);
 
   if (currentPiecePosition === movePiecePosition) {
     return;
@@ -31,7 +32,6 @@ export const handleDrop = (e: any) => {
   }
 
   const afterMove = () => {
-    board.showPath(tmpCells, true);
     gameState.addMove(`${piece.getType()}_${piece.getId()}_${currentPiecePosition}_${movePiecePosition}`);
   }
 
