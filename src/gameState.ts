@@ -17,11 +17,11 @@ class GameState {
 
   changeTheTurn() {
     if (this.isWhiteMove) {
-      this.white.calcPath();
       this.black.calcPath();
+      this.white.calcPath();
     } else {
-      this.black.calcPath();
       this.white.calcPath();
+      this.black.calcPath();
     }
     
     this.isWhiteMove = !this.isWhiteMove;    
