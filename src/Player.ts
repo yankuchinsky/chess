@@ -12,8 +12,9 @@ class Player {
     this.pieces = pieces;
   }
 
-  calcPath() {
+  calcPath(callback: Function) {
     this.pieces.forEach(piece => piece.calculateAvailableCels());
+    callback();
   }
 
   getKing() {

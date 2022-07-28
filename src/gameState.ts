@@ -16,12 +16,16 @@ class GameState {
   }
 
   changeTheTurn() {
+    const callback = () => {
+      //
+    }
+
     if (this.isWhiteMove) {
-      this.black.calcPath();
-      this.white.calcPath();
+      this.black.calcPath(callback);
+      this.white.calcPath(callback);
     } else {
-      this.white.calcPath();
-      this.black.calcPath();
+      this.white.calcPath(callback);
+      this.black.calcPath(callback);
     }
     
     this.isWhiteMove = !this.isWhiteMove;    
