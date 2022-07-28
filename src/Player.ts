@@ -15,6 +15,10 @@ class Player {
   calcPath() {
     this.pieces.forEach(piece => piece.calculateAvailableCels());
   }
+
+  getKing() {
+    this.pieces.find(piece => piece.getPiecetype() === 'k');
+  }
 }
 
 export default Player;
