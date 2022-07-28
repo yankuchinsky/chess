@@ -30,13 +30,21 @@ class King extends Piece {
     }
   }
 
+  setCheck() {
+    this.isCheck = true;
+  }
+
+  clearCheckState() {
+    this.isCheck = false;
+  }
+
   calculateAvailableCels() {
     const curr = this.getCurrentPosition();
     const coordinates = getCoordinatesByPosition(curr);
     const color = this.getColor();
     const opponentColor = color === 'w' ? 'b' : 'w';
     const opponentPaths = this.pieces.getAllAvailablesCellsByColor(opponentColor);
-
+    
     if (~opponentPaths.indexOf(curr)) {
       this.isCheck = true;
     }
