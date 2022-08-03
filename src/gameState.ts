@@ -7,16 +7,23 @@ class GameState {
   private isWhiteMove = true;
   private whiteCapturedPieces: Piece[] = [];
   private blackCapturedPieces: Piece[] = [];
+  private white: Player; 
+  private black: Player;
   private moves: string[] = [];
   private board: Board;
 
-  constructor(field: HTMLDivElement, private white: Player, private black: Player, readonly pieces) {
+  constructor(field: HTMLDivElement, readonly pieces) {
+    this.white = new Player('w');
+    this.black = new Player('w');
     this.board = new Board(field, SIZE);
   }
 
   init() {
     this.white.setPieces(this.pieces.getAllPiecesByColor('w'));
     this.black.setPieces(this.pieces.getAllPiecesByColor('b'));
+
+    this.black.calcPath(() => {});
+    this.white.calcPath(() => {});
   }
 
   getGameState() {

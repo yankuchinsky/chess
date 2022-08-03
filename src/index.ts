@@ -1,8 +1,6 @@
 import "./style.css";
-import GameState from './GameState'
-import Board from "./Board";
+import GameState from './GameState';
 import Pieces from './Pieces';
-import Player from './Player';
 import {
   handleDrop,
   handleDragStart,
@@ -21,20 +19,13 @@ const body = document.querySelector("body");
 const field = document.createElement("div");
 field.className = "field";
 
-const playerWhite = new Player('w');
-const playerBlack = new Player('w');
 export const pieces = new Pieces();
-export const globalGameState = new GameState(field, playerWhite, playerBlack, pieces);
+export const globalGameState = new GameState(field, pieces);
 
 pieces.setupPiecesByJSON(test, globalGameState.getBoard());
 
 globalGameState.init();
 
-playerBlack.calcPath(() => {});
-playerWhite.calcPath(() => {});
-
-
-console.log('board', playerWhite);
 body?.appendChild(field);
 
 field.addEventListener("dragstart", handleDragStart);
