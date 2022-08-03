@@ -14,6 +14,11 @@ class GameState {
     this.board = new Board(field, SIZE);
   }
 
+  init() {
+    this.white.setPieces(this.pieces.getAllPiecesByColor('w'));
+    this.black.setPieces(this.pieces.getAllPiecesByColor('b'));
+  }
+
   getGameState() {
     return this;
   }

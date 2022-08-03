@@ -8,8 +8,7 @@ import {
   handleDragStart,
   handleDragOver,
   handleDragEnd
-} from "./handlers";
-import Game from './Game';
+} from "./handlers"; 
 import jsonSetup from './templates/standart.json';
 import test from './templates/test.json'
 
@@ -29,11 +28,8 @@ export const globalGameState = new GameState(field, playerWhite, playerBlack, pi
 
 pieces.setupPiecesByJSON(test, globalGameState.getBoard());
 
-playerWhite.setPieces(pieces.getAllPiecesByColor('w'));
-playerBlack.setPieces(pieces.getAllPiecesByColor('b'));
+globalGameState.init();
 
-
-export const game = new Game(pieces);
 playerBlack.calcPath(() => {});
 playerWhite.calcPath(() => {});
 
