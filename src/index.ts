@@ -22,13 +22,12 @@ const body = document.querySelector("body");
 const field = document.createElement("div");
 field.className = "field";
 
-const board = new Board(field, SIZE);
 const playerWhite = new Player('w');
 const playerBlack = new Player('w');
-export const globalGameState = new GameState(board, playerWhite, playerBlack);
+export const pieces = new Pieces();
+export const globalGameState = new GameState(field, playerWhite, playerBlack, pieces);
 
-export const pieces = new Pieces(board, globalGameState);
-pieces.setupPiecesByJSON(test);
+pieces.setupPiecesByJSON(test, globalGameState.getBoard());
 
 playerWhite.setPieces(pieces.getAllPiecesByColor('w'));
 playerBlack.setPieces(pieces.getAllPiecesByColor('b'));

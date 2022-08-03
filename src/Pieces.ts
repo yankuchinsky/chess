@@ -4,8 +4,6 @@ import Board from './Board';
 export class Pieces {
   private piecesArray: Piece[] = [];
 
-  constructor(private readonly board: Board, private readonly gameState) {}
-
   addPiece(piece: Piece) {
     this.piecesArray.push(piece);
   }
@@ -30,10 +28,10 @@ export class Pieces {
     return foundPiece;
   }
 
-  setupPiecesByJSON(json: JSON) {
+  setupPiecesByJSON(json: JSON, board) {
     let kings: Piece[] = [];
     for (let id of Object.keys(json)) {
-      const cell = this.board.getCellById(+id)!;
+      const cell = board.getCellById(+id)!;
       const piece = PieceFactory.createPiece(+id, json[id], cell.cellRef);
       if (piece.getPiecetype() === 'k') {
         kings.push(piece);
@@ -59,7 +57,7 @@ export class Pieces {
     }, []);
   }
 
-  move(currCell: number, cellToMoveId: number, onCompleteMove: Function) {
+  move(currCell: number, cellToMoveId: number, cell: HTMLDivElement, onCompleteMove: Function) {
     const piece = this.getPieceByPosition(currCell);
     
     if (piece && piece.getAvailableCells().indexOf(cellToMoveId) !== -1) {
@@ -68,9 +66,7 @@ export class Pieces {
       if (pieceToCapture && pieceColor !== pieceToCapture.getColor()) {
         this.pieceCapture(pieceToCapture);
       }
-      const cell = this.board.getCellById(cellToMoveId)!.cellRef;
       piece.move({ cellToMoveId, cell }, onCompleteMove);
-      this.gameState.changeTheTurn();
     }
   }
 

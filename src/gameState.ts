@@ -1,3 +1,4 @@
+import { SIZE } from "./index";
 import Board from "./Board";
 import Piece from "./pieces/Piece";
 import Player from "./Player";
@@ -7,8 +8,10 @@ class GameState {
   private whiteCapturedPieces: Piece[] = [];
   private blackCapturedPieces: Piece[] = [];
   private moves: string[] = [];
+  private board: Board;
 
-  constructor(private board: Board, private white: Player, private black: Player) {
+  constructor(field: HTMLDivElement, private white: Player, private black: Player, readonly pieces) {
+    this.board = new Board(field, SIZE);
   }
 
   getGameState() {
@@ -65,6 +68,11 @@ class GameState {
 
   getMoves() {
     return this.moves;
+  }
+
+  move(currCell: number, cellToMoveId: number, onCompleteMove: Function) {
+    const cell = this.board.getCellById(cellToMoveId)!.cellRef;
+    this.pieces.move(currCell, cellToMoveId, cell, onCompleteMove);
   }
 }
 

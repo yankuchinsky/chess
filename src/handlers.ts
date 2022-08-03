@@ -32,9 +32,10 @@ export const handleDrop = (e: any) => {
 
   const afterMove = () => {
     gameState.addMove(`${piece.getType()}_${piece.getId()}_${currentPiecePosition}_${movePiecePosition}`);
+    gameState.changeTheTurn();
   }
 
-  pieces.move(currentPiecePosition, movePiecePosition, afterMove);
+  gameState.move(currentPiecePosition, movePiecePosition, afterMove);
 
   return false;
 };
