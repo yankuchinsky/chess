@@ -1,5 +1,5 @@
 import "./style.css";
-import GameState from './gameState'
+import GameState from './GameState'
 import Board from "./Board";
 import Pieces from './Pieces';
 import Player from './Player';
@@ -9,6 +9,7 @@ import {
   handleDragOver,
   handleDragEnd
 } from "./handlers";
+import Game from './Game';
 import jsonSetup from './templates/standart.json';
 import test from './templates/test.json'
 
@@ -31,11 +32,14 @@ pieces.setupPiecesByJSON(test);
 
 playerWhite.setPieces(pieces.getAllPiecesByColor('w'));
 playerBlack.setPieces(pieces.getAllPiecesByColor('b'));
-playerBlack.calcPath();
-playerWhite.calcPath();
 
 
-console.log('board', pieces);
+export const game = new Game(pieces);
+playerBlack.calcPath(() => {});
+playerWhite.calcPath(() => {});
+
+
+console.log('board', playerWhite);
 body?.appendChild(field);
 
 field.addEventListener("dragstart", handleDragStart);

@@ -47,6 +47,14 @@ class GameState {
     }
   }
 
+  getCellRefById(id: number) {
+    return this.board.getCellById(id);
+  }
+
+  showBoardPath(cells: number[], clearFlag?: boolean) {
+    this.board.showPath(cells, clearFlag);
+  }
+
   addMove(move: string) {
     this.moves.push(move);
   }

@@ -16,8 +16,7 @@ export const handleDrop = (e: any) => {
   const currentPiecePosition = +pieceInfo.position;
   const piece = pieces.getPieceByPosition(currentPiecePosition)!;
   const pieceColor = piece.getColor();
-  const board = globalGameState.getBoard();
-  board.showPath(tmpCells, true);
+  globalGameState.showBoardPath(tmpCells, true);
 
   if (currentPiecePosition === movePiecePosition) {
     return;
@@ -45,7 +44,6 @@ export const handleDragEnd = (e: any) => {
 };
 
 export const handleDragStart = (e: any) => {
-  const board = globalGameState.getBoard()
   const pieceId = e.target.id;
   const position = e.target.parentElement.id.split("_")[1];
   const pieceIdx = pieceId.split("_")[1];
@@ -64,7 +62,7 @@ export const handleDragStart = (e: any) => {
     }
 
     tmpCells = pieceElement.getAvailableCells();
-    board.showPath(tmpCells);
+    globalGameState.showBoardPath(tmpCells);
   }
 
   e.target.style.opacity = 0.1;

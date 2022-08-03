@@ -14,18 +14,16 @@ class King extends Piece {
     const color = this.getColor();
     
     if (startingPosition + 2 === cellToMoveId) {
-      const board = globalGameState.getBoard();
       const shift = color === 'w' ? 3 : 4;
       const rook = this.pieces.getPieceById(startingPosition + shift)
-      const cellRef = board.getCellById(startingPosition + 1)!.cellRef;
+      const cellRef = globalGameState.getCellRefById(startingPosition + 1)!.cellRef;
       rook?.move({ cellToMoveId: startingPosition + 1, cell: cellRef })
     }
 
     if (startingPosition - 2 === cellToMoveId) {
-      const board = globalGameState.getBoard();
       const shift = color === 'w' ? 4 : 3;
       const rook = this.pieces.getPieceById(startingPosition - shift)
-      const cellRef = board.getCellById(startingPosition - 1)!.cellRef;
+      const cellRef = globalGameState.getCellRefById(startingPosition - 1)!.cellRef;
       rook?.move({ cellToMoveId: startingPosition - 1, cell: cellRef })
     }
   }
