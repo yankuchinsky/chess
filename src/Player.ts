@@ -4,11 +4,8 @@ class Player {
   color: TColor;
   pieces: Piece[];
 
-  constructor(color: TColor) {
+  constructor(color: TColor, pieces: Piece[]) {
     this.color = color;
-  }
-
-  setPieces(pieces: Piece[]) {
     this.pieces = pieces;
   }
 

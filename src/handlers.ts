@@ -1,4 +1,4 @@
-import { globalGameState, pieces } from "./index";
+import { globalGameState } from "./index";
 import { getCoordinatesByPosition } from './helpers';
 
 let tmpCells: number[] = [];
@@ -6,7 +6,7 @@ let tmpCells: number[] = [];
 export const handleDrop = (e: any) => {
   e.target.style.opacity = 1;
   e.stopPropagation();
-
+  const pieces = globalGameState.getPieces();
   const movePlace = e.target.id.split("_")[0];
   const movePiecePosition =
     movePlace === "cell"
@@ -21,8 +21,8 @@ export const handleDrop = (e: any) => {
   if (currentPiecePosition === movePiecePosition) {
     return;
   }
-  const gameState = globalGameState.getGameState();
-  const isWhiteMove = gameState.getIsWhiteMove();
+
+  const isWhiteMove = globalGameState.getIsWhiteMove();
 
   if (isWhiteMove) {
     if (pieceColor !== "w") return;
@@ -31,11 +31,11 @@ export const handleDrop = (e: any) => {
   }
 
   const afterMove = () => {
-    gameState.addMove(`${piece.getType()}_${piece.getId()}_${currentPiecePosition}_${movePiecePosition}`);
-    gameState.changeTheTurn();
+    globalGameState.addMove(`${piece.getType()}_${piece.getId()}_${currentPiecePosition}_${movePiecePosition}`);
+    globalGameState.changeTheTurn();
   }
 
-  gameState.move(currentPiecePosition, movePiecePosition, afterMove);
+  globalGameState.move(currentPiecePosition, movePiecePosition, afterMove);
 
   return false;
 };
@@ -48,6 +48,7 @@ export const handleDragStart = (e: any) => {
   const pieceId = e.target.id;
   const position = e.target.parentElement.id.split("_")[1];
   const pieceIdx = pieceId.split("_")[1];
+  const pieces = globalGameState.getPieces();
 
   const pieceObject = {
     pieceId,

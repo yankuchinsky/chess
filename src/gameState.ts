@@ -2,32 +2,33 @@ import { SIZE } from "./index";
 import Board from "./Board";
 import Piece from "./pieces/Piece";
 import Player from "./Player";
+import Pieces from "./Pieces";
 
 class GameState {
   private isWhiteMove = true;
   private whiteCapturedPieces: Piece[] = [];
   private blackCapturedPieces: Piece[] = [];
+  private pieces: Pieces;
   private white: Player; 
   private black: Player;
   private moves: string[] = [];
   private board: Board;
 
-  constructor(field: HTMLDivElement, readonly pieces) {
-    this.white = new Player('w');
-    this.black = new Player('w');
+  constructor(field: HTMLDivElement) {
     this.board = new Board(field, SIZE);
+    this.pieces = new Pieces();
   }
-
+  
   init() {
-    this.white.setPieces(this.pieces.getAllPiecesByColor('w'));
-    this.black.setPieces(this.pieces.getAllPiecesByColor('b'));
+    this.white = new Player('w', this.pieces.getAllPiecesByColor('w'));
+    this.black = new Player('w', this.pieces.getAllPiecesByColor('b'));
 
     this.black.calcPath(() => {});
     this.white.calcPath(() => {});
   }
 
-  getGameState() {
-    return this;
+  setupPiecesPositionsByJSON(positions: JSON) {
+    this.pieces.setupPiecesByJSON(positions, this.board);
   }
 
   changeTheTurn() {
@@ -52,6 +53,10 @@ class GameState {
 
   getBoard() {
     return this.board;
+  }
+
+  getPieces() {
+    return this.pieces;
   }
 
   capture(piece: Piece) {

@@ -1,4 +1,4 @@
-import { DEV_MODE, pieces } from "../index";
+import { DEV_MODE, globalGameState } from "../index";
 
 const getImage = (type: string) => {
   return require(`../assets/${type}.png`).default;
@@ -13,7 +13,7 @@ abstract class Piece {
   private currentPosition: number;
   private currentCell: HTMLDivElement;
   protected availableCellsToMove: number[] = [];
-  protected readonly pieces = pieces;
+  protected pieces = globalGameState.getPieces();
 
   constructor(id: number, type: string, currentCell: HTMLDivElement) {
     this.element = document.createElement("div");

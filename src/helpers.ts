@@ -1,4 +1,4 @@
-import { pieces, SIZE } from "./index";
+import { globalGameState, SIZE } from "./index";
 
 export enum PieceType {
   WP = "wp",
@@ -147,6 +147,7 @@ const filterPath = (range: [number, number][], pieceColor: TColor, arrayForResul
   for (let i = 0; i < range.length; i++) {
     const c = range[i];
     const position = getPositionByCoordinates(c);
+    const pieces = globalGameState.getPieces();
     const blockerPositionPiece = pieces.getPieceByPosition(position);
 
     if (!blockerPositionPiece) {
@@ -162,6 +163,7 @@ const filterPath = (range: [number, number][], pieceColor: TColor, arrayForResul
 
 export const calculateDiagonalAvailableCells = (coordinates: [number, number]) => {
   const piecePosition = getPositionByCoordinates(coordinates);
+  const pieces = globalGameState.getPieces();
   const piece = pieces.getPieceByPosition(piecePosition);
 
   if (!piece) {
@@ -192,6 +194,7 @@ export const calculateDiagonalAvailableCells = (coordinates: [number, number]) =
 
 export const calculateVerticalAvailableCells = (coordinates: [number, number]) => {
   const piecePosition = getPositionByCoordinates(coordinates);
+  const pieces = globalGameState.getPieces();
   const piece = pieces.getPieceByPosition(piecePosition);
 
   if (!piece) {

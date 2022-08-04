@@ -19,10 +19,8 @@ const body = document.querySelector("body");
 const field = document.createElement("div");
 field.className = "field";
 
-export const pieces = new Pieces();
-export const globalGameState = new GameState(field, pieces);
-
-pieces.setupPiecesByJSON(test, globalGameState.getBoard());
+export const globalGameState = new GameState(field);
+globalGameState.setupPiecesPositionsByJSON(test);
 
 globalGameState.init();
 
