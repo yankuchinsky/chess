@@ -1,9 +1,9 @@
 import { DEV_MODE, globalGameState } from "../index";
+import { DefaultRenderer } from "./PieceRenderer";
 
 const getImage = (type: string) => {
   return require(`../assets/${type}.png`).default;
 }
-
 abstract class Piece {
   private element: HTMLDivElement;
   private color: TColor;
@@ -12,10 +12,11 @@ abstract class Piece {
   private pieceType: string;
   private currentPosition: number;
   private currentCell: HTMLDivElement;
+  private renderer: DefaultRenderer;
   protected availableCellsToMove: number[] = [];
   protected pieces = globalGameState.getPieces();
 
-  constructor(id: number, type: string, currentCell: HTMLDivElement) {
+  constructor(id: number, type: string, currentCell: HTMLDivElement, renderer: DefaultRenderer) {
     this.element = document.createElement("div");
     if (DEV_MODE) {
       this.element.classList.add("piece_dev_mode");
@@ -31,6 +32,8 @@ abstract class Piece {
     this.element.draggable = true;
     this.color = <TColor>type.split("")[0];
     this.currentCell = currentCell;
+    this.renderer = renderer;
+    this.renderer.setCurrentCell(currentCell);
   };
 
   abstract calculateAvailableCels();
@@ -64,7 +67,7 @@ abstract class Piece {
   }
 
   render() {
-    this.currentCell.appendChild(this.getElement());
+    this.renderer.render(this.getElement());
   }
 
   setCurrentPosition(position: number) {
@@ -80,11 +83,12 @@ abstract class Piece {
   }
   
   setCellElement(cell: HTMLDivElement) {
+    this.renderer.setCurrentCell(cell);
     this.currentCell = cell;
   }
 
   remove() {
-    this.currentCell.removeChild(this.element);
+    this.renderer.remove(this.element);
   }
 
   move({ cellToMoveId, cell }: { cellToMoveId: number, cell: HTMLDivElement }, callback?: Function) {
