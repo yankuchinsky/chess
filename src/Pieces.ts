@@ -1,7 +1,13 @@
 import Piece from './pieces/Piece';
 import PieceFactory from './pieces/PieceFactory';
+
 export class Pieces {
-  private piecesArray: Piece[] = [];
+  private blackPieces: Piece[] = [];
+  private whitePieces: Piece[] = [];
+
+  private get piecesArray() {
+    return [...this.whitePieces, ...this.blackPieces];
+  }
 
   addPiece(piece: Piece) {
     this.piecesArray.push(piece);
@@ -28,19 +34,14 @@ export class Pieces {
   }
 
   setupPiecesByJSON(json: JSON, board) {
-    let kings: Piece[] = [];
     for (let id of Object.keys(json)) {
       const cell = board.getCellById(+id)!;
       const piece = PieceFactory.createPiece(+id, json[id], cell.cellRef);
-      if (piece.getPiecetype() === 'k') {
-        kings.push(piece);
+      if (piece.getColor() === 'w') {
+        this.whitePieces.push(piece);
       } else {
-        this.piecesArray.push(piece);
+        this.blackPieces.push(piece);
       }
-    }
-
-    if (kings.length) {
-      this.piecesArray.push(...kings);
     }
 
     this.render();
@@ -70,8 +71,9 @@ export class Pieces {
   }
 
   pieceCapture(piece: Piece) {
+    const color = piece.getColor() === 'w' ? 'whitePieces' : 'blackPieces';
     piece.remove();
-    this.piecesArray = this.piecesArray.filter(p => p.getId() !== piece.getId());
+    this[color] = this[color].filter(p => p.getId() !== piece.getId());
   }
 
   render() {
