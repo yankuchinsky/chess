@@ -1,7 +1,6 @@
 import { SIZE } from "./index";
 import Board from "./Board";
 import Piece from "./pieces/Piece";
-import Player from "./Player";
 import Pieces from "./Pieces";
 
 class GameState {
@@ -9,8 +8,6 @@ class GameState {
   private whiteCapturedPieces: Piece[] = [];
   private blackCapturedPieces: Piece[] = [];
   private pieces: Pieces;
-  private white: Player; 
-  private black: Player;
   private moves: string[] = [];
   private board: Board;
 
@@ -20,11 +17,6 @@ class GameState {
   }
   
   init() {
-    this.white = new Player('w', this.pieces.getAllPiecesByColor('w'));
-    this.black = new Player('w', this.pieces.getAllPiecesByColor('b'));
-
-    this.black.calcPath(() => {});
-    this.white.calcPath(() => {});
   }
 
   setupPiecesPositionsByJSON(positions: JSON) {
@@ -37,11 +29,11 @@ class GameState {
     }
 
     if (this.isWhiteMove) {
-      this.black.calcPath(callback);
-      this.white.calcPath(callback);
+      this.pieces.calcPath();
+      this.pieces.calcPath(false);
     } else {
-      this.white.calcPath(callback);
-      this.black.calcPath(callback);
+      this.pieces.calcPath(false);
+      this.pieces.calcPath();
     }
     
     this.isWhiteMove = !this.isWhiteMove;    

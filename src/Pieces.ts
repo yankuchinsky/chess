@@ -25,6 +25,14 @@ export class Pieces {
     return foundPiece;
   };
 
+  calcPath(isWhite: boolean = true) {
+    if (isWhite) {
+      this.whitePieces.forEach(piece => piece.calculateAvailableCels());
+    } else {
+      this.blackPieces.forEach(piece => piece.calculateAvailableCels());
+    }
+  }
+
   getPieceById(id: number) {
     const foundPiece = this.piecesArray.find(piece => {
       return piece.getId() === id;
