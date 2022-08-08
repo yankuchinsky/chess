@@ -4,13 +4,21 @@ import PieceFactory from './pieces/PieceFactory';
 export class Pieces {
   private blackPieces: Piece[] = [];
   private whitePieces: Piece[] = [];
+  private blackKing: Piece;
+  private whiteKing: Piece;
 
   private get piecesArray() {
-    return [...this.whitePieces, ...this.blackPieces];
-  }
+    const arr = [...this.whitePieces, ...this.blackPieces];
 
-  addPiece(piece: Piece) {
-    this.piecesArray.push(piece);
+    if (this.whiteKing) {
+      arr.push(this.whiteKing);
+    }
+
+    if (this.blackKing) {
+      arr.push(this.blackKing);
+    }
+
+    return arr;
   }
 
   getPieces() {
@@ -33,6 +41,14 @@ export class Pieces {
     }
   }
 
+  calcKingPath(isWhite: boolean = true) {
+    if (isWhite) {
+      this.whiteKing?.calculateAvailableCels();
+    } else {
+      this.blackKing?.calculateAvailableCels();
+    }
+  }
+
   getPieceById(id: number) {
     const foundPiece = this.piecesArray.find(piece => {
       return piece.getId() === id;
@@ -46,9 +62,17 @@ export class Pieces {
       const cell = board.getCellById(+id)!;
       const piece = PieceFactory.createPiece(+id, json[id], cell.cellRef);
       if (piece.getColor() === 'w') {
-        this.whitePieces.push(piece);
+        if (piece.getPiecetype() === 'k') {
+          this.whiteKing = piece;
+        } else {
+          this.whitePieces.push(piece);
+        }
       } else {
-        this.blackPieces.push(piece);
+        if (piece.getPiecetype() === 'k') {
+          this.blackKing = piece;
+        } else {
+          this.blackPieces.push(piece);
+        }
       }
     }
 

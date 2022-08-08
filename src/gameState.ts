@@ -17,6 +17,7 @@ class GameState {
   }
   
   init() {
+    this.calcPath();
   }
 
   setupPiecesPositionsByJSON(positions: JSON) {
@@ -28,17 +29,26 @@ class GameState {
       //
     }
 
-    if (this.isWhiteMove) {
-      this.pieces.calcPath();
-      this.pieces.calcPath(false);
-    } else {
-      this.pieces.calcPath(false);
-      this.pieces.calcPath();
-    }
+    this.calcPath(); 
     
     this.isWhiteMove = !this.isWhiteMove;    
   }
 
+
+  calcPath() {
+    if (this.isWhiteMove) {
+      this.pieces.calcPath(false);
+      this.pieces.calcPath();
+      this.pieces.calcKingPath(false);
+      this.pieces.calcKingPath()
+    } else {
+      this.pieces.calcPath();
+      this.pieces.calcPath(false);
+      this.pieces.calcKingPath()
+      this.pieces.calcKingPath(false);
+    }
+  }
+  
   getIsWhiteMove() {
     return this.isWhiteMove;
   }
