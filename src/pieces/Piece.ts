@@ -11,7 +11,6 @@ abstract class Piece {
   private type: string;
   private pieceType: string;
   private currentPosition: number;
-  private currentCell: HTMLDivElement;
   private renderer: DefaultRenderer;
   protected availableCellsToMove: number[] = [];
   protected pieces = globalGameState.getPieces();
@@ -31,7 +30,6 @@ abstract class Piece {
     this.element.style.backgroundSize = "contain";
     this.element.draggable = true;
     this.color = <TColor>type.split("")[0];
-    this.currentCell = currentCell;
     this.renderer = renderer;
     this.renderer.setCurrentCell(currentCell);
   };
@@ -84,7 +82,6 @@ abstract class Piece {
   
   setCellElement(cell: HTMLDivElement) {
     this.renderer.setCurrentCell(cell);
-    this.currentCell = cell;
   }
 
   remove() {
