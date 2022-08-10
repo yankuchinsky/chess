@@ -1,6 +1,6 @@
-import Piece from './pieces/Piece';
-import PieceFactory from './pieces/PieceFactory';
-import PieceRenderer from './pieces/PieceRenderer';
+import Piece from './Piece';
+import PieceFactory from './PieceFactory';
+import PieceRenderer from './PieceRenderer';
 
 export class Pieces<T> {
   private blackPieces: Piece<T>[] = [];

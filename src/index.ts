@@ -1,6 +1,5 @@
 import "./style.css";
 import GameState from './HtmlGameState';
-import Pieces from './Pieces';
 import {
   handleDrop,
   handleDragStart,

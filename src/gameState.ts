@@ -1,6 +1,6 @@
 import Board from "./Board";
 import Piece from "./pieces/Piece";
-import Pieces from "./Pieces";
+import Pieces from "./pieces/Pieces";
 
 abstract class GameState<T> {
   private isWhiteMove = true;
