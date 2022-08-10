@@ -1,7 +1,7 @@
 import Piece from './pieces/Piece';
 import PieceFactory from './pieces/PieceFactory';
 
-export class Pieces {
+export class Pieces<T> {
   private blackPieces: Piece[] = [];
   private whitePieces: Piece[] = [];
   private blackKing: Piece;

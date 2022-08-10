@@ -1,55 +1,47 @@
-import { DEV_MODE } from "./index";
-
 export const SIZE = 8;
 
-type BoardMapCell = {
-  cellRef: HTMLDivElement,
+type BoardMapCell<TCellRef> = {
+  cellRef: TCellRef
 }
 
-class Board {
-  private boardMap: BoardMapCell[][] = [];
+abstract class Board<T> {
+  protected boardMap: BoardMapCell<T>[][] = [];
+  protected rootElement: T;
+  protected size: number;
 
-  constructor(element: HTMLDivElement, size: number) {
-    let isBlack = false;
-    let idx = size * size;
-    let fileIdx = 0;
-
+  constructor(element: T, size: number) {
+    this.rootElement = element;
+    this.size = size;
     this.boardMap = Array.from(new Array(size), () => []);
 
-    for (let i = 0; i < size; i ++) {
-      for (let j = 0; j < size; j ++) {
-        idx -= 1;
-        const currentFileIdx = idx - size + j * 2 + 1;
-        const currentFileBoardMapIdx = size - fileIdx - 1;
-        const cellElement = this.createCellElement(currentFileIdx, isBlack ? "black" : "white");
+    this.renderBoard();
+  };
 
-        this.boardMap[currentFileBoardMapIdx][j] = { cellRef: cellElement };
+  loopThrough(action: Function) {
+    let isBlack = false;
+    let idx = this.size * this.size;
+    let fileIdx = 0;
+
+    this.boardMap = Array.from(new Array(this.size), () => []);
+
+    for (let i = 0; i < this.size; i ++) {
+      for (let j = 0; j < this.size; j ++) {
+        idx -= 1;
+
+        const currentFileIdx = idx - this.size + j * 2 + 1;
+        const currentFileBoardMapIdx = this.size - fileIdx - 1;
+        action(currentFileIdx, currentFileBoardMapIdx, j, isBlack);
 
         isBlack = !isBlack;
-        element.appendChild(cellElement);
       }
       isBlack = !isBlack;
       fileIdx += 1;
     }
-  };
+  }
 
-  createCellElement(id: number, color: "white" | "black") {
-    const cell = document.createElement("div");
-    cell.classList.add("cell");
-    cell.id = `cell_${id}`;
+  protected abstract renderBoard();
 
-    if (DEV_MODE) {
-      cell.innerHTML = `${id}`;
-    }
-
-    if (color === "black") {
-      cell.classList.add("cell-black");
-    } else {
-      cell.classList.add("cell-white");
-    }
-
-    return cell;
-  };
+  protected abstract createCellElement(id: number, color: "white" | "black");
 
   getCellRef(id: number) {
     return this.getCellById(id)?.cellRef;
@@ -65,16 +57,7 @@ class Board {
     return boardMap[id];
   }
 
-  showPath(cells: number[], clear = false) {
-    const boardMap = this.getFlatBoard(); 
-    cells.forEach(cell => {
-      if (clear) {
-        boardMap[cell].cellRef.classList.remove('path');
-      } else {
-        boardMap[cell].cellRef.classList.add('path');
-      }
-    });
-  }
+  protected abstract showPath(cells: number[], clear);
 
   getFlatBoard() {
     return this.boardMap.flat();

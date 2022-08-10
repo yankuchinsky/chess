@@ -1,13 +1,13 @@
 import { SIZE } from "./index";
-import Board from "./Board";
+import Board from "./HtmlBoard";
 import Piece from "./pieces/Piece";
 import Pieces from "./Pieces";
 
-class GameState {
+class GameState<TRenderer> {
   private isWhiteMove = true;
   private whiteCapturedPieces: Piece[] = [];
   private blackCapturedPieces: Piece[] = [];
-  private pieces: Pieces;
+  private pieces: Pieces<TRenderer>;
   private moves: string[] = [];
   private board: Board;
 
