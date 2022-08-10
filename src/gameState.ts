@@ -1,22 +1,15 @@
-import { SIZE } from "./index";
-import Board from "./HtmlBoard";
+import Board from "./Board";
 import Piece from "./pieces/Piece";
 import Pieces from "./Pieces";
-import HtmlPieceRenderer from './HtmlPieceRenderer';
 
-class GameState<T> {
+abstract class GameState<T> {
   private isWhiteMove = true;
   private whiteCapturedPieces: Piece<T>[] = [];
   private blackCapturedPieces: Piece<T>[] = [];
-  private pieces: Pieces<HTMLDivElement>;
+  protected pieces: Pieces<T>;
   private moves: string[] = [];
-  private board: Board;
+  protected board: Board<T>;
 
-  constructor(field: HTMLDivElement) {
-    this.board = new Board(field, SIZE);
-    this.pieces = new Pieces<HTMLDivElement>(new HtmlPieceRenderer());
-  }
-  
   init() {
     this.calcPath();
   }

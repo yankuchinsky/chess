@@ -57,7 +57,7 @@ abstract class Board<T> {
     return boardMap[id];
   }
 
-  protected abstract showPath(cells: number[], clear);
+  abstract showPath(cells: number[], clear);
 
   getFlatBoard() {
     return this.boardMap.flat();
