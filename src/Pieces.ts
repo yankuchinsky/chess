@@ -1,11 +1,19 @@
 import Piece from './pieces/Piece';
 import PieceFactory from './pieces/PieceFactory';
+import PieceRenderer from './pieces/PieceRenderer';
 
 export class Pieces<T> {
-  private blackPieces: Piece[] = [];
-  private whitePieces: Piece[] = [];
-  private blackKing: Piece;
-  private whiteKing: Piece;
+  private blackPieces: Piece<T>[] = [];
+  private whitePieces: Piece<T>[] = [];
+  private blackKing: Piece<T>;
+  private whiteKing: Piece<T>;
+  private pieceFactory: PieceFactory<T>; 
+  private pieceRenderer: PieceRenderer<T>;
+
+  constructor(renderer: PieceRenderer<T>) {
+    this.pieceFactory = new PieceFactory<T>();
+    this.pieceRenderer = renderer;
+  }
 
   private get piecesArray() {
     const arr = [...this.whitePieces, ...this.blackPieces];
@@ -60,7 +68,7 @@ export class Pieces<T> {
   setupPiecesByJSON(json: JSON, board) {
     for (let id of Object.keys(json)) {
       const cell = board.getCellById(+id)!;
-      const piece = PieceFactory.createPiece(+id, json[id], cell.cellRef);
+      const piece = this.pieceFactory.createPiece(+id, json[id], cell.cellRef);
       if (piece.getColor() === 'w') {
         if (piece.getPiecetype() === 'k') {
           this.whiteKing = piece;
@@ -76,6 +84,7 @@ export class Pieces<T> {
       }
     }
 
+    this.setPiecesRenderer();
     this.render();
   }
 
@@ -89,7 +98,7 @@ export class Pieces<T> {
     }, []);
   }
 
-  move(currCell: number, cellToMoveId: number, cell: HTMLDivElement, onCompleteMove: Function) {
+  move(currCell: number, cellToMoveId: number, cell: T, onCompleteMove: Function) {
     const piece = this.getPieceByPosition(currCell);
     
     if (piece && piece.getAvailableCells().indexOf(cellToMoveId) !== -1) {
@@ -102,16 +111,20 @@ export class Pieces<T> {
     }
   }
 
-  pieceCapture(piece: Piece) {
+  pieceCapture(piece: Piece<T>) {
     const color = piece.getColor() === 'w' ? 'whitePieces' : 'blackPieces';
     piece.remove();
     this[color] = this[color].filter(p => p.getId() !== piece.getId());
   }
 
-  render() {
+  setPiecesRenderer() {
     this.piecesArray.forEach(piece => {
-      piece.render();
+      piece.setRenderer(this.pieceRenderer.returnNewRenderer());
     });
+  }
+
+  render() {
+    this.piecesArray.forEach(piece => piece.render());
   }
 }
 

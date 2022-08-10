@@ -2,18 +2,19 @@ import { SIZE } from "./index";
 import Board from "./HtmlBoard";
 import Piece from "./pieces/Piece";
 import Pieces from "./Pieces";
+import HtmlPieceRenderer from './HtmlPieceRenderer';
 
-class GameState<TRenderer> {
+class GameState<T> {
   private isWhiteMove = true;
-  private whiteCapturedPieces: Piece[] = [];
-  private blackCapturedPieces: Piece[] = [];
-  private pieces: Pieces<TRenderer>;
+  private whiteCapturedPieces: Piece<T>[] = [];
+  private blackCapturedPieces: Piece<T>[] = [];
+  private pieces: Pieces<HTMLDivElement>;
   private moves: string[] = [];
   private board: Board;
 
   constructor(field: HTMLDivElement) {
     this.board = new Board(field, SIZE);
-    this.pieces = new Pieces();
+    this.pieces = new Pieces<HTMLDivElement>(new HtmlPieceRenderer());
   }
   
   init() {
@@ -61,7 +62,7 @@ class GameState<TRenderer> {
     return this.pieces;
   }
 
-  capture(piece: Piece) {
+  capture(piece: Piece<T>) {
     if (piece.getColor() === 'w') {
       this.whiteCapturedPieces.push(piece);
     } else {

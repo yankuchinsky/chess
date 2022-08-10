@@ -1,21 +1,22 @@
 import { DEV_MODE, globalGameState } from "../index";
-import { DefaultRenderer } from "./PieceRenderer";
+import PieceRenderer from "./PieceRenderer";
 
 const getImage = (type: string) => {
   return require(`../assets/${type}.png`).default;
 }
-abstract class Piece {
+abstract class Piece<T> {
   private element: HTMLDivElement;
   private color: TColor;
   private id: number;
   private type: string;
   private pieceType: string;
   private currentPosition: number;
-  private renderer: DefaultRenderer;
+  private currentCell: T;
+  private renderer: PieceRenderer<T>;
   protected availableCellsToMove: number[] = [];
   protected pieces = globalGameState.getPieces();
 
-  constructor(id: number, type: string, currentCell: HTMLDivElement, renderer: DefaultRenderer) {
+  constructor(id: number, type: string, currentCell: T) {
     this.element = document.createElement("div");
     if (DEV_MODE) {
       this.element.classList.add("piece_dev_mode");
@@ -30,8 +31,7 @@ abstract class Piece {
     this.element.style.backgroundSize = "contain";
     this.element.draggable = true;
     this.color = <TColor>type.split("")[0];
-    this.renderer = renderer;
-    this.renderer.setCurrentCell(currentCell);
+    this.currentCell = currentCell;
   };
 
   abstract calculateAvailableCels();
@@ -64,8 +64,16 @@ abstract class Piece {
     return this.currentPosition;
   }
 
+  getCurrentCell() {
+    return this.currentCell;
+  }
+
   render() {
-    this.renderer.render(this.getElement());
+    this.renderer.render(this);
+  }
+
+  setRenderer(renderer: PieceRenderer<T>) {
+    this.renderer = renderer;
   }
 
   setCurrentPosition(position: number) {
@@ -80,15 +88,15 @@ abstract class Piece {
     return this.availableCellsToMove;
   }
   
-  setCellElement(cell: HTMLDivElement) {
-    this.renderer.setCurrentCell(cell);
+  setCellElement(cell: T) {
+    this.currentCell = cell;
   }
 
   remove() {
-    this.renderer.remove(this.element);
+    this.renderer.remove(this);
   }
 
-  move({ cellToMoveId, cell }: { cellToMoveId: number, cell: HTMLDivElement }, callback?: Function) {
+  move({ cellToMoveId, cell }: { cellToMoveId: number, cell: T }, callback?: Function) {
     this.setCellElement(cell);
     this.setCurrentPosition(cellToMoveId);
     this.render();

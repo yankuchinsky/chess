@@ -1,7 +1,7 @@
 import Piece from './Piece';
 import { Position, getPositionByCoordinates, getCoordinatesByPosition } from '../helpers';
 
-class Knight extends Piece {
+class Knight<T> extends Piece<T> {
 
   calculateAvailableCels() {
     const curr = this.getCurrentPosition();

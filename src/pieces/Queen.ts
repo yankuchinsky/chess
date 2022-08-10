@@ -1,6 +1,6 @@
 import Piece from './Piece';
 import { calculateVerticalAvailableCells, getCoordinatesByPosition, getPositionByCoordinates, calculateDiagonalAvailableCells  } from '../helpers'
-class Queen extends Piece {
+class Queen<T> extends Piece<T> {
 
   calculateAvailableCels() {
     const curr = this.getCurrentPosition();

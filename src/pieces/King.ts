@@ -1,12 +1,12 @@
 import Piece from './Piece';
 import { Position, getPositionByCoordinates, getCoordinatesByPosition } from '../helpers';
 import { globalGameState } from '../index';
-class King extends Piece {
+class King<T> extends Piece<T> {
   private hasCastled = false;
   private isKingMoved = false;
   private isCheck = false;
 
-  move(cell: { cellToMoveId: number, cell: HTMLDivElement }, callback?: Function) {
+  move(cell: { cellToMoveId: number, cell: T }, callback?: Function) {
     super.move(cell, callback);
 
     const { cellToMoveId } = cell;

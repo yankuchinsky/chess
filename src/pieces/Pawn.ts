@@ -1,10 +1,10 @@
 import Piece from './Piece';
 import { getCoordinatesByPosition, getPositionByCoordinates, Position, upMove } from '../helpers';
 
-class Pawn extends Piece {
+class Pawn<T> extends Piece<T> {
   private isMoved = false;
   
-  move(cell: { cellToMoveId: number, cell: HTMLDivElement }, callback?: Function) {
+  move(cell: { cellToMoveId: number, cell: T }, callback?: Function) {
     super.move(cell, callback);
 
     this.isMoved = true;
