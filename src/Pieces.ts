@@ -120,6 +120,7 @@ export class Pieces<T> {
   setPiecesRenderer() {
     this.piecesArray.forEach(piece => {
       piece.setRenderer(this.pieceRenderer.returnNewRenderer());
+      piece.init();
     });
   }
 

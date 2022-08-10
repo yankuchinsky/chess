@@ -5,7 +5,7 @@ const getImage = (type: string) => {
   return require(`../assets/${type}.png`).default;
 }
 abstract class Piece<T> {
-  private element: HTMLDivElement;
+  private element: T;
   private color: TColor;
   private id: number;
   private type: string;
@@ -17,22 +17,18 @@ abstract class Piece<T> {
   protected pieces = globalGameState.getPieces();
 
   constructor(id: number, type: string, currentCell: T) {
-    this.element = document.createElement("div");
-    if (DEV_MODE) {
-      this.element.classList.add("piece_dev_mode");
-    }
+    
     this.type = type;
     this.pieceType = type.split('')[1];
-    this.element.classList.add("piece");
-    this.element.style.backgroundImage = `url(${getImage(type)})`;
-    this.element.id = `${type}_${id}`;
     this.id = id;
     this.currentPosition = id;
-    this.element.style.backgroundSize = "contain";
-    this.element.draggable = true;
     this.color = <TColor>type.split("")[0];
     this.currentCell = currentCell;
   };
+
+  init() {
+    this.element = this.renderer.createRenderElement(this.id, this.type);
+  }
 
   abstract calculateAvailableCels();
 
