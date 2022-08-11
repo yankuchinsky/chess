@@ -1,6 +1,6 @@
-import { SIZE } from "./index";
-import GameState from "./GameState";
-import Pieces from "./pieces/Pieces";
+import { SIZE } from "../index";
+import GameState from "../GameState";
+import Pieces from "../pieces/Pieces";
 import HtmlPieceRenderer from './HtmlPieceRenderer';
 import HtmlBoard from "./HtmlBoard";
 

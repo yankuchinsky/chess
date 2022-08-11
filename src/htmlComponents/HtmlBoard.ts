@@ -1,5 +1,5 @@
-import Board from "./Board";
-import { DEV_MODE } from "./index";
+import Board from "../Board";
+import { DEV_MODE } from "../index";
 
 class HtmlBoard extends Board<HTMLDivElement> {
   renderBoard() {

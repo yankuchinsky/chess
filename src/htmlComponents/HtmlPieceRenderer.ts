@@ -1,9 +1,9 @@
-import PieceRenderer from "./pieces/PieceRenderer";
-import Piece from './pieces/Piece';
-import { DEV_MODE } from "./index";
+import PieceRenderer from "../renderers/PieceRenderer";
+import Piece from '../pieces/Piece';
+import { DEV_MODE } from "../index";
 
 const getImage = (type: string) => {
-  return require(`./assets/${type}.png`).default;
+  return require(`../assets/${type}.png`).default;
 }
 
 export class HtmlPieceRenderer extends PieceRenderer<HTMLDivElement> {

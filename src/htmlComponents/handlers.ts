@@ -1,5 +1,5 @@
-import { globalGameState } from "./index";
-import { getCoordinatesByPosition } from './helpers';
+import { globalGameState } from "../index";
+import { getCoordinatesByPosition } from '../helpers';
 
 let tmpCells: number[] = [];
 

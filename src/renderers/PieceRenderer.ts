@@ -1,4 +1,4 @@
-import Piece from './Piece';
+import Piece from '../pieces/Piece';
 
 export default abstract class PieceRenderer<T> {
   protected currentCell: T;

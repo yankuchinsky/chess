@@ -1,14 +1,14 @@
 import "./style.css";
-import GameState from './HtmlGameState';
+import GameState from './htmlComponents/HtmlGameState';
 import {
   handleDrop,
   handleDragStart,
   handleDragOver,
   handleDragEnd
-} from "./handlers"; 
+} from "./htmlComponents/handlers"; 
 import jsonSetup from './templates/standart.json';
 import test from './templates/test.json'
-import GameRenderer from './pieces/GameRenderer'
+import GameRenderer from './renderers/GameRenderer'
 
 export const DEV_MODE = true;
 export const SIZE = 8;

@@ -1,9 +1,6 @@
 import { DEV_MODE, globalGameState } from "../index";
-import PieceRenderer from "./PieceRenderer";
+import PieceRenderer from "../renderers/PieceRenderer";
 
-const getImage = (type: string) => {
-  return require(`../assets/${type}.png`).default;
-}
 abstract class Piece<T> {
   private element: T;
   private color: TColor;

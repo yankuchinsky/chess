@@ -1,4 +1,4 @@
-import { globalGameState, SIZE } from "./index";
+import { globalGameState, SIZE } from "../index";
 
 export enum PieceType {
   WP = "wp",
