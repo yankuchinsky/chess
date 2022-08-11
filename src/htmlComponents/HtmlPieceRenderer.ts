@@ -1,10 +1,7 @@
 import PieceRenderer from "../renderers/PieceRenderer";
 import Piece from '../pieces/Piece';
 import { DEV_MODE } from "../index";
-
-const getImage = (type: string) => {
-  return require(`../assets/${type}.png`).default;
-}
+import getImage from '../assets/imageLoader';
 
 export class HtmlPieceRenderer extends PieceRenderer<HTMLDivElement> {
   render(piece: Piece<HTMLDivElement>) {
