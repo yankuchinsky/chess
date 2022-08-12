@@ -7,8 +7,7 @@ import {
   handleDragEnd
 } from "./htmlComponents/handlers"; 
 import jsonSetup from './templates/standart.json';
-import test from './templates/test.json'
-import GameRenderer from './renderers/GameRenderer'
+import test from './templates/test.json';
 
 export const DEV_MODE = true;
 export const SIZE = 8;
@@ -17,8 +16,6 @@ const body = document.querySelector("body");
 
 const field = document.createElement("div");
 field.className = "field";
-
-const renderer = new GameRenderer();
 
 export const globalGameState = new GameState(field);
 globalGameState.setupPiecesPositionsByJSON(test);
