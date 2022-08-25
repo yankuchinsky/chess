@@ -1,6 +1,6 @@
 import Piece from './Piece';
 import { Position, getPositionByCoordinates, getCoordinatesByPosition } from '../helpers';
-import { globalGameState } from '../index';
+
 class King<T> extends Piece<T> {
   private hasCastled = false;
   private isKingMoved = false;
@@ -16,14 +16,14 @@ class King<T> extends Piece<T> {
     if (startingPosition + 2 === cellToMoveId) {
       const shift = color === 'w' ? 3 : 4;
       const rook = this.pieces.getPieceById(startingPosition + shift)
-      const cellRef = globalGameState.getCellRefById(startingPosition + 1)!.cellRef;
+      const cellRef = this.globalGameState.getCellRefById(startingPosition + 1)!.cellRef;
       rook?.move({ cellToMoveId: startingPosition + 1, cell: cellRef })
     }
 
     if (startingPosition - 2 === cellToMoveId) {
       const shift = color === 'w' ? 4 : 3;
       const rook = this.pieces.getPieceById(startingPosition - shift)
-      const cellRef = globalGameState.getCellRefById(startingPosition - 1)!.cellRef;
+      const cellRef = this.globalGameState.getCellRefById(startingPosition - 1)!.cellRef;
       rook?.move({ cellToMoveId: startingPosition - 1, cell: cellRef })
     }
   }

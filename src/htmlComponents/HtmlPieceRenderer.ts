@@ -1,5 +1,4 @@
-import PieceRenderer from "../renderers/PieceRenderer";
-import Piece from '../pieces/Piece';
+import { Piece, PieceRenderer } from 'chess-engine';
 import { DEV_MODE } from "../index";
 import getImage from '../assets/imageLoader';
 

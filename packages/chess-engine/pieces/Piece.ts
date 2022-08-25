@@ -1,5 +1,8 @@
-import { DEV_MODE, globalGameState } from "../index";
+import ChessEngine from "../ChessEngine";
+import Pieces from './Pieces';
 import PieceRenderer from "../renderers/PieceRenderer";
+
+type TColor = 'w' | 'b';
 
 abstract class Piece<T> {
   private element: T;
@@ -11,10 +14,10 @@ abstract class Piece<T> {
   private currentCell: T;
   private renderer: PieceRenderer<T>;
   protected availableCellsToMove: number[] = [];
-  protected pieces = globalGameState.getPieces();
+  protected pieces: Pieces<T>;
+  protected globalGameState: ChessEngine<T>;
 
   constructor(id: number, type: string, currentCell: T) {
-    
     this.type = type;
     this.pieceType = type.split('')[1];
     this.id = id;
@@ -22,6 +25,14 @@ abstract class Piece<T> {
     this.color = <TColor>type.split("")[0];
     this.currentCell = currentCell;
   };
+
+  setPiecesRef(pieces: Pieces<T>) {
+    this.pieces = pieces;
+  }
+
+  setGameState(gameState: ChessEngine<T>) {
+    this.globalGameState = gameState;
+  }
 
   init() {
     this.element = this.renderer.createRenderElement(this.id, this.type);

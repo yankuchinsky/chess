@@ -12,16 +12,21 @@
     "cross-env": "^7.0.2",
     "file-loader": "^6.0.0",
     "prettier": "^2.5.1",
-    "webpack": "^5.11.0"
+    "webpack": "^5.11.0",
+    "chess-engine": "*"
   },
   "devDependencies": {
     "css-loader": "^6.5.1",
     "html-webpack-plugin": "^4.5.0",
+    "lerna": "^5.4.3",
     "style-loader": "^3.3.1",
     "ts-loader": "^8.0.12",
     "typescript": "^3.9.7",
     "url-loader": "^4.1.1",
     "webpack-cli": "^4.9.2",
     "webpack-dev-server": "^3.11.0"
-  }
+  },
+  "workspaces": [
+    "packages/*"
+  ]
 }

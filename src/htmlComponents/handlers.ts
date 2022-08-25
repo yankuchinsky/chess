@@ -1,5 +1,5 @@
 import { globalGameState } from "../index";
-import { getCoordinatesByPosition } from '../helpers';
+import { getCoordinatesByPosition } from '../../packages/chess-engine/helpers';
 
 let tmpCells: number[] = [];
 
