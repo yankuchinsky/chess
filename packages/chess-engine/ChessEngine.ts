@@ -2,7 +2,7 @@ import Board from "./Board";
 import Piece from "./pieces/Piece";
 import Pieces from "./pieces/Pieces";
 
-abstract class GameState<T> {
+abstract class ChessEngine<T> {
   private isWhiteMove = true;
   private whiteCapturedPieces: Piece<T>[] = [];
   private blackCapturedPieces: Piece<T>[] = [];
@@ -15,7 +15,7 @@ abstract class GameState<T> {
   }
 
   setupPiecesPositionsByJSON(positions: JSON) {
-    this.pieces.setupPiecesByJSON(positions, this.board);
+    this.pieces.setupPiecesByJSON(positions, this.board, this);
   }
 
   changeTheTurn() {
@@ -89,4 +89,4 @@ abstract class GameState<T> {
   }
 }
 
-export default GameState;
+export default ChessEngine;

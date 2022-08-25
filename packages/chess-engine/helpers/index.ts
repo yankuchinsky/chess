@@ -1,4 +1,4 @@
-import { globalGameState, SIZE } from "../index";
+import { globalGameState, SIZE } from "../../../src/index";
 
 export enum PieceType {
   WP = "wp",
@@ -15,7 +15,7 @@ export enum PieceType {
   BR = "br",
 }
 
-export const upMove = (position: number, color: TColor, cells = 1) => {
+export const upMove = (position: number, color: 'w' | 'b', cells = 1) => {
   if (color === 'w') {
     return position + SIZE * cells;
   }
@@ -143,7 +143,7 @@ export class Position {
   }
 }
 
-const filterPath = (range: [number, number][], pieceColor: TColor, arrayForResults: [number, number][]) => {
+const filterPath = (range: [number, number][], pieceColor: 'w' | 'b', arrayForResults: [number, number][]) => {
   for (let i = 0; i < range.length; i++) {
     const c = range[i];
     const position = getPositionByCoordinates(c);

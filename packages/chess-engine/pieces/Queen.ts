@@ -1,5 +1,6 @@
 import Piece from './Piece';
-import { calculateVerticalAvailableCells, getCoordinatesByPosition, getPositionByCoordinates, calculateDiagonalAvailableCells  } from '../helpers'
+import { calculateVerticalAvailableCells, getCoordinatesByPosition, getPositionByCoordinates, calculateDiagonalAvailableCells  } from '../helpers';
+
 class Queen<T> extends Piece<T> {
 
   calculateAvailableCels() {

@@ -1,0 +1,13 @@
+{
+  "name": "chess-engine",
+  "version": "1.0.0",
+  "description": "chess engine",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "yankuchinsky",
+  "license": "ISC",
+  "dependencies": {
+    "typescript": "^4.7.4"
+  }
+}

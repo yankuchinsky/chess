@@ -1,6 +1,8 @@
 import Piece from './Piece';
+import Board from '../Board';
 import PieceFactory from './PieceFactory';
 import PieceRenderer from '../renderers/PieceRenderer';
+import ChessEngine from '../ChessEngine';
 
 export class Pieces<T> {
   private blackPieces: Piece<T>[] = [];
@@ -65,7 +67,7 @@ export class Pieces<T> {
     return foundPiece;
   }
 
-  setupPiecesByJSON(json: JSON, board) {
+  setupPiecesByJSON(json: JSON, board: Board<T>, gameState: ChessEngine<T>) {
     for (let id of Object.keys(json)) {
       const cell = board.getCellById(+id)!;
       const piece = this.pieceFactory.createPiece(+id, json[id], cell.cellRef);
@@ -84,15 +86,15 @@ export class Pieces<T> {
       }
     }
 
-    this.setPiecesRenderer();
+    this.setPiecesRenderer(gameState);
     this.render();
   }
 
-  getAllPiecesByColor(color: TColor) {
+  getAllPiecesByColor(color: 'w' | 'b') {
     return this.piecesArray.filter(piece => piece.getColor() === color);
   }
 
-  getAllAvailablesCellsByColor(color: TColor) {
+  getAllAvailablesCellsByColor(color: 'w' | 'b') {
     return this.getAllPiecesByColor(color).reduce((res: number[], curr) => {
       return [...res, ...curr.getAvailableCells()];
     }, []);
@@ -117,9 +119,11 @@ export class Pieces<T> {
     this[color] = this[color].filter(p => p.getId() !== piece.getId());
   }
 
-  setPiecesRenderer() {
+  setPiecesRenderer(gameState: ChessEngine<T>) {
     this.piecesArray.forEach(piece => {
       piece.setRenderer(this.pieceRenderer.returnNewRenderer());
+      piece.setPiecesRef(this);
+      piece.setGameState(gameState);
       piece.init();
     });
   }
