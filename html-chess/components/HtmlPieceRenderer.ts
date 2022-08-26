@@ -1,6 +1,6 @@
 import { Piece, PieceRenderer } from 'chess-engine';
 import { DEV_MODE } from "../index";
-import getImage from '../assets/imageLoader';
+import getImage from '../../assets/imageLoader';
 
 export class HtmlPieceRenderer extends PieceRenderer<HTMLDivElement> {
   render(piece: Piece<HTMLDivElement>) {

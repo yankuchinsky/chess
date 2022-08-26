@@ -1,5 +1,5 @@
 import Piece from './Piece';
-import { calculateVerticalAvailableCells, getCoordinatesByPosition, getPositionByCoordinates, calculateDiagonalAvailableCells  } from '../helpers';
+import { getCoordinatesByPosition, getPositionByCoordinates } from '../helpers';
 
 class Queen<T> extends Piece<T> {
 
@@ -8,8 +8,8 @@ class Queen<T> extends Piece<T> {
     const coordinates = getCoordinatesByPosition(curr);
 
     const newCoordinates = [
-      ...calculateDiagonalAvailableCells(coordinates),
-      ...calculateVerticalAvailableCells(coordinates),
+      ...this.globalGameState.calculateDiagonalAvailableCells(coordinates),
+      ...this.globalGameState.calculateVerticalAvailableCells(coordinates),
     ];
 
     const filteredCoordinates = <[number, number][]>newCoordinates.filter(c => c !== null)

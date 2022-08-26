@@ -3,7 +3,7 @@ const webpack = require("webpack");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 const baseConfig = {
-  entry: "./src/index.ts",
+  entry: "./index.ts",
   resolve: {
     extensions: [".tsx", ".ts", ".js"],
   },
