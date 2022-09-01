@@ -128,6 +128,10 @@ export class Pieces<T> {
     });
   }
 
+  calculateDefenders() {
+    //
+  }
+
   render() {
     this.piecesArray.forEach(piece => piece.render());
   }

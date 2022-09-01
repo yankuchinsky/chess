@@ -4,6 +4,36 @@ import { getCoordinatesByPosition, getPositionByCoordinates, Position, upMove } 
 class Pawn<T> extends Piece<T> {
   private isMoved = false;
   
+  getCellsToCapture() {
+    const cells: number[] = [];
+    const color = this.getColor();
+    const position = this.getCurrentPosition();
+    const coordinates = getCoordinatesByPosition(position);
+    const verticalShift = color === 'w' ? 1 : -1;
+    const leftPositionCoordinates = new Position(coordinates).verticalShift(verticalShift).horizontalShift(-1).getPostition();
+    const rightPositionCoordinates = new Position(coordinates).verticalShift(verticalShift).horizontalShift(1).getPostition();
+    
+    if (leftPositionCoordinates) {
+      const leftPosition = getPositionByCoordinates(leftPositionCoordinates);
+      const leftPiece = this.pieces.getPieceByPosition(leftPosition);
+
+      if (leftPiece && leftPiece.getColor() !== color) {
+        cells.push(leftPiece.getPieceByPosition());
+      } 
+    }
+
+    if (rightPositionCoordinates) {
+      const rightPosition = getPositionByCoordinates(rightPositionCoordinates);
+      const rightPiece = this.pieces.getPieceByPosition(rightPosition);
+
+      if (rightPiece && rightPiece.getColor() !== color) {
+        cells.push(rightPiece.getPieceByPosition());
+      } 
+    }
+
+    return cells;
+  }
+
   move(cell: { cellToMoveId: number, cell: T }, callback?: Function) {
     super.move(cell, callback);
 
