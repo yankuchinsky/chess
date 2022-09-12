@@ -15,19 +15,19 @@ class Pawn<T> extends Piece<T> {
     
     if (leftPositionCoordinates) {
       const leftPosition = getPositionByCoordinates(leftPositionCoordinates);
-      const leftPiece = this.pieces.getPieceByPosition(leftPosition);
+      const leftPiece: Piece<T> | undefined = this.pieces.getPieceByPosition(leftPosition);
 
       if (leftPiece && leftPiece.getColor() !== color) {
-        cells.push(leftPiece.getPieceByPosition());
+        cells.push(leftPiece.getCurrentPosition());
       } 
     }
 
     if (rightPositionCoordinates) {
       const rightPosition = getPositionByCoordinates(rightPositionCoordinates);
-      const rightPiece = this.pieces.getPieceByPosition(rightPosition);
+      const rightPiece: Piece<T> | undefined = this.pieces.getPieceByPosition(rightPosition);
 
       if (rightPiece && rightPiece.getColor() !== color) {
-        cells.push(rightPiece.getPieceByPosition());
+        cells.push(rightPiece.getCurrentPosition());
       } 
     }
 

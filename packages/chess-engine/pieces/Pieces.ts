@@ -102,6 +102,12 @@ export class Pieces<T> {
     }, []);
   }
 
+  getAllAttackingCellsByColor(color: 'w' | 'b') {
+    return this.getAllPiecesByColor(color).reduce((res: number[], curr) => {
+      return [...res, ...curr.getCellsToCapture()];
+    }, []);
+  }
+
   move(currCell: number, cellToMoveId: number, cell: T, onCompleteMove: Function) {
     const piece = this.getPieceByPosition(currCell);
     

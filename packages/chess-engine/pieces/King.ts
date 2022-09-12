@@ -41,7 +41,7 @@ class King<T> extends Piece<T> {
     const coordinates = getCoordinatesByPosition(curr);
     const color = this.getColor();
     const opponentColor = color === 'w' ? 'b' : 'w';
-    const opponentPaths = this.pieces.getAllAvailablesCellsByColor(opponentColor);
+    const opponentPaths = this.pieces.getAllAttackingCellsByColor(opponentColor);
     
     if (~opponentPaths.indexOf(curr)) {
       this.isCheck = true;
