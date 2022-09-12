@@ -106,11 +106,11 @@ abstract class ChessEngine<T> {
       const c = range[i];
       const position = getPositionByCoordinates(c);
       const pieces = this.getPieces();
-      const blockerPositionPiece = pieces.getPieceByPosition(position);
+      const blockerPositionPiece: Piece<T> = pieces.getPieceByPosition(position);
       
       if (!blockerPositionPiece) {
         arrayForResults.push(c);
-      } else if(blockerPositionPiece.getColor() !== pieceColor) {
+      } else if(blockerPositionPiece.getColor() !== pieceColor && blockerPositionPiece.getPiecetype() !== 'k') {
         arrayForResults.push(c);
         break;
       } else {
