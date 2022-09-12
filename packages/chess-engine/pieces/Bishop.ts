@@ -12,6 +12,17 @@ class Bishop<T> extends Piece<T> {
 
     this.availableCellsToMove = positions
   };
+
+  calculateCellsToCapture(): void {
+    const curr = this.getCurrentPosition();
+    const coordinates = getCoordinatesByPosition(curr);
+    const ranges = this.globalGameState.calculateDiagonalRanges(coordinates);
+    const filteredRanges: [number, number][] = [];
+    ranges.forEach(range => filteredRanges.push(...range));
+    const positions = filteredRanges.map(c => getPositionByCoordinates(c));
+
+    this.cellsToCapture = positions;
+  };
 };
 
 export default Bishop;

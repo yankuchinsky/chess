@@ -81,7 +81,8 @@ class King<T> extends Piece<T> {
       } else {
         return c;
       }
-    })
+    });
+
     const positions = filteredCoordinates.map(c => getPositionByCoordinates(c));
     if (this.isCheck) {
       this.availableCellsToMove = positions.filter(c => !~opponentPaths.indexOf(c));

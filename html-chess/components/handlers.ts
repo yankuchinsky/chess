@@ -2,6 +2,8 @@ import HtmlGameState from './HtmlGameState';
 import { getCoordinatesByPosition } from '../../packages/chess-engine/helpers';
 
 let tmpCells: number[] = [];
+let tmpAttackCells: number[] = [];
+
 
 export const initHandlers = (globalGameState: HtmlGameState) => {
   const handleDrop = (e: any) => {
@@ -18,7 +20,8 @@ export const initHandlers = (globalGameState: HtmlGameState) => {
     const piece = pieces.getPieceByPosition(currentPiecePosition)!;
     const pieceColor = piece.getColor();
     globalGameState.showBoardPath(tmpCells, true);
-  
+    globalGameState.showBoardPath(tmpAttackCells, true, true);
+
     if (currentPiecePosition === movePiecePosition) {
       return;
     }
@@ -65,7 +68,9 @@ export const initHandlers = (globalGameState: HtmlGameState) => {
       }
   
       tmpCells = pieceElement.getAvailableCells();
+      tmpAttackCells = pieceElement.getCellsToCapture();
       globalGameState.showBoardPath(tmpCells);
+      globalGameState.showBoardPath(tmpAttackCells, false, true);
     }
   
     e.target.style.opacity = 0.1;

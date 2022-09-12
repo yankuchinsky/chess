@@ -74,8 +74,12 @@ abstract class ChessEngine<T> {
     return this.board.getCellById(id);
   }
 
-  showBoardPath(cells: number[], clearFlag?: boolean) {
-    this.board.showPath(cells, clearFlag);
+  showBoardPath(cells: number[], clearFlag?: boolean, isAttack: boolean = false) {
+    if (isAttack) {
+      this.board.showAttackPath(cells, clearFlag);
+    } else {
+      this.board.showPath(cells, clearFlag);
+    }
   }
 
   addMove(move: string) {
@@ -95,13 +99,15 @@ abstract class ChessEngine<T> {
     this.pieces.move(currCell, cellToMoveId, cell, onCompleteMove);
   }
 
-  filterPath(range: [number, number][], pieceColor: 'w' | 'b', arrayForResults: [number, number][]) {
+  filterPath(range: [number, number][], pieceColor: 'w' | 'b') {
+    const arrayForResults: [number, number][] = [];
+    
     for (let i = 0; i < range.length; i++) {
       const c = range[i];
       const position = getPositionByCoordinates(c);
       const pieces = this.getPieces();
       const blockerPositionPiece = pieces.getPieceByPosition(position);
-  
+      
       if (!blockerPositionPiece) {
         arrayForResults.push(c);
       } else if(blockerPositionPiece.getColor() !== pieceColor) {
@@ -111,6 +117,31 @@ abstract class ChessEngine<T> {
         break;
       }
     }
+
+    return arrayForResults;
+  }
+
+  calculateDiagonalRanges(coordinates: [number, number]) {
+    const piecePosition = getPositionByCoordinates(coordinates);
+    const pieces = this.getPieces();
+    const piece = pieces.getPieceByPosition(piecePosition);
+  
+    if (!piece) {
+      return [];
+    }
+
+    const leftRange = getLeftDiagonalRange(coordinates).filter(c => !!c);
+    const rightRange = getRightDiagonalRange(coordinates).filter(c => !!c);
+  
+    const idxLeft = leftRange.findIndex(c => c[0] === coordinates[0] && c[1] === coordinates[1]);
+    const idxRight = rightRange.findIndex(c => c[0] === coordinates[0] && c[1] === coordinates[1]);
+  
+    const tlRange = leftRange.slice(idxLeft + 1, leftRange.length);
+    const trRange = rightRange.slice(idxRight + 1, rightRange.length);
+    const brRange = leftRange.slice(0, idxLeft).reverse();
+    const blRange = rightRange.slice(0, idxRight).reverse();
+
+    return [tlRange, trRange, brRange, blRange];
   }
   
   calculateDiagonalAvailableCells(coordinates: [number, number]) {
@@ -123,28 +154,14 @@ abstract class ChessEngine<T> {
     }
   
     const pieceColor = piece?.getColor();
-    const leftRange = getLeftDiagonalRange(coordinates).filter(c => !!c);
-    const rightRange = getRightDiagonalRange(coordinates).filter(c => !!c);
-  
-    const idxLeft = leftRange.findIndex(c => c[0] === coordinates[0] && c[1] === coordinates[1]);
-    const idxRight = rightRange.findIndex(c => c[0] === coordinates[0] && c[1] === coordinates[1]);
-  
-    const tlRange = leftRange.slice(idxLeft + 1, leftRange.length);
-    const trRange = rightRange.slice(idxRight + 1, rightRange.length);
-    const brRange = leftRange.slice(0, idxLeft).reverse();
-    const blRange = rightRange.slice(0, idxRight).reverse();
-  
-    const newCoordinates: [number, number][] = [];
-  
-    this.filterPath(tlRange, pieceColor, newCoordinates);
-    this.filterPath(brRange, pieceColor, newCoordinates);
-    this.filterPath(blRange, pieceColor, newCoordinates);
-    this.filterPath(trRange, pieceColor, newCoordinates);
-  
-    return newCoordinates;
+    const ranges = this.calculateDiagonalRanges(coordinates);
+    const filteredRanges: [number, number][] = [];
+    ranges.forEach(range => filteredRanges.push(...this.filterPath(range, pieceColor)));
+
+    return filteredRanges;
   }
   
-  calculateVerticalAvailableCells(coordinates: [number, number]) {
+  calcVerticalRanges(coordinates: [number, number]) {
     const piecePosition = getPositionByCoordinates(coordinates);
     const pieces = this.getPieces();
     const piece = pieces.getPieceByPosition(piecePosition);
@@ -152,8 +169,6 @@ abstract class ChessEngine<T> {
     if (!piece) {
       return [];
     }
-  
-    const pieceColor = piece?.getColor();
     const horizontalRange = getHorizontalRange(coordinates);
     const verticalRange = getVerticalRange(coordinates);
   
@@ -164,14 +179,25 @@ abstract class ChessEngine<T> {
     const tRange = verticalRange.slice(idxVertical + 1, verticalRange.length);
     const lRange = horizontalRange.slice(0, idxHorizontal).reverse();
     const bRange = verticalRange.slice(0, idxVertical).reverse();
-    const newCoordinates: [number, number][] = [];
+
+    return [rRange, tRange, lRange, bRange];
+  }
   
-    this.filterPath(tRange, pieceColor, newCoordinates);
-    this.filterPath(lRange, pieceColor, newCoordinates);
-    this.filterPath(rRange, pieceColor, newCoordinates);
-    this.filterPath(bRange, pieceColor, newCoordinates);
+  calculateVerticalAvailableCells(coordinates: [number, number]) {
+    const piecePosition = getPositionByCoordinates(coordinates);
+    const pieces = this.getPieces();
+    const piece = pieces.getPieceByPosition(piecePosition);
   
-    return newCoordinates;
+    if (!piece) {
+      return [];
+    }
+
+    const pieceColor = piece?.getColor();
+    const ranges = this.calcVerticalRanges(coordinates);
+    const filteredRanges: [number, number][] = [];
+    ranges.forEach(range => filteredRanges.push(...this.filterPath(range, pieceColor)));
+
+    return filteredRanges;
   }
   
 }

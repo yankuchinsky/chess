@@ -58,6 +58,7 @@ abstract class Board<T> {
   }
 
   abstract showPath(cells: number[], clear);
+  abstract showAttackPath(cells: number[], clear);
 
   getFlatBoard() {
     return this.boardMap.flat();

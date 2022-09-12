@@ -28,15 +28,23 @@ class HtmlBoard extends Board<HTMLDivElement> {
     return cell;
   };
 
-  showPath(cells: number[], clear = false) {
+  private addClassToAllCells(cells: number[], className: string, clear = false) {
     const boardMap = this.getFlatBoard(); 
     cells.forEach(cell => {
       if (clear) {
-        boardMap[cell].cellRef.classList.remove('path');
+        boardMap[cell].cellRef.classList.remove(className);
       } else {
-        boardMap[cell].cellRef.classList.add('path');
+        boardMap[cell].cellRef.classList.add(className);
       }
     });
+  } 
+
+  showPath(cells: number[], clear = false) {
+    this.addClassToAllCells(cells, 'path', clear);
+  }
+
+  showAttackPath(cells: number[], clear = false) {
+    this.addClassToAllCells(cells, 'attack', clear);
   }
 }
 

@@ -16,7 +16,7 @@ abstract class Piece<T> {
   protected availableCellsToMove: number[] = [];
   protected pieces: Pieces<T>;
   protected globalGameState: ChessEngine<T>;
-  protected cellsToCapture: Pieces<T>[];
+  protected cellsToCapture: number[] = [];
   protected defenders: Piece<T>[] = [];
 
   constructor(id: number, type: string, currentCell: T) {
@@ -29,7 +29,7 @@ abstract class Piece<T> {
   };
 
   getCellsToCapture() {
-    return this.availableCellsToMove;
+    return this.cellsToCapture;
   }
 
   setPiecesRef(pieces: Pieces<T>) {
@@ -45,6 +45,8 @@ abstract class Piece<T> {
   }
 
   abstract calculateAvailableCels();
+  
+  calculateCellsToCapture() {}
 
   getId() {
     return this.id;

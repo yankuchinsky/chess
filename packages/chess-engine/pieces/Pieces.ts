@@ -46,8 +46,10 @@ export class Pieces<T> {
   calcPath(isWhite: boolean = true) {
     if (isWhite) {
       this.whitePieces.forEach(piece => piece.calculateAvailableCels());
+      this.whitePieces.forEach(piece => piece.calculateCellsToCapture());
     } else {
       this.blackPieces.forEach(piece => piece.calculateAvailableCels());
+      this.blackPieces.forEach(piece => piece.calculateCellsToCapture());
     }
   }
 
