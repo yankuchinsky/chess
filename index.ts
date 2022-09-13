@@ -4,6 +4,6 @@ import htmlChess from './html-chess';
 
 const body = document.querySelector("body");
 
-const field = htmlChess.bootstrap(test);
+const field = htmlChess.bootstrap(jsonSetup);
 
 body?.appendChild(field);

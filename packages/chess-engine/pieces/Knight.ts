@@ -4,6 +4,14 @@ import { Position, getPositionByCoordinates, getCoordinatesByPosition } from '..
 class Knight<T> extends Piece<T> {
 
   calculateAvailableCels() {
+    this.availableCellsToMove = this.calculateCells();
+  };
+
+  calculateCellsToCapture() {
+    this.cellsToCapture = this.getAvailableCells();
+  }
+
+  calculateCells() {
     const curr = this.getCurrentPosition();
     const coordinates = getCoordinatesByPosition(curr);
     
@@ -33,8 +41,8 @@ class Knight<T> extends Piece<T> {
     });
     const positions = filteredCoordinates.map(c => getPositionByCoordinates(c));
 
-    this.availableCellsToMove = positions;
-  };
+    return positions;
+  }
 };
 
 export default Knight;
