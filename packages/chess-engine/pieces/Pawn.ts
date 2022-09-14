@@ -5,7 +5,8 @@ class Pawn<T> extends Piece<T> {
   private isMoved = false;
   
   getCellsToCapture() {
-    const cells: number[] = [];
+    const cellsToMove: number[] = [];
+
     const color = this.getColor();
     const position = this.getCurrentPosition();
     const coordinates = getCoordinatesByPosition(position);
@@ -14,24 +15,14 @@ class Pawn<T> extends Piece<T> {
     const rightPositionCoordinates = new Position(coordinates).verticalShift(verticalShift).horizontalShift(1).getPostition();
     
     if (leftPositionCoordinates) {
-      const leftPosition = getPositionByCoordinates(leftPositionCoordinates);
-      const leftPiece: Piece<T> | undefined = this.pieces.getPieceByPosition(leftPosition);
-
-      if (leftPiece && leftPiece.getColor() !== color) {
-        cells.push(leftPiece.getCurrentPosition());
-      } 
+      cellsToMove.push(getPositionByCoordinates(leftPositionCoordinates));
     }
 
     if (rightPositionCoordinates) {
-      const rightPosition = getPositionByCoordinates(rightPositionCoordinates);
-      const rightPiece: Piece<T> | undefined = this.pieces.getPieceByPosition(rightPosition);
-
-      if (rightPiece && rightPiece.getColor() !== color) {
-        cells.push(rightPiece.getCurrentPosition());
-      } 
+      cellsToMove.push(getPositionByCoordinates(rightPositionCoordinates));
     }
 
-    return cells;
+    return cellsToMove;
   }
 
   move(cell: { cellToMoveId: number, cell: T }, callback?: Function) {
@@ -40,10 +31,8 @@ class Pawn<T> extends Piece<T> {
     this.isMoved = true;
   }
 
-  calculateAvailableCels() {
-    const upCell = upMove(this.getCurrentPosition(), this.getColor());
-    const cellsToMove: number[] = []
-    cellsToMove.push(upCell);
+  cellsToAttack() {
+    const cellsToMove:number[] = [];
 
     const color = this.getColor();
     const position = this.getCurrentPosition();
@@ -54,7 +43,7 @@ class Pawn<T> extends Piece<T> {
     
     if (leftPositionCoordinates) {
       const leftPosition = getPositionByCoordinates(leftPositionCoordinates);
-      const leftPiece = this.pieces.getPieceByPosition(leftPosition);
+      const leftPiece: Piece<T> = this.pieces.getPieceByPosition(leftPosition);
 
       if (leftPiece && leftPiece.getColor() !== color) {
         cellsToMove.push(leftPiece.getCurrentPosition());
@@ -63,12 +52,22 @@ class Pawn<T> extends Piece<T> {
 
     if (rightPositionCoordinates) {
       const rightPosition = getPositionByCoordinates(rightPositionCoordinates);
-      const rightPiece = this.pieces.getPieceByPosition(rightPosition);
+      const rightPiece: Piece<T> = this.pieces.getPieceByPosition(rightPosition);
 
       if (rightPiece && rightPiece.getColor() !== color) {
         cellsToMove.push(rightPiece.getCurrentPosition());
       } 
     }
+
+    return cellsToMove;
+  }
+
+  calculateAvailableCels() {
+    const upCell = upMove(this.getCurrentPosition(), this.getColor());
+    const cellsToMove: number[] = []
+    cellsToMove.push(upCell);
+
+    cellsToMove.push(...this.cellsToAttack());
 
     if (!this.isMoved) {
       const cell = upMove(this.getCurrentPosition(), this.getColor(), 2);
