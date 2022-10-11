@@ -17,7 +17,6 @@ abstract class Piece<T> {
   protected pieces: Pieces<T>;
   protected globalGameState: ChessEngine<T>;
   protected cellsToCapture: number[] = [];
-  protected defenders: Piece<T>[] = [];
 
   constructor(id: number, type: string, currentCell: T) {
     this.type = type;
