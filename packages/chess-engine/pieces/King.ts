@@ -5,6 +5,7 @@ class King<T> extends Piece<T> {
   private hasCastled = false;
   private isKingMoved = false;
   private isCheck = false;
+  private defenders: Piece<T>[] = [];
 
   move(cell: { cellToMoveId: number, cell: T }, callback?: Function) {
     super.move(cell, callback);

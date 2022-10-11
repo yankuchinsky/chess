@@ -43,7 +43,7 @@ class Pawn<T> extends Piece<T> {
     
     if (leftPositionCoordinates) {
       const leftPosition = getPositionByCoordinates(leftPositionCoordinates);
-      const leftPiece: Piece<T> = this.pieces.getPieceByPosition(leftPosition);
+      const leftPiece: Piece<T> | undefined = this.pieces.getPieceByPosition(leftPosition);
 
       if (leftPiece && leftPiece.getColor() !== color) {
         cellsToMove.push(leftPiece.getCurrentPosition());
@@ -52,7 +52,7 @@ class Pawn<T> extends Piece<T> {
 
     if (rightPositionCoordinates) {
       const rightPosition = getPositionByCoordinates(rightPositionCoordinates);
-      const rightPiece: Piece<T> = this.pieces.getPieceByPosition(rightPosition);
+      const rightPiece: Piece<T> | undefined = this.pieces.getPieceByPosition(rightPosition);
 
       if (rightPiece && rightPiece.getColor() !== color) {
         cellsToMove.push(rightPiece.getCurrentPosition());
