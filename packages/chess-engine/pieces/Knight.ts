@@ -1,7 +1,8 @@
-import Piece from './Piece';
-import { Position, getPositionByCoordinates, getCoordinatesByPosition } from '../helpers';
+import RegularPiece from './RegularPiece';
+import { getPositionByCoordinates, getCoordinatesByPosition } from '../helpers';
+import Position from '../helpers/Position';
 
-class Knight<T> extends Piece<T> {
+class Knight<T> extends RegularPiece<T> {
 
   calculateAvailableCels() {
     this.availableCellsToMove = this.calculateCells();

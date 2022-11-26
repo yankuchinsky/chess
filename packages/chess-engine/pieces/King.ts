@@ -1,11 +1,14 @@
 import Piece from './Piece';
-import { Position, getPositionByCoordinates, getCoordinatesByPosition } from '../helpers';
+import { getPositionByCoordinates, getCoordinatesByPosition } from '../helpers';
+import RegularPiece from './RegularPiece';
+import Position from '../helpers/Position';
 
 class King<T> extends Piece<T> {
   private hasCastled = false;
   private isKingMoved = false;
   private isCheck = false;
-  private defenders: Piece<T>[] = [];
+  private bindedPieces: RegularPiece<T>[] = [];
+  private defendRanges = [];
 
   move(cell: { cellToMoveId: number, cell: T }, callback?: Function) {
     super.move(cell, callback);
@@ -37,13 +40,38 @@ class King<T> extends Piece<T> {
     this.isCheck = false;
   }
 
+  checkRanges() {
+    const color = this.getColor();
+    const opponentColor = color === 'w' ? 'b' : 'w';
+    const ranges = this.pieces.getAllRangesByColor(opponentColor);
+    const currPos = this.getCurrentPosition();
+
+    const attackingRanges = ranges.filter(range => ~range.indexOf(currPos));
+
+    attackingRanges.forEach(range => {
+      const selfIndex = range.indexOf(currPos);
+      const newRange = range.splice(0, selfIndex);
+
+      const piecesBetween = newRange
+        .map(pos => this.pieces.getPieceByPosition(pos))
+        .filter(c => c && c.getColor() === color);
+
+      if (piecesBetween.length !== 1) {
+        return;
+      }
+
+      (<RegularPiece<T>>piecesBetween[0]).bindToKing();
+      this.bindedPieces.push(<RegularPiece<T>>piecesBetween[0]);
+    });
+  }
+
   calculateAvailableCels() {
     const curr = this.getCurrentPosition();
     const coordinates = getCoordinatesByPosition(curr);
     const color = this.getColor();
     const opponentColor = color === 'w' ? 'b' : 'w';
     const opponentPaths = this.pieces.getAllAttackingCellsByColor(opponentColor);
-    
+
     if (~opponentPaths.indexOf(curr)) {
       this.isCheck = true;
     }
@@ -58,6 +86,15 @@ class King<T> extends Piece<T> {
       new Position(coordinates).horizontalShift(1).getPostition(),
       new Position(coordinates).horizontalShift(-1).getPostition(),
     ];
+
+    newCoordinates.forEach(coord => {
+      if(!coord) {
+        return;
+      }
+
+      const pos = getPositionByCoordinates(coord);
+      const piece = this.pieces.getPieceByPosition(pos);
+    });
 
     const kingStartingPosition = this.getColor() === 'w' ? 4 : 59;
 

@@ -3,6 +3,7 @@ import Board from '../Board';
 import PieceFactory from './PieceFactory';
 import PieceRenderer from '../renderers/PieceRenderer';
 import ChessEngine from '../ChessEngine';
+import Rook from './Rook';
 
 export class Pieces<T> {
   private blackPieces: Piece<T>[] = [];
@@ -31,11 +32,26 @@ export class Pieces<T> {
     return arr;
   }
 
+  getPiecesWithoutKing(color: 'w' | 'b') {
+    if (color === 'w') {
+      return this.whitePieces;
+    }
+    else return this.blackPieces;
+  }
+
+  getKing(color: 'w' | 'b') {
+    if (color === 'w') {
+      return this.whiteKing;
+    } 
+
+    return this.blackKing;
+  }
+
   getPieces() {
     return this.piecesArray;
   }
 
-  getPieceByPosition(position: number) {
+  getPieceByPosition(position: number): Piece<T> | undefined {
     const foundPiece = this.piecesArray.find(piece => {
       return piece?.getCurrentPosition() === position;
     })
@@ -92,7 +108,7 @@ export class Pieces<T> {
     this.render();
   }
 
-  getAllPiecesByColor(color: 'w' | 'b') {
+  getAllPiecesByColor(color: 'w' | 'b'): Piece<T>[] {
     return this.piecesArray.filter(piece => piece.getColor() === color);
   }
 
@@ -100,6 +116,16 @@ export class Pieces<T> {
     return this.getAllPiecesByColor(color).reduce((res: number[], curr) => {
       return [...res, ...curr.getAvailableCells()];
     }, []);
+  }
+
+  getAllRangesByColor(color: 'w' | 'b'): number[][] {
+    return this.getAllPiecesByColor(color).reduce((res: number[][], curr) => {
+      if (curr.getPiecetype() !== 'r') {
+        return [];
+      }
+
+      return [...res, ...(<Rook<T>>curr).getRanges()];
+    }, []).filter(range => range.length);
   }
 
   getAllAttackingCellsByColor(color: 'w' | 'b') {

@@ -1,7 +1,12 @@
-import Piece from './Piece';
+import RegularPiece from './RegularPiece';
 import { getPositionByCoordinates, getCoordinatesByPosition } from '../helpers';
 
-class Rook<T> extends Piece<T> {
+class Rook<T> extends RegularPiece<T> {
+  private ranges: number[][] = [];
+
+  getRanges() {
+    return this.ranges;
+  }
 
   calculateAvailableCels() {
     const curr = this.getCurrentPosition();
@@ -16,11 +21,30 @@ class Rook<T> extends Piece<T> {
     const curr = this.getCurrentPosition();
     const coordinates = getCoordinatesByPosition(curr);
     const ranges = this.globalGameState.calcVerticalRanges(coordinates);
-    const filteredRanges: [number, number][] = [];
-    ranges.forEach(range => filteredRanges.push(...range));
-    const positions = filteredRanges.map(c => getPositionByCoordinates(c));
+    const color = this.getColor();
+    const opponentColor = color === 'w' ? 'b' : 'w';
 
-    this.cellsToCapture = positions;
+    const opponentPieces = this.pieces.getPiecesWithoutKing(opponentColor).map(c => c.getCurrentPosition());
+    const newRanges: number[] = [];
+
+    ranges.forEach(range => {
+      const rangePositions: number[] = [];
+
+      for (let i = 0; i < range.length; i++) {
+        const pos = getPositionByCoordinates(range[i]);
+
+        if (opponentPieces.includes(pos)) {
+          break;
+        }
+
+        rangePositions.push(pos);
+      }
+
+      this.ranges.push(rangePositions);
+      newRanges.push(...rangePositions);
+    });
+
+    this.cellsToCapture = newRanges;
   };
 };
 

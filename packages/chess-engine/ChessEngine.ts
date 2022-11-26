@@ -106,7 +106,7 @@ abstract class ChessEngine<T> {
       const c = range[i];
       const position = getPositionByCoordinates(c);
       const pieces = this.getPieces();
-      const blockerPositionPiece: Piece<T> = pieces.getPieceByPosition(position);
+      const blockerPositionPiece: Piece<T> = <Piece<T>>pieces.getPieceByPosition(position);
       
       if (!blockerPositionPiece) {
         arrayForResults.push(c);
@@ -171,7 +171,6 @@ abstract class ChessEngine<T> {
     }
     const horizontalRange = getHorizontalRange(coordinates);
     const verticalRange = getVerticalRange(coordinates);
-  
     const idxHorizontal = horizontalRange.findIndex(c => c[0] === coordinates[0] && c[1] === coordinates[1]);
     const idxVertical = verticalRange.findIndex(c => c[0] === coordinates[0] && c[1] === coordinates[1]);
   

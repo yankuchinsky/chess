@@ -1,7 +1,7 @@
-import Piece from './Piece';
+import RegularPiece from './RegularPiece';
 import { getCoordinatesByPosition, getPositionByCoordinates } from '../helpers'
 
-class Bishop<T> extends Piece<T> {
+class Bishop<T> extends RegularPiece<T> {
 
   calculateAvailableCels() {
     const curr = this.getCurrentPosition();

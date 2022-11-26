@@ -1,7 +1,9 @@
 import Piece from './Piece';
-import { getCoordinatesByPosition, getPositionByCoordinates, Position, upMove } from '../helpers';
+import RegularPiece from './RegularPiece';
+import { getCoordinatesByPosition, getPositionByCoordinates, upMove } from '../helpers';
+import Position from '../helpers/Position';
 
-class Pawn<T> extends Piece<T> {
+class Pawn<T> extends RegularPiece<T> {
   private isMoved = false;
   
   getCellsToCapture() {
