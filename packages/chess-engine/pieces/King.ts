@@ -9,6 +9,7 @@ class King<T> extends Piece<T> {
   private isCheck = false;
   private bindedPieces: RegularPiece<T>[] = [];
   private defendRanges = [];
+  private defenders: Piece<T>[] = [];
 
   move(cell: { cellToMoveId: number, cell: T }, callback?: Function) {
     super.move(cell, callback);
