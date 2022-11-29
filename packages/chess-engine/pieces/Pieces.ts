@@ -59,6 +59,14 @@ export class Pieces<T> {
     return foundPiece;
   };
 
+  preCalculation() {
+    // 
+  }
+
+  calculation() {
+    
+  }
+
   calcPath(isWhite: boolean = true) {
     if (isWhite) {
       this.whitePieces.forEach(piece => piece.calculateAvailableCels());
@@ -121,7 +129,7 @@ export class Pieces<T> {
   getAllRangesByColor(color: 'w' | 'b'): number[][] {
     return this.getAllPiecesByColor(color).reduce((res: number[][], curr) => {
       if (curr.getPiecetype() !== 'r') {
-        return [];
+        return [...res];
       }
 
       return [...res, ...(<Rook<T>>curr).getRanges()];

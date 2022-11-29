@@ -2,6 +2,7 @@ import Piece from './Piece';
 import { getPositionByCoordinates, getCoordinatesByPosition } from '../helpers';
 import RegularPiece from './RegularPiece';
 import Position from '../helpers/Position';
+import Rook from './Rook';
 
 class King<T> extends Piece<T> {
   private hasCastled = false;
@@ -48,10 +49,10 @@ class King<T> extends Piece<T> {
     const currPos = this.getCurrentPosition();
 
     const attackingRanges = ranges.filter(range => ~range.indexOf(currPos));
-
+    
     attackingRanges.forEach(range => {
       const selfIndex = range.indexOf(currPos);
-      const newRange = range.splice(0, selfIndex);
+      const newRange = [...range].splice(0, selfIndex);
 
       const piecesBetween = newRange
         .map(pos => this.pieces.getPieceByPosition(pos))
@@ -60,13 +61,17 @@ class King<T> extends Piece<T> {
       if (piecesBetween.length !== 1) {
         return;
       }
-
       (<RegularPiece<T>>piecesBetween[0]).bindToKing();
+      if (piecesBetween[0] && piecesBetween[0] instanceof Rook) {
+        (<Rook<T>>piecesBetween[0]).updateRange(range[0]);
+        this.pieces.calcPath();
+      }
       this.bindedPieces.push(<RegularPiece<T>>piecesBetween[0]);
     });
   }
 
   calculateAvailableCels() {
+    this.checkRanges();
     const curr = this.getCurrentPosition();
     const coordinates = getCoordinatesByPosition(curr);
     const color = this.getColor();

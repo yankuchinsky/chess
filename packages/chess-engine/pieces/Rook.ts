@@ -8,6 +8,13 @@ class Rook<T> extends RegularPiece<T> {
     return this.ranges;
   }
 
+  updateRange(cellInRange) {
+    const range = this.ranges.find(c => ~c.indexOf(cellInRange));
+    if (range) {
+      this.ranges = [range];
+    }
+  }
+
   calculateAvailableCels() {
     const curr = this.getCurrentPosition();
     const coordinates = getCoordinatesByPosition(curr);
@@ -23,24 +30,26 @@ class Rook<T> extends RegularPiece<T> {
     const ranges = this.globalGameState.calcVerticalRanges(coordinates);
     const color = this.getColor();
     const opponentColor = color === 'w' ? 'b' : 'w';
-
-    const opponentPieces = this.pieces.getPiecesWithoutKing(opponentColor).map(c => c.getCurrentPosition());
+    
+    const oponentPieces = this.pieces.getPiecesWithoutKing(opponentColor);
+    const opponentPiecesPositions = oponentPieces.map(c => c.getCurrentPosition());
     const newRanges: number[] = [];
 
     ranges.forEach(range => {
       const rangePositions: number[] = [];
+      const positionsRanges = range.map(c => getPositionByCoordinates(c));
 
       for (let i = 0; i < range.length; i++) {
         const pos = getPositionByCoordinates(range[i]);
-
-        if (opponentPieces.includes(pos)) {
+        
+        if (opponentPiecesPositions.includes(pos)) {
           break;
         }
-
+        
         rangePositions.push(pos);
       }
-
-      this.ranges.push(rangePositions);
+      
+      this.ranges.push(positionsRanges);
       newRanges.push(...rangePositions);
     });
 
