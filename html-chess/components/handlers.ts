@@ -35,7 +35,7 @@ export const initHandlers = (globalGameState: HtmlGameState) => {
     }
   
     const afterMove = () => {
-      globalGameState.addMove(`${piece.getType()}_${piece.getId()}_${currentPiecePosition}_${movePiecePosition}`);
+      globalGameState.addMove(piece, currentPiecePosition, movePiecePosition);
       globalGameState.changeTheTurn();
     }
   

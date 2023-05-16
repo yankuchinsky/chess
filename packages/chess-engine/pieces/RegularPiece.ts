@@ -1,15 +1,13 @@
 import Piece from './Piece';
 
 abstract class RegularPiece<T> extends Piece<T> {
-  private isBindedToKing = false;
+  protected isBindedToKing = false;
 
   isBinded() {
     return this.isBindedToKing;
   }
 
-  bindToKing() {
-    this.isBindedToKing = true;
-  }
+  protected bindToKing(rangeToBing: number[]){};
 
   unbind() {
     this.isBindedToKing = false;

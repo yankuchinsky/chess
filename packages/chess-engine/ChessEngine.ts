@@ -1,6 +1,7 @@
 import Board from "./Board";
 import Piece from "./pieces/Piece";
 import Pieces from "./pieces/Pieces";
+import Move from './Move';
 import { 
   getPositionByCoordinates, 
   getLeftDiagonalRange, 
@@ -14,7 +15,7 @@ abstract class ChessEngine<T> {
   private whiteCapturedPieces: Piece<T>[] = [];
   private blackCapturedPieces: Piece<T>[] = [];
   protected pieces: Pieces<T>;
-  private moves: string[] = [];
+  private moves: Move<T>[] = [];
   protected board: Board<T>;
 
   init() {
@@ -82,8 +83,8 @@ abstract class ChessEngine<T> {
     }
   }
 
-  addMove(move: string) {
-    this.moves.push(move);
+  addMove(piece: Piece<T>, prev: number, curr: number) {
+    this.moves.push(new Move(piece, prev, curr));
   }
 
   getLastMoveAndRemove() {

@@ -8,18 +8,11 @@ class Rook<T> extends RegularPiece<T> {
     return this.ranges;
   }
 
-  updateRange(cellInRange) {
-    const range = this.ranges.find(c => ~c.indexOf(cellInRange));
-    if (range) {
-      this.ranges = [range];
-    }
-  }
-
   calculateAvailableCels() {
     const curr = this.getCurrentPosition();
     const coordinates = getCoordinatesByPosition(curr);
     const newCoordinates = this.globalGameState.calculateVerticalAvailableCells(coordinates);
-    const filteredCoordinates = <[number, number][]>newCoordinates.filter(c => c !== null)
+    const filteredCoordinates = <[number, number][]>newCoordinates.filter(c => c !== null);
     const positions = filteredCoordinates.map(c => getPositionByCoordinates(c));
     this.availableCellsToMove = positions;
   };
@@ -35,6 +28,8 @@ class Rook<T> extends RegularPiece<T> {
     const opponentPiecesPositions = oponentPieces.map(c => c.getCurrentPosition());
     const newRanges: number[] = [];
 
+    const tmpRanges: number[][] = [];
+
     ranges.forEach(range => {
       const rangePositions: number[] = [];
       const positionsRanges = range.map(c => getPositionByCoordinates(c));
@@ -48,13 +43,29 @@ class Rook<T> extends RegularPiece<T> {
         
         rangePositions.push(pos);
       }
-      
-      this.ranges.push(positionsRanges);
+      tmpRanges.push(positionsRanges);
       newRanges.push(...rangePositions);
     });
 
+    this.ranges = tmpRanges;
+
     this.cellsToCapture = newRanges;
   };
+
+  recalc() {
+    this.cellsToCapture = this.ranges.flat();
+    const newAvailableCells = this.availableCellsToMove.filter(cell => ~this.cellsToCapture.indexOf(cell));
+    this.availableCellsToMove = newAvailableCells;
+  }
+
+  bindToKing(rangeToBing: number[]) {
+    this.isBindedToKing = true;
+    const ranges = this.ranges.filter(range => range.some(r => ~rangeToBing.indexOf(r)));
+    this.ranges = ranges;
+
+    this.recalc();
+  }
+
 };
 
 export default Rook;

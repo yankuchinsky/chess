@@ -61,10 +61,10 @@ class King<T> extends Piece<T> {
       if (piecesBetween.length !== 1) {
         return;
       }
-      (<RegularPiece<T>>piecesBetween[0]).bindToKing();
       if (piecesBetween[0] && piecesBetween[0] instanceof Rook) {
-        (<Rook<T>>piecesBetween[0]).updateRange(range[0]);
-        this.pieces.calcPath();
+        // (<Rook<T>>piecesBetween[0]).updateRange(range[0]);
+        (<Rook<T>>piecesBetween[0]).bindToKing(range);
+        // this.pieces.calcPath();
       }
       this.bindedPieces.push(<RegularPiece<T>>piecesBetween[0]);
     });
