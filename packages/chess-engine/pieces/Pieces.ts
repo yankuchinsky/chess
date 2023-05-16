@@ -1,9 +1,10 @@
-import Piece from './Piece';
+import Piece from './RenderablePiece';
 import Board from '../Board';
 import PieceFactory from './PieceFactory';
 import PieceRenderer from '../renderers/PieceRenderer';
 import ChessEngine from '../ChessEngine';
 import Rook from './Rook';
+import RenderablePiece from './RenderablePiece';
 
 export class Pieces<T> {
   private blackPieces: Piece<T>[] = [];
@@ -132,7 +133,8 @@ export class Pieces<T> {
         return [...res];
       }
 
-      return [...res, ...(<Rook<T>>curr).getRanges()];
+      const piece = <Rook<T>>(<unknown>curr.getPiece());
+      return [...res, ...piece.getRanges()];
     }, []).filter(range => range.length);
   }
 

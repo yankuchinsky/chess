@@ -9,11 +9,12 @@
   "author": "Yan Kuchinsky",
   "license": "ISC",
   "dependencies": {
+    "chess-engine": "*",
     "cross-env": "^7.0.2",
     "file-loader": "^6.0.0",
     "prettier": "^2.5.1",
-    "webpack": "^5.11.0",
-    "chess-engine": "*"
+    "raw-loader": "^4.0.2",
+    "webpack": "^5.11.0"
   },
   "devDependencies": {
     "css-loader": "^6.5.1",

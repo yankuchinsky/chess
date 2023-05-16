@@ -1,6 +1,6 @@
-import Piece from './Piece';
+import AbstractPiece from './AbstractPiece';
 
-abstract class RegularPiece<T> extends Piece<T> {
+abstract class RegularPiece<T> extends AbstractPiece<T> {
   protected isBindedToKing = false;
 
   isBinded() {

@@ -12,15 +12,30 @@ const baseConfig = {
       {
         test: /\.tsx?$/,
         use: "ts-loader",
-        exclude: /node_modules/,
+        include: [
+          path.resolve(__dirname, "html-chess"),
+          path.resolve(__dirname, "assets"),
+          path.resolve(__dirname, "packages/chess-engine"),
+        ]
       },
       {
         test: /\.png$/,
         use: "url-loader",
+        include: [
+          path.resolve(__dirname, "html-chess"),
+          path.resolve(__dirname, "templates"),
+          path.resolve(__dirname, "assets"),
+          path.resolve(__dirname, "packages/chess-engine"),
+        ]
       },
       {
         test: /\.css$/i,
         use: ["style-loader", "css-loader"],
+        include: [
+          path.resolve(__dirname, "html-chess"),
+          path.resolve(__dirname, "assets"),
+          path.resolve(__dirname, "packages/chess-engine"),
+        ]
       }
     ],
   },

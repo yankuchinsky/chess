@@ -1,7 +1,8 @@
 import RegularPiece from './RegularPiece';
 import { getPositionByCoordinates, getCoordinatesByPosition } from '../helpers';
+import AbstractPiece from './AbstractPiece';
 
-class Rook<T> extends RegularPiece<T> {
+class Rook<T> extends AbstractPiece<T> {
   private ranges: number[][] = [];
 
   getRanges() {
@@ -59,7 +60,7 @@ class Rook<T> extends RegularPiece<T> {
   }
 
   bindToKing(rangeToBing: number[]) {
-    this.isBindedToKing = true;
+    // this.isBindedToKing = true;
     const ranges = this.ranges.filter(range => range.some(r => ~rangeToBing.indexOf(r)));
     this.ranges = ranges;
 

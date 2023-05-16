@@ -1,5 +1,5 @@
 import { Piece, PieceRenderer } from 'chess-engine';
-import { DEV_MODE } from "../index";
+import { DEV_MODE } from '../index';
 import getImage from '../../assets/imageLoader';
 
 export class HtmlPieceRenderer extends PieceRenderer<HTMLDivElement> {
@@ -18,15 +18,15 @@ export class HtmlPieceRenderer extends PieceRenderer<HTMLDivElement> {
   }
 
   createRenderElement(id: number, type: string): HTMLDivElement {
-    const element = document.createElement("div");
+    const element = document.createElement('div');
     if (DEV_MODE) {
-      element.classList.add("piece_dev_mode");
+      element.classList.add('piece_dev_mode');
     }
 
-    element.classList.add("piece");
+    element.classList.add('piece');
     element.style.backgroundImage = `url(${getImage(type)})`;
     element.id = `${type}_${id}`;
-    element.style.backgroundSize = "contain";
+    element.style.backgroundSize = 'contain';
     element.draggable = true;
 
     return element;

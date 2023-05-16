@@ -1,30 +1,25 @@
 import ChessEngine from "../ChessEngine";
 import Pieces from './Pieces';
-import PieceRenderer from "../renderers/PieceRenderer";
 
 type TColor = 'w' | 'b';
 
-abstract class Piece<T> {
-  private element: T;
+abstract class AbstractPiece<T> {
   private color: TColor;
   private id: number;
   private type: string;
   private pieceType: string;
   private currentPosition: number;
-  private currentCell: T;
-  private renderer: PieceRenderer<T>;
   protected availableCellsToMove: number[] = [];
   protected pieces: Pieces<T>;
   protected globalGameState: ChessEngine<T>;
   protected cellsToCapture: number[] = [];
 
-  constructor(id: number, type: string, currentCell: T) {
+  constructor(id: number, type: string) {
     this.type = type;
     this.pieceType = type.split('')[1];
     this.id = id;
     this.currentPosition = id;
     this.color = <TColor>type.split("")[0];
-    this.currentCell = currentCell;
   };
 
   getCellsToCapture() {
@@ -37,10 +32,6 @@ abstract class Piece<T> {
 
   setGameState(gameState: ChessEngine<T>) {
     this.globalGameState = gameState;
-  }
-
-  init() {
-    this.element = this.renderer.createRenderElement(this.id, this.type);
   }
 
   abstract calculateAvailableCels();
@@ -59,10 +50,6 @@ abstract class Piece<T> {
     return this.color;
   }
 
-  getElement() {
-    return this.element;
-  }
-
   getType() {
     return this.type;
   }
@@ -73,18 +60,6 @@ abstract class Piece<T> {
 
   getCurrentPosition() {
     return this.currentPosition;
-  }
-
-  getCurrentCell() {
-    return this.currentCell;
-  }
-
-  render() {
-    this.renderer.render(this);
-  }
-
-  setRenderer(renderer: PieceRenderer<T>) {
-    this.renderer = renderer;
   }
 
   setCurrentPosition(position: number) {
@@ -98,19 +73,9 @@ abstract class Piece<T> {
   getAvailableCells() {
     return this.availableCellsToMove;
   }
-  
-  setCellElement(cell: T) {
-    this.currentCell = cell;
-  }
 
-  remove() {
-    this.renderer.remove(this);
-  }
-
-  move({ cellToMoveId, cell }: { cellToMoveId: number, cell: T }, callback?: Function) {
-    this.setCellElement(cell);
+  move({ cellToMoveId }: { cellToMoveId: number, cell: T }, callback?: Function) {
     this.setCurrentPosition(cellToMoveId);
-    this.render();
 
     if (callback) {
       callback();
@@ -118,4 +83,4 @@ abstract class Piece<T> {
   }
 }
 
-export default Piece;
+export default AbstractPiece;

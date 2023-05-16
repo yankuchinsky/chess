@@ -1,10 +1,27 @@
-import "./style.css";
+import style from "./style.css";
 import GameState from "./components/HtmlGameState";
 import { initHandlers } from "./components/handlers";
 import jsonSetup from "../templates/standart";
 
 export const DEV_MODE = true;
 export const SIZE = 8;
+
+class HtmlChess extends HTMLElement {
+  constructor() {
+    super();
+
+    const shadow = this.attachShadow({ mode: "open" });
+    console.log("style", style);
+    const divElement = document.createElement("div");
+    divElement.innerHTML = '<style>@import "styles.css";' + style + "</style>";
+    shadow.appendChild(divElement);
+    const filed = bootstrap(jsonSetup);
+
+    shadow.appendChild(filed);
+  }
+}
+
+window.customElements.define("html-chess", HtmlChess);
 
 const bootstrap = (json) => {
   const field = document.createElement("div");
@@ -26,4 +43,4 @@ const bootstrap = (json) => {
   return field;
 };
 
-export default { bootstrap };
+export default { bootstrap, HtmlChess };

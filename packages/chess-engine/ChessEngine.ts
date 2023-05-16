@@ -1,5 +1,5 @@
 import Board from "./Board";
-import Piece from "./pieces/Piece";
+import Piece from "./pieces/RenderablePiece";
 import Pieces from "./pieces/Pieces";
 import Move from './Move';
 import { 

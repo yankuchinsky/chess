@@ -1,9 +1,10 @@
-import Piece from './Piece';
+import Piece from './RenderablePiece';
 import RegularPiece from './RegularPiece';
+import AbstractPiece from './AbstractPiece';
 import { getCoordinatesByPosition, getPositionByCoordinates, upMove } from '../helpers';
 import Position from '../helpers/Position';
 
-class Pawn<T> extends RegularPiece<T> {
+class Pawn<T> extends AbstractPiece<T> {
   private isMoved = false;
   
   getCellsToCapture() {

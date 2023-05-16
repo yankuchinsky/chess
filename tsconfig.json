@@ -11,6 +11,7 @@
     "noImplicitThis": true,
     "noImplicitReturns": true,
     "strictFunctionTypes": true,
+    "resolveJsonModule": true,
     "baseUrl": "./",
     "jsx": "preserve",
     "esModuleInterop": true

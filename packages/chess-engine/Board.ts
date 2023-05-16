@@ -1,21 +1,27 @@
+import AbstractBoard from './AbstractBoard';
+
 export const SIZE = 8;
 
 type BoardMapCell<TCellRef> = {
-  cellRef: TCellRef
-}
+  cellRef: TCellRef;
+};
 
-abstract class Board<T> {
+abstract class Board<T> extends AbstractBoard<T> {
   protected boardMap: BoardMapCell<T>[][] = [];
   protected rootElement: T;
   protected size: number;
 
-  constructor(element: T, size: number) {
-    this.rootElement = element;
+  constructor(size: number, element?: T) {
+    super(size, element);
+
+    if (element) {
+      this.rootElement = element;
+    }
     this.size = size;
     this.boardMap = Array.from(new Array(size), () => []);
 
     this.renderBoard();
-  };
+  }
 
   loopThrough(action: Function) {
     let isBlack = false;
@@ -24,8 +30,8 @@ abstract class Board<T> {
 
     this.boardMap = Array.from(new Array(this.size), () => []);
 
-    for (let i = 0; i < this.size; i ++) {
-      for (let j = 0; j < this.size; j ++) {
+    for (let i = 0; i < this.size; i++) {
+      for (let j = 0; j < this.size; j++) {
         idx -= 1;
 
         const currentFileIdx = idx - this.size + j * 2 + 1;
@@ -41,11 +47,11 @@ abstract class Board<T> {
 
   protected abstract renderBoard();
 
-  protected abstract createCellElement(id: number, color: "white" | "black");
+  protected abstract createCellElement(id: number, color: 'white' | 'black');
 
   getCellRef(id: number) {
     return this.getCellById(id)?.cellRef;
-  };
+  }
 
   getCellById(id: number) {
     const boardMap = this.getFlatBoard();
