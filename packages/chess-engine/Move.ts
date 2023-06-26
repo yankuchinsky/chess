@@ -1,4 +1,4 @@
-import Piece from './pieces/RenderablePiece';
+import Piece from './pieces/AbstractPiece';
 
 export default class Move<T> {
   piece: Piece<T>;

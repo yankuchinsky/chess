@@ -1,16 +1,32 @@
 import { SIZE } from '../index';
-import { ChessEngine, Pieces, PieceRenderer } from 'chess-engine';
+import { ChessEngine, BasePiecesStore } from 'chess-engine';
 import HtmlPieceRenderer from './HtmlPieceRenderer';
 import HtmlBoard from './HtmlBoard';
+import HtmlPiece from './HtmlPiece';
 
 class HtmlChessEngine extends ChessEngine<HTMLDivElement> {
+  private pieceRenderer: HtmlPieceRenderer;
   constructor(field: HTMLDivElement) {
     super();
 
     this.board = new HtmlBoard(SIZE, field);
-    this.pieces = new Pieces<HTMLDivElement>(
-      <PieceRenderer<HTMLDivElement>>new HtmlPieceRenderer()
-    );
+    this.piecesStore = new BasePiecesStore<HTMLDivElement>(this);
+    this.pieceRenderer = new HtmlPieceRenderer();
+  }
+
+  renderPieces() {
+    const pieces = this.piecesStore.getAllPieces();
+
+    pieces.forEach(piece => {
+      const p = this.pieceRenderer.createRenderElement(piece.getId(), piece.getType());
+      const cell = this.board.getCellRef(piece.getId());
+      if (!cell) {
+        return;
+      }
+      const htmlPiece = new HtmlPiece(cell, piece);
+      htmlPiece.setElement(p);
+      this.pieceRenderer.render(htmlPiece);
+    });
   }
 }
 

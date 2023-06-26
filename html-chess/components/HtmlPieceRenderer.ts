@@ -1,20 +1,17 @@
-import { Piece, PieceRenderer } from 'chess-engine';
+// import { PieceRenderer } from 'chess-engine';
 import { DEV_MODE } from '../index';
+import HtmlPiece from './HtmlPiece'
 import getImage from '../../assets/imageLoader';
 
-export class HtmlPieceRenderer extends PieceRenderer<HTMLDivElement> {
-  render(piece: Piece<HTMLDivElement>) {
+export class HtmlPieceRenderer {
+  render(piece: HtmlPiece<HTMLDivElement>) {
     const cell = piece.getCurrentCell();
     cell.appendChild(piece.getElement());
   }
 
-  remove(piece: Piece<HTMLDivElement>) {
+  remove(piece: HtmlPiece<HTMLDivElement>) {
     const cell = piece.getCurrentCell();
     cell.removeChild(piece.getElement());
-  }
-
-  returnNewRenderer(): PieceRenderer<HTMLDivElement> {
-    return new HtmlPieceRenderer();
   }
 
   createRenderElement(id: number, type: string): HTMLDivElement {

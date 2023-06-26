@@ -1,14 +1,13 @@
-import ChessEngine from '../ChessEngine';
-import Pieces from './Pieces';
-import PieceRenderer from '../renderers/PieceRenderer';
-import AbstractPiece from './AbstractPiece';
+// import ChessEngine from '../ChessEngine';
+// import Pieces from './PiecesStore/_PiecesStore';
+// import PieceRenderer from '../renderers/PieceRenderer';
+import { AbstractPiece } from 'chess-engine';
 
 type TColor = 'w' | 'b';
 
-class RenderablePiece<T> {
+class HtmlPiece<T> {
   private element: T;
   private currentCell: T;
-  private renderer: PieceRenderer<T>;
   private piece: AbstractPiece<T>;
 
   constructor(currentCell: T, piece: AbstractPiece<T>) {
@@ -16,8 +15,8 @@ class RenderablePiece<T> {
     this.piece = piece;
   }
 
-  init() {
-    this.element = this.renderer.createRenderElement(this.piece.getId(), this.piece.getType());
+  setElement(el) {
+    this.element = el;
   }
 
   calculateAvailableCels() {
@@ -72,29 +71,29 @@ class RenderablePiece<T> {
     return this.piece.getCellsToCapture();
   }
 
-  setPiecesRef(pieces: Pieces<T>) {
-    this.piece.setPiecesRef(pieces);
-  }
+  // setPiecesRef(pieces: Pieces<T>) {
+  //   // this.piece.setPiecesRef(pieces);
+  // }
 
-  setGameState(gameState: ChessEngine<T>) {
-    this.piece.setGameState(gameState);
-  }
+  // setGameState(gameState: ChessEngine<T>) {
+  //   this.piece.setGameState(gameState);
+  // }
 
-  render() {
-    this.renderer.render(this);
-  }
+  // render() {
+  //   this.renderer.render(this);
+  // }
 
-  setRenderer(renderer: PieceRenderer<T>) {
-    this.renderer = renderer;
-  }
+  // setRenderer(renderer: PieceRenderer<T>) {
+  //   this.renderer = renderer;
+  // }
 
   setCellElement(cell: T) {
     this.currentCell = cell;
   }
 
-  remove() {
-    this.renderer.remove(this);
-  }
+  // remove() {
+  //   this.renderer.remove(this);
+  // }
 
   move(
     { cellToMoveId, cell }: { cellToMoveId: number; cell: T },
@@ -102,7 +101,7 @@ class RenderablePiece<T> {
   ) {
     this.setCellElement(cell);
     this.piece.setCurrentPosition(cellToMoveId);
-    this.render();
+    // this.render();
 
     if (callback) {
       callback();
@@ -110,4 +109,4 @@ class RenderablePiece<T> {
   }
 }
 
-export default RenderablePiece;
+export default HtmlPiece;

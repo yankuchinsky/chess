@@ -1,4 +1,3 @@
-import Piece from './RenderablePiece';
 import AbstractPiece from './AbstractPiece';
 import { getPositionByCoordinates, getCoordinatesByPosition } from '../helpers';
 import RegularPiece from './RegularPiece';

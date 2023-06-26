@@ -1,5 +1,5 @@
 import ChessEngine from "../ChessEngine";
-import Pieces from './Pieces';
+import Pieces, { BasePiecesStore } from './PiecesStore/BasePiecesStore';
 
 type TColor = 'w' | 'b';
 
@@ -74,7 +74,12 @@ abstract class AbstractPiece<T> {
     return this.availableCellsToMove;
   }
 
-  move({ cellToMoveId }: { cellToMoveId: number, cell: T }, callback?: Function) {
+  connectState(piecesStore: BasePiecesStore<T>) {
+    this.pieces = piecesStore;
+    this.globalGameState = piecesStore.getChessEngine();
+  }
+
+  move({ cellToMoveId }: { cellToMoveId: number }, callback?: Function) {
     this.setCurrentPosition(cellToMoveId);
 
     if (callback) {

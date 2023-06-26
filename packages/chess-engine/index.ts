@@ -1,8 +1,8 @@
 import ChessEngine from './ChessEngine';
-import Pieces from './pieces/Pieces';
+import BasePiecesStore from './pieces/PiecesStore/BasePiecesStore';
 import Board from './Board';
-import PieceRenderer from './renderers/PieceRenderer';
-import Piece from './pieces/RenderablePiece';
+// import PieceRenderer from './renderers/PieceRenderer';
 import AbstractBoard from './AbstractBoard';
+import AbstractPiece from './pieces/AbstractPiece'
 
-export { ChessEngine, Pieces, Board, PieceRenderer, Piece, AbstractBoard };
+export { ChessEngine, BasePiecesStore, Board, AbstractBoard, AbstractPiece };

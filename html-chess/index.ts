@@ -23,6 +23,8 @@ const bootstrap = (json) => {
   field.addEventListener("drop", handleDrop);
   field.addEventListener("dragover", handleDragOver);
 
+  globalGameState.renderPieces();
+
   return field;
 };
 
