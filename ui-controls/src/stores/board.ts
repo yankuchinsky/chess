@@ -1,7 +1,36 @@
-import { defineStore } from 'pinia';
 import { reactive, Ref, ref, VNode } from 'vue';
+import { defineStore } from 'pinia';
+import standart from '../templates/standart.json';
+import { BasePiecesStore } from 'chess-engine';
+import VueChessEngine from '@/src/helpers/VueChess';
 
 export const useBoardStore = defineStore('board', () => {
+  const chessEngine = new VueChessEngine();
+  const pieces = new BasePiecesStore<VNode>(chessEngine);
+  const pieceToMove = ref(0);
+  pieces.setupPiecesByJSON(standart);
+
+  const move = (currCell: number, cellToMoveId: number) => {
+    const x1 = Math.floor(currCell / 8);
+    const y1 = currCell % 8;
+    const x2 = Math.floor(cellToMoveId / 8);
+    const y2 = cellToMoveId % 8;
+
+    pieces.move(currCell, cellToMoveId, () => {
+      const piece = cells[x1][y1].piece;
+      cells[x1][y1].piece = undefined;
+      cells[x2][y2].piece = piece;
+    });
+  };
+
+  const dragStart = (pieceId: number) => {
+    pieceToMove.value = pieceId;
+  };
+
+  const dragEnd = () => {
+    pieceToMove.value = 0;
+  };
+
   const size = 8;
   const cells: any[][] = reactive(Array.from(new Array(size), () => []));
 
@@ -18,8 +47,13 @@ export const useBoardStore = defineStore('board', () => {
 
       const x = currentFileBoardMapIdx;
       const y = j;
-
-      cells[x][y] = { cellRef: ref(null), id: currentFileIdx, color: isBlack ? 'black' : 'white'  };
+      const piece = pieces.getPieceByPosition(currentFileIdx);
+      cells[x][y] = {
+        cellRef: ref(null),
+        id: currentFileIdx,
+        color: isBlack ? 'black' : 'white',
+        piece,
+      };
 
       isBlack = !isBlack;
     }
@@ -27,12 +61,5 @@ export const useBoardStore = defineStore('board', () => {
     fileIdx += 1;
   }
 
-  const setRefToCell = (id: number, elRef: Ref) => {
-    const flatBoard = cells.flat();
-    // console.log(flatBoard.map(el => el.id));
-    const found = flatBoard.find(el => el.id === id);
-    found.cellRef = ref(elRef);
-  }
-
-  return { board: cells, setRefToCell }
+  return { board: cells, move, dragStart, dragEnd, pieceToMove };
 });

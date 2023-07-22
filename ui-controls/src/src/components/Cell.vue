@@ -1,11 +1,25 @@
 <script lang="ts" setup>
-defineProps({ color: String, id: Number });
+  import { useBoardStore } from '@/stores/board';
+
+  const boardStore = useBoardStore();
+
+  const props = defineProps({ color: String, id: Number });
+
+  const dragEnd = () => {
+    boardStore.move(boardStore.pieceToMove, props.id);
+  }
+
+  const dragOver = (e: Event) => {
+    e.preventDefault();
+  }
 </script>
 <template>
   <div
     class="cell"
     :class="`cell-${color}`"
     :cell-id="id"
+    @drop="dragEnd"
+    @dragover="dragOver"
   >
     <div class="cell-number">
       {{ id }}

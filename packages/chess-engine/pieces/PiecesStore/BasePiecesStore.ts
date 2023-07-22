@@ -154,16 +154,19 @@ export class BasePiecesStore<T> {
   move(
     currCell: number,
     cellToMoveId: number,
-    onCompleteMove: Function
+    onCompleteMove?: Function
   ) {
     const piece = this.getPieceByPosition(currCell);
-
-    if (piece && piece.getAvailableCells().indexOf(cellToMoveId) !== -1) {
+    
+    // if (piece && piece.getAvailableCells().indexOf(cellToMoveId) !== -1) {
+      if (piece) {
+      console.log('curr', currCell, piece.getAvailableCells());
       const pieceColor = piece?.getColor();
       const pieceToCapture = this.getPieceByPosition(cellToMoveId);
       if (pieceToCapture && pieceColor !== pieceToCapture.getColor()) {
         this.pieceCapture(pieceToCapture);
       }
+      console.log('move');
       piece.move({ cellToMoveId }, onCompleteMove);
     }
   }

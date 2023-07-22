@@ -5,17 +5,22 @@ import { BasePiecesStore } from 'chess-engine';
 
 export const usePiecesStore = defineStore('pieces', () => {
   const pieces = new BasePiecesStore<VNode>();
+  const piece = ref(0);
   pieces.setupPiecesByJSON(standart);
   const piecesController = reactive(pieces)
-  console.log('pieces', pieces.getAllPieces());
-  const allPieces = pieces.getAllPieces();
+  const allPieces = reactive(pieces.getAllPieces());
 
-  const setRefToCell = (id: number, ref: Ref) => {
-    // const flatBoard = allPieces;
-    // console.log(flatBoard.map(el => el.id));
-    const found = allPieces.find(el => el.id === id);
-    found.pieceRef = ref;
+  const move = (currCell: number, cellToMoveId: number) => {
+    pieces.move(currCell, cellToMoveId);
   }
 
-  return { piecesController, allPieces, setRefToCell };
+  const dragStart = (pieceId: number) => {
+    piece.value = pieceId;
+  }
+
+  const dragEnd = () => {
+    piece.value = 0;
+  }
+
+  return { piecesController, allPieces, move, dragStart, dragEnd, piece };
 });

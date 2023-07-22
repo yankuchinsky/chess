@@ -6,6 +6,8 @@ import HtmlPiece from './HtmlPiece';
 
 class HtmlChessEngine extends ChessEngine<HTMLDivElement> {
   private pieceRenderer: HtmlPieceRenderer;
+  private pieces: HtmlPiece<HTMLDivElement>[] = [];
+
   constructor(field: HTMLDivElement) {
     super();
 
@@ -26,6 +28,8 @@ class HtmlChessEngine extends ChessEngine<HTMLDivElement> {
       const htmlPiece = new HtmlPiece(cell, piece);
       htmlPiece.setElement(p);
       this.pieceRenderer.render(htmlPiece);
+
+      this.pieces.push(htmlPiece);
     });
   }
 }
