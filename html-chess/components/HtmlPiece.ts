@@ -1,6 +1,3 @@
-// import ChessEngine from '../ChessEngine';
-// import Pieces from './PiecesStore/_PiecesStore';
-// import PieceRenderer from '../renderers/PieceRenderer';
 import { AbstractPiece } from 'chess-engine';
 
 type TColor = 'w' | 'b';

@@ -4,33 +4,7 @@ import standart from '../templates/standart.json';
 import { BasePiecesStore } from 'chess-engine';
 import VueChessEngine from '@/src/helpers/VueChess';
 
-export const useBoardStore = defineStore('board', () => {
-  const chessEngine = new VueChessEngine();
-  const pieces = new BasePiecesStore<VNode>(chessEngine);
-  const pieceToMove = ref(0);
-  pieces.setupPiecesByJSON(standart);
-
-  const move = (currCell: number, cellToMoveId: number) => {
-    const x1 = Math.floor(currCell / 8);
-    const y1 = currCell % 8;
-    const x2 = Math.floor(cellToMoveId / 8);
-    const y2 = cellToMoveId % 8;
-
-    pieces.move(currCell, cellToMoveId, () => {
-      const piece = cells[x1][y1].piece;
-      cells[x1][y1].piece = undefined;
-      cells[x2][y2].piece = piece;
-    });
-  };
-
-  const dragStart = (pieceId: number) => {
-    pieceToMove.value = pieceId;
-  };
-
-  const dragEnd = () => {
-    pieceToMove.value = 0;
-  };
-
+const setupBoard = <T>(pieces: BasePiecesStore<T>) => {
   const size = 8;
   const cells: any[][] = reactive(Array.from(new Array(size), () => []));
 
@@ -60,6 +34,42 @@ export const useBoardStore = defineStore('board', () => {
     isBlack = !isBlack;
     fileIdx += 1;
   }
+
+  return cells;
+}
+
+export const useBoardStore = defineStore('board', () => {
+  const chessEngine = new VueChessEngine();
+  const pieces = new BasePiecesStore<VNode>(chessEngine);
+  chessEngine.setPiecesStore(pieces);
+  const pieceToMove = ref(0);
+  pieces.setupPiecesByJSON(standart);
+
+  pieces.calcPath();
+  
+  const cells = setupBoard(pieces);
+
+  const move = (currCell: number, cellToMoveId: number) => {
+    const x1 = Math.floor(currCell / 8);
+    const y1 = currCell % 8;
+    const x2 = Math.floor(cellToMoveId / 8);
+    const y2 = cellToMoveId % 8;
+
+    pieces.move(currCell, cellToMoveId, () => {
+      const piece = cells[x1][y1].piece;
+      cells[x1][y1].piece = undefined;
+      cells[x2][y2].piece = piece;
+    });
+  };
+  
+  const dragStart = (pieceId: number) => {
+    pieceToMove.value = pieceId;
+  };
+  
+  const dragEnd = () => {
+    pieceToMove.value = 0;
+  };
+  
 
   return { board: cells, move, dragStart, dragEnd, pieceToMove };
 });
