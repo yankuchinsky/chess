@@ -2,7 +2,7 @@ import { reactive, Ref, ref, VNode } from 'vue';
 import { defineStore } from 'pinia';
 import standart from '../templates/standart.json';
 import { BasePiecesStore } from 'chess-engine';
-import VueChessEngine from '@/src/helpers/VueChess';
+import VueChessEngine from '@/helpers/VueChess';
 
 const setupBoard = <T>(pieces: BasePiecesStore<T>) => {
   const size = 8;
