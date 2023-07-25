@@ -12,7 +12,7 @@ abstract class Board<T> extends AbstractBoard<T> {
   protected size: number;
 
   constructor(size: number, element?: T) {
-    super(size, element);
+    super();
 
     if (element) {
       this.rootElement = element;
