@@ -13,6 +13,7 @@ const dragStart = () => {
 
 const dragEnd = () => {
   boardStore.move(boardStore.pieceToMove, props.data.id);
+  boardStore.dragEnd();
 };
 
 const dragOver = (e: Event) => {
