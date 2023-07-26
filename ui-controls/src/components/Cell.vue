@@ -3,10 +3,11 @@
 
   const boardStore = useBoardStore();
 
-  const props = defineProps({ color: String, id: Number });
+  const props = defineProps({ color: String, id: Number, isPath: Boolean });
 
   const dragEnd = () => {
     boardStore.move(boardStore.pieceToMove, props.id);
+    boardStore.dragEnd();
   }
 
   const dragOver = (e: Event) => {
@@ -16,7 +17,7 @@
 <template>
   <div
     class="cell"
-    :class="`cell-${color}`"
+    :class="`cell-${color} ${props.isPath && 'path'}`"
     :cell-id="id"
     @drop="dragEnd"
     @dragover="dragOver"
@@ -31,6 +32,10 @@
   width: 65px;
   height: 65px;
   position: relative;
+}
+
+.path {
+  background-color: rgb(255, 106, 0) !important;
 }
 
 .cell-black {

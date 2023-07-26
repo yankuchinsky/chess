@@ -211,7 +211,6 @@ abstract class ChessEngine<T> {
 
   calculateVerticalAvailableCells(coordinates: [number, number]) {
     const piecePosition = getPositionByCoordinates(coordinates);
-    console.log('pc', this.getPieces());
     const pieces = this.getPieces();
     const piece = pieces.getPieceByPosition(piecePosition);
 

@@ -13,7 +13,7 @@ const cells = boardStore.board;
   <div class="board">
     <div v-for="row in cells" class="row">
       <div v-for="cell in row" class="cell-wrapper">
-        <Cell :color="cell.color" :id="cell.id" />
+        <Cell :color="cell.color" :id="cell.id" :isPath="cell.path"/>
         <Piece v-if="cell.piece" :data="cell.piece" />
       </div>
     </div>

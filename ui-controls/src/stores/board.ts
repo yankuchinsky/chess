@@ -32,9 +32,17 @@ export const useBoardStore = defineStore('board', () => {
 
   const dragStart = (pieceId: number) => {
     pieceToMove.value = pieceId;
+    const piece = pieces.getPieceById(pieceId);
+    if (piece) {
+      board.showPath(piece?.getAvailableCells(), true);
+    }
   };
 
   const dragEnd = () => {
+    const piece = pieces.getPieceById(pieceToMove.value);
+    if (piece) {
+      board.showPath(piece?.getAvailableCells(), false);
+    }
     pieceToMove.value = 0;
   };
 

@@ -42,6 +42,10 @@ class VueBoard extends AbstractBoard<VNode> {
   
     this.cells = cells;
   }
+
+  showPath(cells: number[], clear: boolean) {
+    this.cells.flat().forEach(cell => ~cells.indexOf(cell.id) && (cell.path = clear));
+  };
 }
 
 export default VueBoard;
