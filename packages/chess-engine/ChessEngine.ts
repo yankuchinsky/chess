@@ -19,9 +19,25 @@ abstract class ChessEngine<T> {
   private moves: Move<T>[] = [];
   private piecesController: PiecesController;
   protected board: Board<T>;
+  private isCalculationDisabled = true;
 
   init() {
     this.calcPath();
+  }
+
+  toggleCalculation(value: boolean) {
+    this.isCalculationDisabled = value;
+
+    if (value) {
+      this.clearPath();
+    } else {
+      this.calcPath();
+    }
+
+  }
+
+  getCalculationDisabledStatus() {
+    return this.isCalculationDisabled;
   }
 
   setPiecesStore (store: BasePiecesStore<T>) {
@@ -42,7 +58,16 @@ abstract class ChessEngine<T> {
     this.isWhiteMove = !this.isWhiteMove;
   }
 
+  clearPath() {
+    this.piecesStore.clearPathCells(true);
+    this.piecesStore.clearPathCells(false);
+  }
+
   calcPath() {
+    if (this.isCalculationDisabled) {
+      return;
+    }
+
     if (this.isWhiteMove) {
       this.piecesStore.calcPath(false);
       this.piecesStore.calcPath();

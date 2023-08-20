@@ -75,6 +75,16 @@ export class BasePiecesStore<T> {
     }
   }
 
+  clearPathCells(isWhite: boolean = true) {
+    if (isWhite) {
+      this.whitePieces.forEach((piece) => piece.clearAvailableCells());
+      this.whitePieces.forEach((piece) => piece.clearCellsToCapture());
+    } else {
+      this.blackPieces.forEach((piece) => piece.clearAvailableCells());
+      this.blackPieces.forEach((piece) => piece.clearCellsToCapture());
+    }
+  }
+
   calcKingPath(isWhite: boolean = true) {
     if (isWhite) {
       this.whiteKing?.calculateAvailableCels();

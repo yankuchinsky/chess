@@ -70,6 +70,10 @@ abstract class AbstractPiece<T> {
     this.availableCellsToMove = [];
   }
 
+  clearCellsToCapture() {
+    this.cellsToCapture = [];
+  }
+
   getAvailableCells() {
     return this.availableCellsToMove;
   }

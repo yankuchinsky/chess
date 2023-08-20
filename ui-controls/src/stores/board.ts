@@ -1,4 +1,4 @@
-import { reactive, Ref, ref, VNode } from 'vue';
+import { reactive, ref, VNode } from 'vue';
 import { defineStore } from 'pinia';
 import standart from '../templates/standart.json';
 import { BasePiecesStore } from 'chess-engine';
@@ -8,11 +8,12 @@ import VueBoard from '@/helpers/Board';
 export const useBoardStore = defineStore('board', () => {
   const chessEngine = new VueChessEngine();
   const pieces = new BasePiecesStore<VNode>(chessEngine);
+  chessEngine.init();
   chessEngine.setPiecesStore(pieces);
   const pieceToMove = ref(0);
   pieces.setupPiecesByJSON(standart);
 
-  pieces.calcPath();
+  chessEngine.calcPath();
 
   const board = new VueBoard(pieces);
   const { cells } = board;
@@ -46,5 +47,5 @@ export const useBoardStore = defineStore('board', () => {
     pieceToMove.value = 0;
   };
 
-  return { board: cells, move, dragStart, dragEnd, pieceToMove };
+  return { board: cells, move, dragStart, dragEnd, pieceToMove, chessEngine };
 });

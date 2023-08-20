@@ -1,9 +1,11 @@
 <script setup lang="ts">
-  import Board from '@/components/Board.vue';
+  import Board from '@/components/chess/Board.vue';
+  import Controls from '@/components/controls/Controls.vue'
 </script>
 
 <template>
-  <Board></Board>
+  <Board />
+  <Controls />
 </template>
 
 <style scoped>
