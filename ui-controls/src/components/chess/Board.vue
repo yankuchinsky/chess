@@ -1,19 +1,23 @@
 <script lang="ts" setup>
 import { useBoardStore } from '@/stores/board';
-
 import Cell from './Cell.vue';
 import Piece from './Piece.vue';
+import Socket from '@/helpers/Socket';
 
 const boardStore = useBoardStore();
 
 const cells = boardStore.board;
+
+Socket.on('move', (data) => {
+  //
+});
 </script>
 
 <template>
   <div class="board">
     <div v-for="row in cells" class="row">
       <div v-for="cell in row" class="cell-wrapper">
-        <Cell :color="cell.color" :id="cell.id" :isPath="cell.path"/>
+        <Cell :color="cell.color" :id="cell.id" :isPath="cell.path" />
         <Piece v-if="cell.piece" :data="cell.piece" />
       </div>
     </div>

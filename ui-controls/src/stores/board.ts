@@ -4,6 +4,7 @@ import standart from '../templates/standart.json';
 import { BasePiecesStore } from 'chess-engine';
 import VueChessEngine from '@/helpers/VueChess';
 import VueBoard from '@/helpers/Board';
+import Socket from '@/helpers/Socket';
 
 export const useBoardStore = defineStore('board', () => {
   const chessEngine = new VueChessEngine();
@@ -11,9 +12,9 @@ export const useBoardStore = defineStore('board', () => {
   chessEngine.setPiecesStore(pieces);
   const pieceToMove = ref(0);
   pieces.setupPiecesByJSON(standart);
-  
+
   chessEngine.calcPath();
-  
+
   const moves = reactive(chessEngine.moves);
   const board = new VueBoard(pieces);
   const { cells } = board;
@@ -38,6 +39,15 @@ export const useBoardStore = defineStore('board', () => {
 
       chessEngine.addMove(piece, piecePrevPosition, cellToMoveId);
       chessEngine.getMoves();
+
+      Socket.emit('event', {
+        type: 'move',
+        data: {
+          id: pieceId,
+          from: piecePrevPosition,
+          to: cellToMoveId,
+        },
+      });
     });
   };
 
@@ -57,6 +67,10 @@ export const useBoardStore = defineStore('board', () => {
     pieceToMove.value = 0;
   };
 
+  const movesUpdated = (newMove: any) => {
+    //
+  }
+
   return {
     board: cells,
     move,
@@ -65,5 +79,6 @@ export const useBoardStore = defineStore('board', () => {
     pieceToMove,
     chessEngine,
     moves,
+    movesUpdated,
   };
 });
