@@ -1,4 +1,4 @@
-import { reactive, ref, VNode } from 'vue';
+import { reactive, ref, VNode, toRefs } from 'vue';
 import { defineStore } from 'pinia';
 import standart from '../templates/standart.json';
 import { BasePiecesStore } from 'chess-engine';
@@ -8,17 +8,24 @@ import VueBoard from '@/helpers/Board';
 export const useBoardStore = defineStore('board', () => {
   const chessEngine = new VueChessEngine();
   const pieces = new BasePiecesStore<VNode>(chessEngine);
-  chessEngine.init();
   chessEngine.setPiecesStore(pieces);
   const pieceToMove = ref(0);
   pieces.setupPiecesByJSON(standart);
-
+  
   chessEngine.calcPath();
-
+  
+  const moves = reactive(chessEngine.moves);
   const board = new VueBoard(pieces);
   const { cells } = board;
 
-  const move = (currCell: number, cellToMoveId: number) => {
+  const move = (pieceId: number, cellToMoveId: number) => {
+    const piece = pieces.getPieceById(pieceId);
+    if (!piece) {
+      return;
+    }
+
+    const piecePrevPosition = piece.getCurrentPosition();
+    const currCell = piece.getCurrentPosition();
     const x1 = Math.floor(currCell / 8);
     const y1 = currCell % 8;
     const x2 = Math.floor(cellToMoveId / 8);
@@ -28,6 +35,9 @@ export const useBoardStore = defineStore('board', () => {
       const piece = cells[x1][y1].piece;
       cells[x1][y1].piece = undefined;
       cells[x2][y2].piece = piece;
+
+      chessEngine.addMove(piece, piecePrevPosition, cellToMoveId);
+      chessEngine.getMoves();
     });
   };
 
@@ -47,5 +57,13 @@ export const useBoardStore = defineStore('board', () => {
     pieceToMove.value = 0;
   };
 
-  return { board: cells, move, dragStart, dragEnd, pieceToMove, chessEngine };
+  return {
+    board: cells,
+    move,
+    dragStart,
+    dragEnd,
+    pieceToMove,
+    chessEngine,
+    moves,
+  };
 });

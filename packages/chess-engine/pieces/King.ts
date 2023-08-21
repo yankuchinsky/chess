@@ -165,6 +165,9 @@ class King<T> extends AbstractPiece<T> {
   }
 
   castleShort() {
+    // @TODO move to pieces store
+    return;
+
     const position = this.getCurrentPosition();
     const coordinates = getCoordinatesByPosition(position);
     const color = this.getColor();
@@ -197,6 +200,9 @@ class King<T> extends AbstractPiece<T> {
   }
 
   castleLong() {
+    // @TODO move to pieces store
+    return;
+
     const position = this.getCurrentPosition();
     const coordinates = getCoordinatesByPosition(position);
     const color = this.getColor();

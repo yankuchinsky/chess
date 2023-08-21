@@ -1,13 +1,18 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { useBoardStore } from '@/stores/board';
+import { storeToRefs } from 'pinia'
 
-const { chessEngine } = useBoardStore();
-const isCalculationDisabled = chessEngine.getCalculationDisabledStatus();
+const boardStore = useBoardStore();
+const { pieceToMove, moves } = storeToRefs(boardStore);
+const isCalculationDisabled = boardStore.chessEngine.getCalculationDisabledStatus();
+
 
 const toggleCalculation = (e) => {
-  chessEngine.toggleCalculation(e.target.checked);
+  boardStore.chessEngine.toggleCalculation(e.target.checked);
 }
+
+watch(moves, () => {console.log('changed')}, {deep: true})
 
 const isWhiteMove = ref(true);
 </script>
@@ -22,5 +27,15 @@ const isWhiteMove = ref(true);
     </div>
     <h4>Dev data</h4>
     <div>Current move {{ isWhiteMove ? 'white' : 'black' }}</div>
+    <div>Moves 
+      <ul>
+        <li v-for="move in moves">
+          piece {{ move.piece }} prev {{ move.prevPosition }} new {{ move.newPosition }}
+        </li>
+      </ul>
+    </div>
+    <div>
+      {{ pieceToMove }}
+    </div>
   </div>
 </template>

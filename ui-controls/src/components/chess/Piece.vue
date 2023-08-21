@@ -12,7 +12,7 @@ const dragStart = () => {
 };
 
 const dragEnd = () => {
-  boardStore.move(boardStore.pieceToMove, props.data.id);
+  boardStore.move(boardStore.pieceToMove, props.data.currentPosition);
   boardStore.dragEnd();
 };
 

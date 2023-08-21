@@ -10,6 +10,7 @@ export class BasePiecesStore<T> {
   protected blackKing: Piece<T>;
   protected whiteKing: Piece<T>;
   private chessEngine: ChessEngine<T>;
+  private isCalculationDisabled = true;
 
   constructor(chessEngine) {
     this.chessEngine = chessEngine;
@@ -59,13 +60,26 @@ export class BasePiecesStore<T> {
     return foundPiece;
   }
 
-  preCalculation() {
-    //
+  getCalculationDisabledStatus() {
+    return this.isCalculationDisabled;
   }
 
-  calculation() {}
+  toggleCalculation(value: boolean) {
+    this.isCalculationDisabled = value;
 
+    if (value) {
+      this.clearPathCells();
+    } else {
+      this.calcPath();
+    }
+
+  }
+  
   calcPath(isWhite: boolean = true) {
+    if (this.isCalculationDisabled) {
+      return;
+    }
+
     if (isWhite) {
       this.whitePieces.forEach((piece) => piece.calculateAvailableCels());
       this.whitePieces.forEach((piece) => piece.calculateCellsToCapture());
@@ -121,7 +135,7 @@ export class BasePiecesStore<T> {
   }
 
   protected createPiece(boardId, type): AbstractPiece<T> {
-    const pieceFactory = new BasePieceFactory<T>(); 
+    const pieceFactory = new BasePieceFactory<T>();
     const piece = pieceFactory.createPiece(boardId, type);
     piece.connectState(this);
 
@@ -129,7 +143,12 @@ export class BasePiecesStore<T> {
   }
 
   getAllPieces() {
-    return [...this.whitePieces, this.whiteKing, ...this.blackPieces, this.blackKing];
+    return [
+      ...this.whitePieces,
+      this.whiteKing,
+      ...this.blackPieces,
+      this.blackKing,
+    ];
   }
 
   getAllPiecesByColor(color: 'w' | 'b'): Piece<T>[] {
@@ -161,13 +180,19 @@ export class BasePiecesStore<T> {
     }, []);
   }
 
-  move(
-    currCell: number,
-    cellToMoveId: number,
-    onCompleteMove?: Function
-  ) {
+  move(currCell: number, cellToMoveId: number, onCompleteMove?: Function) {
     const piece = this.getPieceByPosition(currCell);
-     if (piece && piece.getAvailableCells().indexOf(cellToMoveId) !== -1) {
+
+    if (!piece) {
+      return;
+    }
+
+    if (this.isCalculationDisabled) {
+      piece.move({ cellToMoveId }, onCompleteMove);
+      return;
+    }
+
+    if (piece.getAvailableCells().indexOf(cellToMoveId) !== -1) {
       const pieceColor = piece?.getColor();
       const pieceToCapture = this.getPieceByPosition(cellToMoveId);
       if (pieceToCapture && pieceColor !== pieceToCapture.getColor()) {
