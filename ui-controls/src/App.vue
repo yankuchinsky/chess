@@ -1,11 +1,15 @@
 <script setup lang="ts">
   import Board from '@/components/chess/Board.vue';
-  import Controls from '@/components/controls/Controls.vue'
+  import Controls from '@/components/controls/Controls.vue';
+  import GS from '@/components/gs/GS.vue';
 </script>
 
 <template>
   <Board />
   <Controls />
+  <div class="modal">
+    <GS />
+  </div>
 </template>
 
 <style scoped>
@@ -21,5 +25,10 @@
 html, body {
   font-family: Arial, Helvetica, sans-serif;
 }
+
+.modal {
+  position: absolute;
+  right: 100px;
+  top: 20px;
+}
 </style>
-./src/components/Board.vue
