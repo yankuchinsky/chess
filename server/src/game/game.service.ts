@@ -37,7 +37,15 @@ export class GameService {
     return game;
   }
 
-  joinGame() {
-    //
+  joinGame(gameId: string, userId: string) {
+    const game = this.games.find((game) => game.id === gameId);
+    if (!game) {
+      return { error: 'Not Found' };
+    }
+
+    game.user2 = { id: userId };
+    game.gameStatus = GameStatus.Started;
+
+    return game;
   }
 }

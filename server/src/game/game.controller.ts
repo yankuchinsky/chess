@@ -11,4 +11,11 @@ export class GameController {
 
     return this.gameService.createGame(userId);
   }
+
+  @Post('join')
+  joinGame(@Req() req: any): any {
+    const { userId, gameId } = req.body;
+
+    return this.gameService.joinGame(gameId, userId);
+  }
 }
