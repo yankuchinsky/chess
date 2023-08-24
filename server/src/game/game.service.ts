@@ -30,9 +30,7 @@ export class GameService {
       user1: { id: userId },
       gameStatus: GameStatus.Pending,
     };
-
     this.games.push(game);
-    console.log('this games', JSON.stringify(this.games));
 
     return game;
   }
