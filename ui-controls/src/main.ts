@@ -1,12 +1,13 @@
 import { createApp } from 'vue';
 import { createPinia } from 'pinia';
 import { createRouter, createWebHistory } from 'vue-router';
+import type { RouteRecordRaw } from 'vue-router';
 
 import App from './App.vue'
 import Dev from '@/pages/Dev.vue';
 import Game from '@/pages/Game.vue';
 
-const routes: any = [
+const routes: RouteRecordRaw[] = [
   { path: '/dev', component: Dev },
   { path: '/game', component: Game },
 ];
