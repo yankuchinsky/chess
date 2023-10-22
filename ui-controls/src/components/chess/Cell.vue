@@ -6,7 +6,9 @@
   const props = defineProps({ color: String, id: Number, isPath: Boolean });
 
   const dragEnd = () => {
-    boardStore.move(boardStore.pieceToMove, props.id);
+    if (props.id) {
+      boardStore.move(boardStore.pieceToMove, props.id);
+    }
     boardStore.dragEnd();
   }
 

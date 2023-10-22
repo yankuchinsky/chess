@@ -7,8 +7,11 @@ const boardStore = useBoardStore();
 const { pieceToMove, moves } = storeToRefs(boardStore);
 const isCalculationDisabled = boardStore.chessEngine.getCalculationDisabledStatus();
 
-const toggleCalculation = (e) => {
-  boardStore.chessEngine.toggleCalculation(e.target.checked);
+const toggleCalculation = (e: Event) => {
+  if (e.target) {
+    const target = e.target as (HTMLInputElement & { checked: boolean });
+    boardStore.chessEngine.toggleCalculation(target.checked);
+  }
 }
 
 const isWhiteMove = ref(true);
