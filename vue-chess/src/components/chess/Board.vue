@@ -8,13 +8,24 @@ const boardStore = useBoardStore();
 
 const cells = boardStore.board;
 
+const mouseOver = (e) => {
+  if (boardStore.pieceToMove) {
+    console.log('move')
+  }
+}
+
+const dragEnd = (e) => {
+  console.log('end')
+  boardStore.dragEnd();
+}
+
 Socket.on('move', (data) => {
   //
 });
 </script>
 
 <template>
-  <div class="board">
+  <div class="board" @mouseover="mouseOver" @mouseup="dragEnd">
     <div v-for="row in cells" class="row">
       <div v-for="cell in row" class="cell-wrapper">
         <Cell :color="cell.color" :id="cell.id" :isPath="cell.path" />
@@ -39,5 +50,7 @@ Socket.on('move', (data) => {
 
 .cell-wrapper {
   position: relative;
+  width: 65px;
+  height: 65px;
 }
 </style>

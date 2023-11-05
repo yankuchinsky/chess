@@ -19,7 +19,7 @@
 <template>
   <div
     class="cell"
-    :class="`cell-${color} ${props.isPath && 'path'}`"
+    :class="`cell-${color} ${props.isPath ? 'path' : ''}`"
     :cell-id="id"
     @drop="dragEnd"
     @dragover="dragOver"
