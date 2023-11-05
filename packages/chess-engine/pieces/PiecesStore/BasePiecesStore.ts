@@ -115,7 +115,7 @@ export class BasePiecesStore<T> {
     return foundPiece;
   }
 
-  setupPiecesByJSON(json: JSON) {
+  setupPiecesByJSON(json: { [key: string]: string }) {
     for (let id of Object.keys(json)) {
       const piece = this.createPiece(+id, json[id]);
       if (piece.getColor() === 'w') {
