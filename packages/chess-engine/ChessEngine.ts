@@ -15,9 +15,9 @@ abstract class ChessEngine<T> {
   private whiteCapturedPieces: Piece<T>[] = [];
   private blackCapturedPieces: Piece<T>[] = [];
   protected piecesStore: BasePiecesStore<T>;
-  private moves: Move<T>[] = [];
   protected board: Board<T>;
   private isCalculationDisabled = true;
+  moves: Move<T>[] = [];
 
   init() {
     this.calcPath();
@@ -42,7 +42,7 @@ abstract class ChessEngine<T> {
     this.piecesStore = store;
   }
 
-  setupPiecesPositionsByJSON(positions: JSON) {
+  setupPiecesPositionsByJSON(positions: { [key: string]: string }) {
     this.piecesStore.setupPiecesByJSON(positions);
   }
 
