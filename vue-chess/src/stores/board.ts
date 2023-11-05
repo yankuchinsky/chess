@@ -1,4 +1,4 @@
-import { reactive, ref, VNode, toRefs } from 'vue';
+import { reactive, ref, type VNode } from 'vue';
 import { defineStore } from 'pinia';
 import standart from '../templates/standart.json';
 import { BasePiecesStore } from 'chess-engine';
