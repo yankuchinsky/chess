@@ -4,7 +4,7 @@ import standart from '../templates/standart.json';
 import { BasePiecesStore } from 'chess-engine';
 import VueChessEngine from '@/helpers/VueChess';
 import VueBoard from '@/helpers/Board';
-import Socket from '@/helpers/Socket';
+// import Socket from '@/helpers/Socket';
 
 export const useBoardStore = defineStore('board', () => {
   const chessEngine = new VueChessEngine();
@@ -40,14 +40,14 @@ export const useBoardStore = defineStore('board', () => {
       chessEngine.addMove(piece, piecePrevPosition, cellToMoveId);
       chessEngine.getMoves();
 
-      Socket.emit('event', {
-        type: 'move',
-        data: {
-          id: pieceId,
-          from: piecePrevPosition,
-          to: cellToMoveId,
-        },
-      });
+      // Socket.emit('event', {
+      //   type: 'move',
+      //   data: {
+      //     id: pieceId,
+      //     from: piecePrevPosition,
+      //     to: cellToMoveId,
+      //   },
+      // });
     });
   };
 

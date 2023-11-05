@@ -2,26 +2,26 @@
 import { useBoardStore } from '@/stores/board';
 import Cell from './Cell.vue';
 import Piece from './Piece.vue';
-import Socket from '@/helpers/Socket';
+// import Socket from '@/helpers/Socket';
 
 const boardStore = useBoardStore();
 
 const cells = boardStore.board;
 
-const mouseOver = (e) => {
+const mouseOver = () => {
   if (boardStore.pieceToMove) {
     console.log('move')
   }
 }
 
-const dragEnd = (e) => {
+const dragEnd = () => {
   console.log('end')
   boardStore.dragEnd();
 }
 
-Socket.on('move', (data) => {
-  //
-});
+// Socket.on('move', (data) => {
+//   //
+// });
 </script>
 
 <template>
