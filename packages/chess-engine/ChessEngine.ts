@@ -2,7 +2,6 @@ import Board from './Board';
 import Piece from './pieces/AbstractPiece';
 import BasePiecesStore from './pieces/PiecesStore/BasePiecesStore';
 import Move from './Move';
-import PiecesController from './PiecesController';
 import {
   getPositionByCoordinates,
   getLeftDiagonalRange,
@@ -17,7 +16,6 @@ abstract class ChessEngine<T> {
   private blackCapturedPieces: Piece<T>[] = [];
   protected piecesStore: BasePiecesStore<T>;
   private moves: Move<T>[] = [];
-  private piecesController: PiecesController;
   protected board: Board<T>;
   private isCalculationDisabled = true;
 
