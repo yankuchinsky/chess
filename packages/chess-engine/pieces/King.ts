@@ -23,7 +23,7 @@ class King<T> extends AbstractPiece<T> {
       const cellRef = this.globalGameState.getCellRefById(
         startingPosition + 1
       )!.cellRef;
-      rook?.move({ cellToMoveId: startingPosition + 1, cell: cellRef });
+      // rook?.move({ cellToMoveId: startingPosition + 1, cell: cellRef });
     }
 
     if (startingPosition - 2 === cellToMoveId) {
@@ -32,7 +32,7 @@ class King<T> extends AbstractPiece<T> {
       const cellRef = this.globalGameState.getCellRefById(
         startingPosition - 1
       )!.cellRef;
-      rook?.move({ cellToMoveId: startingPosition - 1, cell: cellRef });
+      // rook?.move({ cellToMoveId: startingPosition - 1, cell: cellRef });
     }
   }
 
