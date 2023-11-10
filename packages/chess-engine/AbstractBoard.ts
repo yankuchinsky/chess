@@ -4,7 +4,8 @@ type BoardMapCell<TCellRef> = {
 
 abstract class AbstractBoard<T> {
   protected boardMap: BoardMapCell<T>[][] = [];
-
+  protected size: number = 8;
+  
   getCellRef(id: number) {
     return this.getCellById(id)?.cellRef;
   };
