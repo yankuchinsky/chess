@@ -3,6 +3,8 @@ import { useBoardStore } from '@/stores/board';
 import Cell from './Cell.vue';
 import Piece from './Piece.vue';
 // import Socket from '@/helpers/Socket';
+import type { VuePiece } from '@/types'
+
 
 const boardStore = useBoardStore();
 
@@ -28,8 +30,9 @@ const dragEnd = () => {
   <div class="board" @mouseover="mouseOver" @mouseup="dragEnd">
     <div v-for="row in cells" class="row">
       <div v-for="cell in row" class="cell-wrapper">
-        <Cell :color="cell.color" :id="cell.id" :isPath="cell.path" />
-        <Piece v-if="cell.piece" :data="cell.piece" />
+        <Cell :color="cell.color" :id="cell.id" :isPath="cell.path" >
+          <Piece v-if="cell.piece" :data="<VuePiece>cell.piece" />
+        </Cell>
       </div>
     </div>
   </div>

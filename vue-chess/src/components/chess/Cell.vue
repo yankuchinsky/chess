@@ -27,13 +27,13 @@
     <div class="cell-number">
       {{ id }}
     </div>
+    <slot></slot>
   </div>
 </template>
 <style scoped>
 .cell {
   width: 65px;
   height: 65px;
-  position: relative;
 }
 
 .path {

@@ -1,8 +1,3 @@
-declare module "*.json" {
-  const value: any;
-  export = value;
-}
-
 type TCell = {
   piece: number | string;
   cellRef: HTMLElement;
@@ -14,3 +9,8 @@ type TPiece = {
   cellId: number;
 };
 
+type TColor = "w" | "b";
+
+type TPieceType = 'p' | 'n' | 'r' | 'b' | 'k' | 'q';
+
+export { TCell, TPiece, TColor, TPieceType };

@@ -37,8 +37,8 @@ export const useBoardStore = defineStore('board', () => {
       cells[x1][y1].piece = undefined;
       cells[x2][y2].piece = piece;
 
-      chessEngine.addMove(piece, piecePrevPosition, cellToMoveId);
-      chessEngine.getMoves();
+      // chessEngine.addMove(piece, piecePrevPosition, cellToMoveId);
+      // chessEngine.getMoves();
 
       // Socket.emit('event', {
       //   type: 'move',

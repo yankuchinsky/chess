@@ -1,13 +1,12 @@
 import ChessEngine from "../ChessEngine";
 import Pieces, { BasePiecesStore } from './PiecesStore/BasePiecesStore';
-
-type TColor = 'w' | 'b';
+import type { TColor, TPieceType } from '../types';
 
 abstract class AbstractPiece<T> {
   private color: TColor;
   private id: number;
   private type: string;
-  private pieceType: string;
+  private pieceType: TPieceType;
   private currentPosition: number;
   protected availableCellsToMove: number[] = [];
   protected pieces: Pieces<T>;
@@ -16,7 +15,7 @@ abstract class AbstractPiece<T> {
 
   constructor(id: number, type: string) {
     this.type = type;
-    this.pieceType = type.split('')[1];
+    this.pieceType = <TPieceType>type.split('')[1];
     this.id = id;
     this.currentPosition = id;
     this.color = <TColor>type.split("")[0];
