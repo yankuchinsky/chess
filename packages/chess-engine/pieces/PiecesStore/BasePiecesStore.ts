@@ -2,7 +2,7 @@ import Piece from '../AbstractPiece';
 import BasePieceFactory from '../BasePieceFactory';
 import Rook from '../Rook';
 import AbstractPiece from '../AbstractPiece';
-import { ChessEngine } from 'chess-engine';
+import { ChessEngine, TColor } from 'chess-engine';
 
 export class BasePiecesStore<T> {
   protected blackPieces: Piece<T>[] = [];
@@ -30,13 +30,13 @@ export class BasePiecesStore<T> {
     return arr;
   }
 
-  getPiecesWithoutKing(color: 'w' | 'b') {
+  getPiecesWithoutKing(color: TColor) {
     if (color === 'w') {
       return this.whitePieces;
     } else return this.blackPieces;
   }
 
-  getKing(color: 'w' | 'b') {
+  getKing(color: TColor) {
     if (color === 'w') {
       return this.whiteKing;
     }
@@ -74,7 +74,7 @@ export class BasePiecesStore<T> {
     }
 
   }
-  
+
   calcPath(isWhite: boolean = true) {
     if (this.isCalculationDisabled) {
       return;
@@ -151,17 +151,17 @@ export class BasePiecesStore<T> {
     ];
   }
 
-  getAllPiecesByColor(color: 'w' | 'b'): Piece<T>[] {
+  getAllPiecesByColor(color: TColor): Piece<T>[] {
     return this.piecesArray.filter((piece) => piece.getColor() === color);
   }
 
-  getAllAvailablesCellsByColor(color: 'w' | 'b') {
+  getAllAvailablesCellsByColor(color: TColor) {
     return this.getAllPiecesByColor(color).reduce((res: number[], curr) => {
       return [...res, ...curr.getAvailableCells()];
     }, []);
   }
 
-  getAllRangesByColor(color: 'w' | 'b'): number[][] {
+  getAllRangesByColor(color: TColor): number[][] {
     return this.getAllPiecesByColor(color)
       .reduce((res: number[][], curr) => {
         if (curr.getPiecetype() !== 'r') {
@@ -174,7 +174,7 @@ export class BasePiecesStore<T> {
       .filter((range) => range.length);
   }
 
-  getAllAttackingCellsByColor(color: 'w' | 'b') {
+  getAllAttackingCellsByColor(color: TColor) {
     return this.getAllPiecesByColor(color).reduce((res: number[], curr) => {
       return [...res, ...curr.getCellsToCapture()];
     }, []);
