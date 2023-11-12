@@ -72,7 +72,6 @@ export class BasePiecesStore<T> {
     } else {
       this.calcPath();
     }
-
   }
 
   calcPath(isWhite: boolean = true) {
