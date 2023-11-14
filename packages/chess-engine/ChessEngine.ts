@@ -1,4 +1,4 @@
-import Board from './Board';
+import Board from './AbstractBoard';
 import Piece from './pieces/AbstractPiece';
 import BasePiecesStore from './pieces/PiecesStore/BasePiecesStore';
 import Move from './Move';
@@ -108,11 +108,11 @@ abstract class ChessEngine<T> {
     clearFlag?: boolean,
     isAttack: boolean = false
   ) {
-    if (isAttack) {
-      this.board.showAttackPath(cells, clearFlag);
-    } else {
-      this.board.showPath(cells, clearFlag);
-    }
+    // if (isAttack) {
+    //   this.board.showAttackPath(cells, clearFlag);
+    // } else {
+    //   this.board.showPath(cells, clearFlag);
+    // }
   }
 
   addMove(piece: Piece<T>, prev: number, curr: number) {
