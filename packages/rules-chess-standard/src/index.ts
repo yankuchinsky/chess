@@ -69,6 +69,16 @@ export interface ChessGameStateMetadata extends GameStateMetadata {
  */
 type Direction = [number, number];
 
+// Re-export movement generators
+export {
+  generatePawnMoves,
+  generateKnightMoves,
+  generateBishopMoves,
+  generateRookMoves,
+  generateQueenMoves,
+  generateKingMoves,
+} from './rules/movements';
+
 /**
  * Standard Chess Ruleset Implementation
  */
