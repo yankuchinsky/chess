@@ -1,0 +1,27 @@
+{
+  "name": "@chess-kernel/core",
+  "version": "0.1.0",
+  "description": "Abstract game engine core with topology-agnostic board support",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "keywords": ["chess", "game-engine", "board-games", "hexagonal"],
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "vitest": "^1.4.0",
+    "@types/node": "^20.11.0"
+  }
+}
