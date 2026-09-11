@@ -1,13 +1,16 @@
 /**
  * Standard chess ruleset implementation
  * Implements FIDE chess rules for 8x8 board
+ * 
+ * Architecture:
+ * - Piece is just data (type, color, id, position) - no behavior
+ * - All movement logic lives in RuleSet
+ * - Position is immutable, each move creates new state
  */
 
 import {
   RuleSet,
   PieceDefinition,
-  MovementPattern,
-  DirectionSpec,
   GameState,
   Move,
   PlayerId,
@@ -16,7 +19,6 @@ import {
   createMove,
   GameResult,
   GameStateMetadata,
-  finishGame,
   applyMove,
   movePieceOnBoard,
   getPieceAt,
@@ -26,7 +28,8 @@ import {
   createPiece,
   placePieceOnBoard,
   createGameState,
-  transformPiece
+  transformPiece,
+  PieceType
 } from '@chess-kernel/core';
 
 // Piece type constants
@@ -37,16 +40,6 @@ export const PIECE_TYPES = {
   BISHOP: 'bishop',
   KNIGHT: 'knight',
   PAWN: 'pawn'
-} as const;
-
-// Movement pattern IDs
-const MOVEMENT_PATTERNS = {
-  KING: 'king-move',
-  QUEEN: 'queen-move',
-  ROOK: 'rook-move',
-  BISHOP: 'bishop-move',
-  KNIGHT: 'knight-move',
-  PAWN: 'pawn-move'
 } as const;
 
 /**
@@ -70,6 +63,21 @@ export interface ChessGameStateMetadata extends GameStateMetadata {
   readonly isCheck?: boolean;
   readonly halfmoveClock?: number;
 }
+
+/**
+ * Direction delta for rectangular board [fileDelta, rankDelta]
+ */
+type Direction = [number, number];
+
+// Re-export movement generators
+export {
+  generatePawnMoves,
+  generateKnightMoves,
+  generateBishopMoves,
+  generateRookMoves,
+  generateQueenMoves,
+  generateKingMoves,
+} from './rules/movements';
 
 /**
  * Standard Chess Ruleset Implementation
@@ -150,11 +158,10 @@ export class StandardChessRuleSet implements RuleSet {
 
   /**
    * Generates all pseudo-legal moves for a player
+   * Pseudo-legal = follows piece movement rules but may leave king in check
    */
   generateMoves(state: GameState, player: PlayerId): readonly Move[] {
     const moves: Move[] = [];
-    
-    const { createMove } = await import('@chess-kernel/core');
 
     // Get all player's pieces
     for (const [pieceId, piece] of state.board.pieces) {
@@ -169,7 +176,7 @@ export class StandardChessRuleSet implements RuleSet {
   }
 
   /**
-   * Generates moves for a specific piece
+   * Generates moves for a specific piece based on its type
    */
   private generatePieceMoves(state: GameState, piece: any): Move[] {
     const moves: Move[] = [];
@@ -180,20 +187,19 @@ export class StandardChessRuleSet implements RuleSet {
         moves.push(...this.generatePawnMoves(state, piece));
         break;
       case PIECE_TYPES.KNIGHT:
-        moves.push(...this.generateSlidingMoves(state, piece, this.getKnightDirections(), 1));
+        moves.push(...this.generateKnightMoves(state, piece));
         break;
       case PIECE_TYPES.BISHOP:
-        moves.push(...this.generateSlidingMoves(state, piece, this.getBishopDirections(), Infinity));
+        moves.push(...this.generateSlidingMoves(state, piece, this.getBishopDirections()));
         break;
       case PIECE_TYPES.ROOK:
-        moves.push(...this.generateSlidingMoves(state, piece, this.getRookDirections(), Infinity));
+        moves.push(...this.generateSlidingMoves(state, piece, this.getRookDirections()));
         break;
       case PIECE_TYPES.QUEEN:
-        moves.push(...this.generateSlidingMoves(state, piece, this.getQueenDirections(), Infinity));
+        moves.push(...this.generateSlidingMoves(state, piece, this.getQueenDirections()));
         break;
       case PIECE_TYPES.KING:
-        moves.push(...this.generateSlidingMoves(state, piece, this.getKingDirections(), 1));
-        moves.push(...this.generateCastlingMoves(state, piece));
+        moves.push(...this.generateKingMoves(state, piece));
         break;
     }
 
@@ -201,65 +207,45 @@ export class StandardChessRuleSet implements RuleSet {
   }
 
   /**
-   * Generate pawn moves
+   * Generate pawn moves (basic: single push, double push, captures)
+   * TODO: Add en passant and promotion later
    */
   private generatePawnMoves(state: GameState, piece: any): Move[] {
     const moves: Move[] = [];
     const fromPos = piece.position!;
-    const [file, rank] = fromPos.coords;
+    const [file, rank] = fromPos.coords as [number, number];
     const isWhite = piece.owner === state.players[0];
     const direction = isWhite ? 1 : -1;
     const startRank = isWhite ? 1 : 6;
-    const promotionRank = isWhite ? 7 : 0;
 
-    
-    const { createMove, getPieceAt, serializePosition } = await import('@chess-kernel/core');
-
-    // Single push
+    // Single push forward
     const oneStepRank = rank + direction;
     if (oneStepRank >= 0 && oneStepRank <= 7) {
       const oneStepPos = { coords: [file, oneStepRank] as const };
       const targetPiece = getPieceAt(state.board, oneStepPos);
       
       if (!targetPiece) {
-        // Check for promotion
-        if (oneStepRank === promotionRank) {
-          // Promotion moves
-          for (const promoType of [PIECE_TYPES.QUEEN, PIECE_TYPES.ROOK, PIECE_TYPES.BISHOP, PIECE_TYPES.KNIGHT]) {
-            const move = createMove(
-              this.generateMoveId(state, piece, oneStepPos),
+        // Empty square - can move here
+        moves.push(createMove(
+          this.generateMoveId(state, piece, oneStepPos),
+          piece.id,
+          fromPos,
+          oneStepPos
+        ));
+
+        // Double push from starting position
+        if (rank === startRank) {
+          const twoStepRank = rank + 2 * direction;
+          const twoStepPos = { coords: [file, twoStepRank] as const };
+          const twoStepTarget = getPieceAt(state.board, twoStepPos);
+          
+          if (!twoStepTarget) {
+            moves.push(createMove(
+              this.generateMoveId(state, piece, twoStepPos),
               piece.id,
               fromPos,
-              oneStepPos,
-              undefined,
-              { promotionType: promoType }
-            );
-            moves.push(move);
-          }
-        } else {
-          const move = createMove(
-            this.generateMoveId(state, piece, oneStepPos),
-            piece.id,
-            fromPos,
-            oneStepPos
-          );
-          moves.push(move);
-
-          // Double push from starting position
-          if (rank === startRank) {
-            const twoStepRank = rank + 2 * direction;
-            const twoStepPos = { coords: [file, twoStepRank] as const };
-            const twoStepTarget = getPieceAt(state.board, twoStepPos);
-            
-            if (!twoStepTarget) {
-              const doubleMove = createMove(
-                this.generateMoveId(state, piece, twoStepPos),
-                piece.id,
-                fromPos,
-                twoStepPos
-              );
-              moves.push(doubleMove);
-            }
+              twoStepPos
+            ));
           }
         }
       }
@@ -276,55 +262,14 @@ export class StandardChessRuleSet implements RuleSet {
       const targetPiece = getPieceAt(state.board, capturePos);
 
       if (targetPiece && targetPiece.owner !== piece.owner) {
-        if (captureRank === promotionRank) {
-          // Promotion captures
-          for (const promoType of [PIECE_TYPES.QUEEN, PIECE_TYPES.ROOK, PIECE_TYPES.BISHOP, PIECE_TYPES.KNIGHT]) {
-            const move = createMove(
-              this.generateMoveId(state, piece, capturePos),
-              piece.id,
-              fromPos,
-              capturePos,
-              targetPiece.id,
-              { promotionType: promoType }
-            );
-            moves.push(move);
-          }
-        } else {
-          const move = createMove(
-            this.generateMoveId(state, piece, capturePos),
-            piece.id,
-            fromPos,
-            capturePos,
-            targetPiece.id
-          );
-          moves.push(move);
-        }
-      }
-
-      // En passant
-      const metadata = state.metadata as ChessGameStateMetadata | undefined;
-      if (metadata?.enPassantTarget) {
-        const epTarget = metadata.enPassantTarget;
-        const [epFile, epRank] = epTarget.coords;
-        
-        if (captureFile === epFile && captureRank === epRank) {
-          // Find the captured pawn
-          const capturedPawnRank = rank;
-          const capturedPawnPos = { coords: [captureFile, capturedPawnRank] as const };
-          const capturedPawn = getPieceAt(state.board, capturedPawnPos);
-          
-          if (capturedPawn && capturedPawn.type === PIECE_TYPES.PAWN && capturedPawn.owner !== piece.owner) {
-            const epMove = createMove(
-              this.generateMoveId(state, piece, capturePos),
-              piece.id,
-              fromPos,
-              capturePos,
-              capturedPawn.id,
-              { isEnPassant: true }
-            );
-            moves.push(epMove);
-          }
-        }
+        // Enemy piece - can capture
+        moves.push(createMove(
+          this.generateMoveId(state, piece, capturePos),
+          piece.id,
+          fromPos,
+          capturePos,
+          targetPiece.id
+        ));
       }
     }
 
@@ -332,23 +277,66 @@ export class StandardChessRuleSet implements RuleSet {
   }
 
   /**
-   * Generate sliding piece moves (rook, bishop, queen)
+   * Generate knight moves (L-shape: 2+1 or 1+2)
+   */
+  private generateKnightMoves(state: GameState, piece: any): Move[] {
+    const moves: Move[] = [];
+    const fromPos = piece.position!;
+    const [startFile, startRank] = fromPos.coords as [number, number];
+
+    // All 8 knight moves
+    const knightMoves: Direction[] = [
+      [1, 2], [2, 1], [2, -1], [1, -2],
+      [-1, -2], [-2, -1], [-2, 1], [-1, 2]
+    ];
+
+    for (const [df, dr] of knightMoves) {
+      const newFile = startFile + df;
+      const newRank = startRank + dr;
+
+      if (newFile < 0 || newFile > 7 || newRank < 0 || newRank > 7) continue;
+
+      const toPos = { coords: [newFile, newRank] as const };
+      const targetPiece = getPieceAt(state.board, toPos);
+
+      if (!targetPiece) {
+        // Empty square
+        moves.push(createMove(
+          this.generateMoveId(state, piece, toPos),
+          piece.id,
+          fromPos,
+          toPos
+        ));
+      } else if (targetPiece.owner !== piece.owner) {
+        // Enemy piece - capture
+        moves.push(createMove(
+          this.generateMoveId(state, piece, toPos),
+          piece.id,
+          fromPos,
+          toPos,
+          targetPiece.id
+        ));
+      }
+      // Friendly piece - skip
+    }
+
+    return moves;
+  }
+
+  /**
+   * Generate sliding piece moves (bishop, rook, queen)
    */
   private generateSlidingMoves(
     state: GameState,
     piece: any,
-    directions: readonly number[][],
-    maxSteps: number
+    directions: readonly Direction[]
   ): Move[] {
     const moves: Move[] = [];
     const fromPos = piece.position!;
-    const [startFile, startRank] = fromPos.coords;
-
-    
-    const { createMove, getPieceAt } = await import('@chess-kernel/core');
+    const [startFile, startRank] = fromPos.coords as [number, number];
 
     for (const [df, dr] of directions) {
-      for (let step = 1; step <= maxSteps; step++) {
+      for (let step = 1; step <= 7; step++) {
         const newFile = startFile + df * step;
         const newRank = startRank + dr * step;
 
@@ -359,26 +347,24 @@ export class StandardChessRuleSet implements RuleSet {
 
         if (!targetPiece) {
           // Empty square - can move here
-          const move = createMove(
+          moves.push(createMove(
             this.generateMoveId(state, piece, toPos),
             piece.id,
             fromPos,
             toPos
-          );
-          moves.push(move);
+          ));
         } else if (targetPiece.owner !== piece.owner) {
-          // Enemy piece - can capture
-          const move = createMove(
+          // Enemy piece - can capture, then stop
+          moves.push(createMove(
             this.generateMoveId(state, piece, toPos),
             piece.id,
             fromPos,
             toPos,
             targetPiece.id
-          );
-          moves.push(move);
-          break; // Can't go further after capture
+          ));
+          break;
         } else {
-          // Friendly piece - blocked
+          // Friendly piece - blocked, stop
           break;
         }
       }
@@ -388,59 +374,44 @@ export class StandardChessRuleSet implements RuleSet {
   }
 
   /**
-   * Generate castling moves for king
+   * Generate king moves (one step in any direction)
+   * TODO: Add castling later
    */
-  private generateCastlingMoves(state: GameState, piece: any): Move[] {
+  private generateKingMoves(state: GameState, piece: any): Move[] {
     const moves: Move[] = [];
     const fromPos = piece.position!;
-    const [file, rank] = fromPos.coords;
-    const isWhite = piece.owner === state.players[0];
-    
-    const metadata = state.metadata as ChessGameStateMetadata | undefined;
-    if (!metadata?.castlingRights) return moves;
+    const [startFile, startRank] = fromPos.coords as [number, number];
 
-    
-    const { createMove, getPieceAt } = await import('@chess-kernel/core');
+    // All 8 king moves
+    const kingMoves: Direction[] = [
+      [0, 1], [1, 1], [1, 0], [1, -1],
+      [0, -1], [-1, -1], [-1, 0], [-1, 1]
+    ];
 
-    // Kingside castling
-    const kingsideRight = isWhite ? 'K' : 'k';
-    if (metadata.castlingRights.has(kingsideRight)) {
-      // Check if path is clear and not attacked
-      const pathClear = !getPieceAt(state.board, { coords: [5, rank] as const }) &&
-                       !getPieceAt(state.board, { coords: [6, rank] as const });
-      
-      if (pathClear) {
-        const toPos = { coords: [6, rank] as const };
-        const move = createMove(
+    for (const [df, dr] of kingMoves) {
+      const newFile = startFile + df;
+      const newRank = startRank + dr;
+
+      if (newFile < 0 || newFile > 7 || newRank < 0 || newRank > 7) continue;
+
+      const toPos = { coords: [newFile, newRank] as const };
+      const targetPiece = getPieceAt(state.board, toPos);
+
+      if (!targetPiece) {
+        moves.push(createMove(
+          this.generateMoveId(state, piece, toPos),
+          piece.id,
+          fromPos,
+          toPos
+        ));
+      } else if (targetPiece.owner !== piece.owner) {
+        moves.push(createMove(
           this.generateMoveId(state, piece, toPos),
           piece.id,
           fromPos,
           toPos,
-          undefined,
-          { isCastling: true, castlingRookId: isWhite ? 'w-rook-7' : 'b-rook-7' }
-        );
-        moves.push(move);
-      }
-    }
-
-    // Queenside castling
-    const queensideRight = isWhite ? 'Q' : 'q';
-    if (metadata.castlingRights.has(queensideRight)) {
-      const pathClear = !getPieceAt(state.board, { coords: [1, rank] as const }) &&
-                       !getPieceAt(state.board, { coords: [2, rank] as const }) &&
-                       !getPieceAt(state.board, { coords: [3, rank] as const });
-      
-      if (pathClear) {
-        const toPos = { coords: [2, rank] as const };
-        const move = createMove(
-          this.generateMoveId(state, piece, toPos),
-          piece.id,
-          fromPos,
-          toPos,
-          undefined,
-          { isCastling: true, castlingRookId: isWhite ? 'w-rook-0' : 'b-rook-0' }
-        );
-        moves.push(move);
+          targetPiece.id
+        ));
       }
     }
 
@@ -448,351 +419,146 @@ export class StandardChessRuleSet implements RuleSet {
   }
 
   /**
-   * Validates if a move is legal
+   * Direction helpers for sliding pieces
    */
-  isValidMove(state: GameState, move: Move): boolean {
-    // First check if move is in generated moves
-    const allMoves = this.generateMoves(state, state.currentPlayer);
-    const moveExists = allMoves.some(m => m.id === move.id);
-    
-    if (!moveExists) return false;
+  private getBishopDirections(): readonly Direction[] {
+    return [[1, 1], [1, -1], [-1, -1], [-1, 1]] as const;
+  }
 
-    // Check if move would leave king in check
-    const testState = this.executeMoveWithoutValidation(state, move);
-    if (this.isKingInCheck(testState, state.currentPlayer)) {
-      return false;
-    }
+  private getRookDirections(): readonly Direction[] {
+    return [[0, 1], [1, 0], [0, -1], [-1, 0]] as const;
+  }
 
-    // Additional validation for castling (path must not be attacked)
-    if (move.metadata?.isCastling) {
-      if (this.isPathAttacked(state, move.from, move.to, state.currentPlayer)) {
-        return false;
-      }
-    }
-
-    return true;
+  private getQueenDirections(): readonly Direction[] {
+    return [...this.getBishopDirections(), ...this.getRookDirections()];
   }
 
   /**
-   * Executes a validated move
+   * Validates if a move is legal
+   * For now, just checks if move is in generated moves
+   * TODO: Add check validation
+   */
+  isValidMove(state: GameState, move: Move): boolean {
+    const allMoves = this.generateMoves(state, state.currentPlayer);
+    return allMoves.some(m => m.id === move.id);
+  }
+
+  /**
+   * Executes a validated move and returns new game state
    */
   executeMove(state: GameState, move: Move): GameState {
-    
-    const { movePieceOnBoard, getPieceAt, serializePosition, deserializePosition } = await import('@chess-kernel/core');
-    
     const piece = state.board.pieces.get(move.pieceId);
     if (!piece) throw new Error('Piece not found');
 
-    let newBoard = state.board;
+    // Move the piece on the board
+    const newBoard = movePieceOnBoard(state.board, move.pieceId, move.to);
+    if (!newBoard) throw new Error('Invalid move');
 
-    // Handle castling (move rook too)
-    if (move.metadata?.isCastling && move.metadata.castlingRookId) {
-      const rook = state.board.pieces.get(move.metadata.castlingRookId);
-      if (rook && rook.position) {
-        const rookToRank = rook.position.coords[1];
-        const rookToFile = move.to.coords[0] > move.from.coords[0] ? 5 : 3;
-        const rookToPos = { coords: [rookToFile, rookToRank] as const };
-        
-        const rookMoveResult = movePieceOnBoard(newBoard, rook.id, rookToPos);
-        if (rookMoveResult) newBoard = rookMoveResult;
-      }
-    }
+    // Get captured piece if any
+    const capturedPiece = move.capturedPieceId 
+      ? state.board.pieces.get(move.capturedPieceId)
+      : undefined;
 
-    // Move the piece
-    const moveResult = movePieceOnBoard(newBoard, move.pieceId, move.to);
-    if (!moveResult) throw new Error('Invalid move');
-    newBoard = moveResult;
+    // Update metadata (en passant target, castling rights)
+    const newMetadata = this.updateMetadata(state, move, piece);
 
-    // Handle promotion
-    let movedPiece = newBoard.pieces.get(move.pieceId)!;
-    if (move.metadata?.promotionType && movedPiece.type === PIECE_TYPES.PAWN) {
-      
-    const { transformPiece } = await import('@chess-kernel/core');
-      movedPiece = transformPiece(movedPiece, move.metadata.promotionType);
-      
-      // Update piece in board
-      const newPieces = new Map(newBoard.pieces);
-      newPieces.set(movedPiece.id, movedPiece);
-      newBoard = Object.freeze({
-        ...newBoard,
-        pieces: newPieces as ReadonlyMap<string, any>
-      });
-    }
-
-    // Update metadata
-    const newMetadata = this.updateMetadata(state, move, newBoard);
-
-    // Apply move to state
-    const capturedPiece = move.capturedPieceId ? state.board.pieces.get(move.capturedPieceId) : undefined;
-    let newState = applyMove(state, move, newBoard, capturedPiece, newMetadata);
-
-    // Check for game over
-    const nextPlayer = newState.currentPlayer;
-    if (this.isKingInCheck(newState, nextPlayer)) {
-      if (!this.hasLegalMoves(newState, nextPlayer)) {
-        // Checkmate
-        const winner = state.currentPlayer;
-        newState = finishGame(newState, { winner, reason: 'checkmate' });
-      }
-    } else {
-      if (!this.hasLegalMoves(newState, nextPlayer)) {
-        // Stalemate
-        newState = finishGame(newState, { draw: true, reason: 'stalemate' });
-      }
-    }
-
-    return newState;
+    // Apply the move to game state
+    return applyMove(state, move, newBoard, capturedPiece, newMetadata);
   }
 
   /**
-   * Execute move without validation (for testing if move leaves king in check)
+   * Updates game metadata after a move
    */
-  private executeMoveWithoutValidation(state: GameState, move: Move): GameState {
+  private updateMetadata(
+    state: GameState,
+    move: Move,
+    piece: any
+  ): ChessGameStateMetadata | undefined {
+    const currentMetadata = state.metadata as ChessGameStateMetadata | undefined;
     
-    const { movePieceOnBoard } = await import('@chess-kernel/core');
-    
-    const piece = state.board.pieces.get(move.pieceId);
-    if (!piece) return state;
-
-    let newBoard = state.board;
-    const moveResult = movePieceOnBoard(newBoard, move.pieceId, move.to);
-    if (!moveResult) return state;
-    newBoard = moveResult;
-
-    const capturedPiece = move.capturedPieceId ? state.board.pieces.get(move.capturedPieceId) : undefined;
-    return applyMove(state, move, newBoard, capturedPiece);
-  }
-
-  /**
-   * Updates game state metadata after a move
-   */
-  private updateMetadata(state: GameState, move: Move, newBoard: any): ChessGameStateMetadata {
-    const metadata = state.metadata as ChessGameStateMetadata | undefined;
-    const newCastlingRights = metadata?.castlingRights ? new Set(metadata.castlingRights) : new Set<string>();
-    
-    const piece = state.board.pieces.get(move.pieceId)!;
-
-    // Update castling rights
-    if (piece.type === PIECE_TYPES.KING) {
-      const isWhite = piece.owner === state.players[0];
-      newCastlingRights.delete(isWhite ? 'K' : 'k');
-      newCastlingRights.delete(isWhite ? 'Q' : 'q');
-    }
-    
-    if (piece.type === PIECE_TYPES.ROOK) {
-      const [file, rank] = piece.position!.coords;
-      if (file === 0 && rank === 0) newCastlingRights.delete('Q');
-      if (file === 7 && rank === 0) newCastlingRights.delete('K');
-      if (file === 0 && rank === 7) newCastlingRights.delete('q');
-      if (file === 7 && rank === 7) newCastlingRights.delete('k');
-    }
-
     // Update en passant target
     let enPassantTarget: Position | undefined;
     if (piece.type === PIECE_TYPES.PAWN) {
-      const [fromFile, fromRank] = move.from.coords;
-      const [toFile, toRank] = move.to.coords;
+      const [fromFile, fromRank] = move.from.coords as [number, number];
+      const [toFile, toRank] = move.to.coords as [number, number];
       
+      // If pawn moved two squares, set en passant target
       if (Math.abs(toRank - fromRank) === 2) {
-        // Double pawn push - set en passant target
         const epRank = (fromRank + toRank) / 2;
         enPassantTarget = { coords: [fromFile, epRank] as const };
       }
     }
 
+    // Update castling rights
+    let castlingRights = currentMetadata?.castlingRights 
+      ? new Set(currentMetadata.castlingRights) 
+      : new Set(['K', 'Q', 'k', 'q']);
+
+    // Remove rights if king moves
+    if (piece.type === PIECE_TYPES.KING) {
+      if (piece.owner === state.players[0]) {
+        castlingRights.delete('K');
+        castlingRights.delete('Q');
+      } else {
+        castlingRights.delete('k');
+        castlingRights.delete('q');
+      }
+    }
+
+    // Remove rights if rook moves or is captured
+    if (piece.type === PIECE_TYPES.ROOK) {
+      const [fromFile, fromRank] = move.from.coords as [number, number];
+      if (piece.owner === state.players[0]) {
+        if (fromFile === 0 && fromRank === 0) castlingRights.delete('Q');
+        if (fromFile === 7 && fromRank === 0) castlingRights.delete('K');
+      } else {
+        if (fromFile === 0 && fromRank === 7) castlingRights.delete('q');
+        if (fromFile === 7 && fromRank === 7) castlingRights.delete('k');
+      }
+    }
+
     return {
-      castlingRights: newCastlingRights,
-      enPassantTarget
+      castlingRights,
+      enPassantTarget,
+      isCheck: false,
+      halfmoveClock: state.halfmoveClock
     };
   }
 
   /**
    * Checks if the game is over
+   * TODO: Implement checkmate and stalemate detection
    */
   checkGameOver(state: GameState): GameResult {
-    return state.result;
+    // Placeholder - will implement later
+    return null;
   }
 
   /**
    * Gets all positions attacked by a player's pieces
+   * TODO: Implement for check detection
    */
-  getAttackedPositions(state: GameState, player: PlayerId): Position[] {
-    const attackedPositions = new Map<string, Position>();
-
-    for (const [pieceId, piece] of state.board.pieces) {
-      if (piece.owner !== player || !piece.position) continue;
-
-      let attackPatterns: number[][];
-      
-      switch (piece.type) {
-        case PIECE_TYPES.PAWN:
-          attackPatterns = this.getPawnAttackDirections(piece.owner === state.players[0]);
-          this.addAttackPositions(state, piece, attackPatterns, 1, attackedPositions);
-          break;
-        case PIECE_TYPES.KNIGHT:
-          attackPatterns = this.getKnightDirections();
-          this.addAttackPositions(state, piece, attackPatterns, 1, attackedPositions);
-          break;
-        case PIECE_TYPES.BISHOP:
-          attackPatterns = this.getBishopDirections();
-          this.addAttackPositions(state, piece, attackPatterns, Infinity, attackedPositions);
-          break;
-        case PIECE_TYPES.ROOK:
-          attackPatterns = this.getRookDirections();
-          this.addAttackPositions(state, piece, attackPatterns, Infinity, attackedPositions);
-          break;
-        case PIECE_TYPES.QUEEN:
-          attackPatterns = this.getQueenDirections();
-          this.addAttackPositions(state, piece, attackPatterns, Infinity, attackedPositions);
-          break;
-        case PIECE_TYPES.KING:
-          attackPatterns = this.getKingDirections();
-          this.addAttackPositions(state, piece, attackPatterns, 1, attackedPositions);
-          break;
-      }
-    }
-
-    return Array.from(attackedPositions.values());
-  }
-
-  /**
-   * Helper to add attack positions for a piece
-   */
-  private addAttackPositions(
-    state: GameState,
-    piece: any,
-    directions: number[][],
-    maxSteps: number,
-    positions: Map<string, Position>
-  ) {
-    const [startFile, startRank] = piece.position!.coords;
-
-    for (const [df, dr] of directions) {
-      for (let step = 1; step <= maxSteps; step++) {
-        const newFile = startFile + df * step;
-        const newRank = startRank + dr * step;
-
-        if (newFile < 0 || newFile > 7 || newRank < 0 || newRank > 7) break;
-
-        const pos = { coords: [newFile, newRank] as const };
-        positions.set(`${newFile}:${newRank}`, pos);
-
-        // Stop at first piece for sliding pieces
-        if (maxSteps === Infinity) {
-          const targetPiece = getPieceAt(state.board, pos);
-          if (targetPiece) break;
-        }
-      }
-    }
+  getAttackedPositions(state: GameState, player: PlayerId): readonly Position[] {
+    // Placeholder - will implement later
+    return [];
   }
 
   /**
    * Gets piece definition by type
    */
-  getPieceDefinition(type: string): PieceDefinition | undefined {
-    return this.pieceDefinitions.find(pd => pd.type === type);
-  }
-
-  // Direction helpers
-  private getKingDirections(): number[][] {
-    return [[0, 1], [0, -1], [1, 0], [-1, 0], [1, 1], [1, -1], [-1, 1], [-1, -1]];
-  }
-
-  private getQueenDirections(): number[][] {
-    return [...this.getRookDirections(), ...this.getBishopDirections()];
-  }
-
-  private getRookDirections(): number[][] {
-    return [[0, 1], [0, -1], [1, 0], [-1, 0]];
-  }
-
-  private getBishopDirections(): number[][] {
-    return [[1, 1], [1, -1], [-1, 1], [-1, -1]];
-  }
-
-  private getKnightDirections(): number[][] {
-    return [[2, 1], [2, -1], [-2, 1], [-2, -1], [1, 2], [1, -2], [-1, 2], [-1, -2]];
-  }
-
-  private getPawnAttackDirections(isWhite: boolean): number[][] {
-    const direction = isWhite ? 1 : -1;
-    return [[-1, direction], [1, direction]];
-  }
-
-  /**
-   * Checks if a player's king is in check
-   */
-  private isKingInCheck(state: GameState, player: PlayerId): boolean {
-    // Find king
-    let kingPosition: Position | undefined;
-    
-    for (const [pieceId, piece] of state.board.pieces) {
-      if (piece.type === PIECE_TYPES.KING && piece.owner === player && piece.position) {
-        kingPosition = piece.position;
-        break;
-      }
-    }
-
-    if (!kingPosition) return false;
-
-    // Check if any enemy piece attacks king's position
-    const opponent = player === state.players[0] ? state.players[1] : state.players[0];
-    const attackedPositions = this.getAttackedPositions(state, opponent);
-    
-    return attackedPositions.some(pos => 
-      pos.coords[0] === kingPosition!.coords[0] && 
-      pos.coords[1] === kingPosition!.coords[1]
-    );
-  }
-
-  /**
-   * Checks if a player has any legal moves
-   */
-  private hasLegalMoves(state: GameState, player: PlayerId): boolean {
-    const allMoves = this.generateMoves(state, player);
-    return allMoves.some(move => this.isValidMove(state, move));
-  }
-
-  /**
-   * Checks if path between two positions is attacked
-   */
-  private isPathAttacked(state: GameState, from: Position, to: Position, player: PlayerId): boolean {
-    const [fromFile, fromRank] = from.coords;
-    const [toFile, toRank] = to.coords;
-    
-    const opponent = player === state.players[0] ? state.players[1] : state.players[0];
-    const attackedPositions = this.getAttackedPositions(state, opponent);
-
-    // Check all squares along the path
-    const df = Math.sign(toFile - fromFile);
-    const dr = Math.sign(toRank - fromRank);
-    
-    let currentFile = fromFile;
-    let currentRank = fromRank;
-    
-    while (currentFile !== toFile || currentRank !== toRank) {
-      currentFile += df;
-      currentRank += dr;
-      
-      const isAttacked = attackedPositions.some(pos => 
-        pos.coords[0] === currentFile && pos.coords[1] === currentRank
-      );
-      
-      if (isAttacked) return true;
-    }
-    
-    return false;
+  getPieceDefinition(type: PieceType): PieceDefinition | undefined {
+    return this.pieceDefinitions.find(def => def.type === type);
   }
 
   /**
    * Generates a unique move ID
    */
   private generateMoveId(state: GameState, piece: any, toPos: Position): string {
-    const [toFile, toRank] = toPos.coords;
-    const fileChars = 'abcdefgh';
-    return `${piece.id}-${fileChars[toFile]}${toRank + 1}`;
+    const fromKey = serializePosition(piece.position!);
+    const toKey = serializePosition(toPos);
+    return `${piece.id}-${fromKey}-${toKey}`;
   }
 }
 
-// Export singleton instance
-export const standardChessRuleSet = new StandardChessRuleSet();
+// Export default instance
+export const standardChess = new StandardChessRuleSet();
