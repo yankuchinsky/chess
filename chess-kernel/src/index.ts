@@ -75,3 +75,14 @@ export {
   MovementCondition,
   RuleSet
 } from './core/ruleset';
+
+// Movement pattern generator
+export {
+  MovementContext,
+  translatePosition,
+  generatePatternTargets,
+  generateAllTargets
+} from './rulesets/movement';
+
+// Built-in rulesets
+export { ChessRuleSet } from './rulesets/chess-ruleset';
