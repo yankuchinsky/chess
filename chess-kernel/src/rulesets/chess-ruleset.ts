@@ -18,6 +18,15 @@ import {
 } from '../state/game-state';
 import { MovementPattern, PieceDefinition, RuleSet } from '../core/ruleset';
 import { generatePatternTargets, translatePosition, MovementContext } from './movement';
+import { hasOrientation, OrientedBoard } from './geometry';
+import {
+  CHESS_PIECES,
+  STANDARD_PIECE_SPECS,
+  BACK_RANK_LAYOUT,
+  KING_FILE
+} from './chess/pieces';
+import { STANDARD_PATTERNS, PAWN_PUSH, PAWN_CAPTURE, FORWARD } from './chess/patterns';
+import { ChessRuleSetConfig, resolveConfig } from './chess/config';
 
 /**
  * Standard FIDE-style chess ruleset (square 8x8 boards).
@@ -25,6 +34,12 @@ import { generatePatternTargets, translatePosition, MovementContext } from './mo
  * Implements: all piece movements, captures, check/checkmate/stalemate,
  * castling, en passant, pawn promotion, fifty-move rule and basic
  * insufficient-material draw detection.
+ *
+ * Layering note: this file contains RULES only. The piece vocabulary lives in
+ * `chess/pieces.ts`, movement geometry in `chess/patterns.ts`, board
+ * orientation requirements in `geometry.ts` and tunable conventions in
+ * `chess/config.ts`. Variant rulesets compose those modules instead of
+ * copying this one.
  *
  * Coordinate convention: [file, rank], file 0..7 = a..h,
  * rank 0 = white back rank, rank 7 = black back rank (white moves "up").
@@ -55,18 +70,22 @@ function key(p: Position): string {
 }
 
 export class ChessRuleSet implements RuleSet {
-  readonly id = 'chess-standard';
-  readonly name = 'Standard Chess';
-  readonly requiredTopology = 'rect-8x8';
+  readonly id: string;
+  readonly name: string;
+  readonly requiredTopology: string;
 
-  readonly pieceDefinitions: readonly PieceDefinition[] = [
-    { type: 'pawn', name: 'Pawn', value: 1 },
-    { type: 'rook', name: 'Rook', value: 5 },
-    { type: 'knight', name: 'Knight', value: 3 },
-    { type: 'bishop', name: 'Bishop', value: 3 },
-    { type: 'queen', name: 'Queen', value: 9 },
-    { type: 'king', name: 'King', value: 0 }
-  ];
+  private readonly cfg: ReturnType<typeof resolveConfig>;
+  /** Orientation capability resolved from the board at setup time. */
+  private orientation?: OrientedBoard;
+
+  constructor(config: ChessRuleSetConfig = {}) {
+    this.cfg = resolveConfig(config);
+    this.id = this.cfg.id;
+    this.name = this.cfg.name;
+    this.requiredTopology = this.cfg.requiredTopology;
+  }
+
+  readonly pieceDefinitions: readonly PieceDefinition[] = STANDARD_PIECE_SPECS;
 
   getPieceDefinition(type: PieceType): PieceDefinition | undefined {
     return this.pieceDefinitions.find(d => d.type === type);
@@ -81,18 +100,20 @@ export class ChessRuleSet implements RuleSet {
 
     const white = players[0] ?? WHITE;
     const black = players[1] ?? BLACK;
-    const pieces: Piece[] = [];
+    // Boards that expose orientation opt into it; otherwise fall back to the
+    // configured default so plain test boards keep working.
+    this.orientation = hasOrientation(topology) ? topology : undefined;
+    const pieces: Piece[] = [] as Piece[];
     // deterministic ids: e.g. white-pawn-4 (e2), black-king-4 (e8)
     const add = (type: PieceType, owner: PlayerId, file: number, rank: number) => {
       pieces.push(createPiece(`${owner}-${type}-${file}`, type, owner, pos(file, rank)));
     };
 
-    const backRank: PieceType[] = ['rook', 'knight', 'bishop', 'queen', 'king', 'bishop', 'knight', 'rook'];
     for (let f = 0; f < 8; f++) {
-      add(backRank[f], white, f, 0);
-      add('pawn', white, f, 1);
-      add('pawn', black, f, 6);
-      add(backRank[f], black, f, 7);
+      add(BACK_RANK_LAYOUT[f], white, f, this.homeRankOf(white));
+      add(CHESS_PIECES.PAWN, white, f, this.pawnStartRankOf(white));
+      add(CHESS_PIECES.PAWN, black, f, this.pawnStartRankOf(black));
+      add(BACK_RANK_LAYOUT[f], black, f, this.homeRankOf(black));
     }
 
     const board = createBoard(topology, pieces);
@@ -110,81 +131,31 @@ export class ChessRuleSet implements RuleSet {
 
   // -------------------------------------------------------------- movement
 
-  /** Declares movement patterns per piece type; orientation depends on owner. */
-  patternsForOwner(type: PieceType, owner: PlayerId): readonly MovementPattern[] {
-    const dir = owner === WHITE ? 1 : -1;
-    const startRank = owner === WHITE ? 1 : 6;
-    const promoRank = owner === WHITE ? 7 : 0;
+  /**
+   * Movement patterns per piece type. Patterns are declared once (absolute
+   * deltas with a symbolic `FORWARD` step for pawns); the board's orientation
+   * resolves `FORWARD` per owner through the generator's `mapDirection` hook.
+   */
+  patternsFor(type: PieceType): readonly MovementPattern[] {
+    return STANDARD_PATTERNS[type] ?? [];
+  }
 
-    switch (type) {
-      case 'pawn':
-        return [
-          {
-            id: 'pawn-push',
-            directions: [{ delta: [0, dir], minSteps: 1, maxSteps: 2 }],
-            isSliding: false,
-            canCapture: false,
-            canMoveEmpty: true,
-            metadata: { startRank, promoRank }
-          },
-          {
-            id: 'pawn-capture',
-            directions: [
-              { delta: [-1, dir], minSteps: 1, maxSteps: 1 },
-              { delta: [1, dir], minSteps: 1, maxSteps: 1 }
-            ],
-            isSliding: false,
-            canCapture: true,
-            canMoveEmpty: false,
-            metadata: { promoRank }
-          }
-        ];
-      case 'knight':
-        return [{
-          id: 'knight',
-          directions: ([[-1, -2], [1, -2], [-2, -1], [2, -1],
-                        [-2, 1], [2, 1], [-1, 2], [1, 2]] as number[][]).map(delta => ({ delta })),
-          isSliding: false,
-          canCapture: true,
-          canMoveEmpty: true
-        }];
-      case 'bishop':
-        return [{
-          id: 'bishop',
-          directions: ([[-1, -1], [1, -1], [-1, 1], [1, 1]] as number[][]).map(delta => ({ delta })),
-          isSliding: true,
-          canCapture: true,
-          canMoveEmpty: true
-        }];
-      case 'rook':
-        return [{
-          id: 'rook',
-          directions: ([[0, -1], [0, 1], [-1, 0], [1, 0]] as number[][]).map(delta => ({ delta })),
-          isSliding: true,
-          canCapture: true,
-          canMoveEmpty: true
-        }];
-      case 'queen':
-        return [{
-          id: 'queen',
-          directions: ([[0, -1], [0, 1], [-1, 0], [1, 0],
-                        [-1, -1], [1, -1], [-1, 1], [1, 1]] as number[][]).map(delta => ({ delta })),
-          isSliding: true,
-          canCapture: true,
-          canMoveEmpty: true
-        }];
-      case 'king':
-        return [{
-          id: 'king',
-          directions: ([[0, -1], [0, 1], [-1, 0], [1, 0],
-                        [-1, -1], [1, -1], [-1, 1], [1, 1]] as number[][]).map(delta => ({ delta })),
-          isSliding: false,
-          canCapture: true,
-          canMoveEmpty: true
-        }];
-      default:
-        return [];
-    }
+  private movementCtx(board: Board, piece: Piece): MovementContext {
+    const forward = (player: PlayerId): readonly number[] => {
+      if (this.orientation) return this.orientation.forwardOf(player);
+      // Default rectangular convention: first player advances along +rank.
+      const sign = this.isFirstPlayer(player) ? 1 : -1;
+      return [0, sign];
+    };
+    return {
+      board,
+      piece,
+      mapDirection: (delta, owner) => {
+        if (delta[this.cfg.orientation.rankIndex] !== FORWARD) return delta;
+        const fwd = forward(owner);
+        return delta.map((d, i) => (i === this.cfg.orientation.rankIndex ? fwd[i] : d));
+      }
+    };
   }
 
   /** Pseudo-legal moves (may leave own king in check). Includes specials. */
@@ -197,22 +168,23 @@ export class ChessRuleSet implements RuleSet {
     const ownPieces = [...state.board.pieces.values()].filter(p => p.owner === player && p.position);
 
     for (const piece of ownPieces) {
-      const patterns = this.patternsForOwner(piece.type, piece.owner);
+      const patterns = this.patternsFor(piece.type);
 
       for (const pattern of patterns) {
-        const ctx: MovementContext = { board: state.board, piece };
+        const ctx = this.movementCtx(state.board, piece);
         let targets = generatePatternTargets(ctx, pattern);
 
-        if (pattern.id === 'pawn-push') {
-          const { startRank, promoRank } = pattern.metadata as { startRank: number; promoRank: number };
-          const [, fromRank] = piece.position!.coords as [number, number];
+        if (pattern === PAWN_PUSH) {
+          const startRank = this.pawnStartRankOf(piece.owner);
+          const promoRank = this.promotionRankOf(piece.owner);
+          const fromRank = this.rankOf(piece.position!);
           // two-step only from the start rank (generator already stops lines on occupied cells)
           targets = targets.filter(t => {
-            const [, rank] = t.coords as [number, number];
+            const rank = this.rankOf(t);
             return Math.abs(rank - fromRank) === 2 ? fromRank === startRank : true;
           });
           for (const to of targets) {
-            const isPromotion = to.coords[1] === promoRank;
+            const isPromotion = this.rankOf(to) === promoRank;
             for (const promo of this.promotionOptions(piece, isPromotion)) {
               moves.push(createMove(nextId(), piece.id, piece.position!, to, undefined, promo));
             }
@@ -220,11 +192,11 @@ export class ChessRuleSet implements RuleSet {
           continue;
         }
 
-        if (pattern.id === 'pawn-capture') {
-          const promoRank = (pattern.metadata as { promoRank: number }).promoRank;
+        if (pattern === PAWN_CAPTURE) {
+          const promoRank = this.promotionRankOf(piece.owner);
           for (const to of targets) {
             const captured = getPieceAt(state.board, to)!;
-            const isPromotion = to.coords[1] === promoRank;
+            const isPromotion = this.rankOf(to) === promoRank;
             for (const promo of this.promotionOptions(piece, isPromotion)) {
               moves.push(createMove(nextId(), piece.id, piece.position!, to, captured.id, promo));
             }
@@ -233,9 +205,12 @@ export class ChessRuleSet implements RuleSet {
           // En passant: diagonal onto the (empty) target square behind an enemy pawn
           const ep = meta.enPassantTarget;
           if (ep) {
-            const [pf, pr] = piece.position!.coords as [number, number];
-            const [ef, er] = ep.coords as [number, number];
-            if (Math.abs(ef - pf) === 1 && er === pr + (piece.owner === WHITE ? 1 : -1)) {
+            const pf = this.fileOf(piece.position!);
+            const pr = this.rankOf(piece.position!);
+            const ef = this.fileOf(ep);
+            const er = this.rankOf(ep);
+            const fwdSign = Math.sign(this.forwardDelta(piece.owner)[this.cfg.orientation.rankIndex]);
+            if (Math.abs(ef - pf) === 1 && er === pr + fwdSign) {
               const victim = getPieceAt(state.board, pos(ef, pr));
               if (victim && victim.owner !== player) {
                 moves.push(createMove(nextId(), piece.id, piece.position!, ep, victim.id, { isEnPassant: true }));
@@ -255,14 +230,15 @@ export class ChessRuleSet implements RuleSet {
     // Castling
     const rights = meta.castlingRights[player];
     if (rights) {
-      const king = ownPieces.find(p => p.type === 'king');
+      const king = ownPieces.find(p => this.isRoyal(p.type));
       if (king) {
-        const [kf, kr] = king.position!.coords as [number, number];
-        if (kf === 4 && kr === this.backRankOf(player)) {
+        const kf = this.fileOf(king.position!);
+        const kr = this.rankOf(king.position!);
+        if (kf === KING_FILE && kr === this.homeRankOf(player)) {
           const opp = this.opponent(player);
           const attacked = new Set(this.getAttackedPositions(state, opp).map(key));
-          const rookK = getPieceAt(state.board, pos(7, kr));
-          const rookQ = getPieceAt(state.board, pos(0, kr));
+          const rookK = getPieceAt(state.board, pos(this.cfg.castleRookFiles.kingSide, kr));
+          const rookQ = getPieceAt(state.board, pos(this.cfg.castleRookFiles.queenSide, kr));
 
           const pathFree = (files: number[]) => files.every(f => !getPieceAt(state.board, pos(f, kr)));
           // a square is unsafe if attacked OR occupied by an enemy piece (captures count as attacks)
@@ -272,12 +248,12 @@ export class ChessRuleSet implements RuleSet {
             return !(occ && occ.owner !== player);
           });
 
-          if (rights.kingSide && rookK?.type === 'rook' && rookK.owner === player &&
+          if (rights.kingSide && rookK?.type === CHESS_PIECES.ROOK && rookK.owner === player &&
               pathFree([5, 6]) && pathSafe([4, 5, 6])) {
             moves.push(createMove(nextId(), king.id, king.position!, pos(6, kr), undefined,
               { isCastling: true, castlingRookId: rookK.id }));
           }
-          if (rights.queenSide && rookQ?.type === 'rook' && rookQ.owner === player &&
+          if (rights.queenSide && rookQ?.type === CHESS_PIECES.ROOK && rookQ.owner === player &&
               pathFree([1, 2, 3]) && pathSafe([4, 3, 2])) {
             moves.push(createMove(nextId(), king.id, king.position!, pos(2, kr), undefined,
               { isCastling: true, castlingRookId: rookQ.id }));
@@ -326,13 +302,13 @@ export class ChessRuleSet implements RuleSet {
 
     // Castling: move the rook too
     if (move.metadata?.isCastling && move.metadata.castlingRookId) {
-      const rank = move.to.coords[1] as number;
-      const rookToFile = (move.to.coords[0] as number) === 6 ? 5 : 3;
+      const rank = this.rankOf(move.to);
+      const rookToFile = this.fileOf(move.to) === 6 ? 5 : 3;
       board = movePieceOnBoard(board, move.metadata.castlingRookId, pos(rookToFile, rank)) ?? board;
     }
 
     // Promotion
-    if (move.metadata?.promotionType && piece.type === 'pawn') {
+    if (move.metadata?.promotionType && piece.type === CHESS_PIECES.PAWN) {
       const promoted = transformPiece(piece, move.metadata.promotionType as PieceType);
       board = replacePieceOnBoard(board, promoted);
     }
@@ -342,31 +318,33 @@ export class ChessRuleSet implements RuleSet {
     const loseAll = (owner: PlayerId) => {
       if (rights[owner]) rights[owner] = { kingSide: false, queenSide: false };
     };
-    if (piece.type === 'king') loseAll(piece.owner);
-    if (captured?.type === 'rook' && captured.position) {
-      const [cf, cr] = captured.position.coords as [number, number];
+    if (this.isRoyal(piece.type)) loseAll(piece.owner);
+    if (captured?.type === CHESS_PIECES.ROOK && captured.position) {
+      const cf = this.fileOf(captured.position);
+      const cr = this.rankOf(captured.position);
       const owner = captured.owner;
-      if (rights[owner] && cr === this.backRankOf(owner)) {
-        if (cf === 0) rights[owner] = { ...rights[owner], queenSide: false };
-        if (cf === 7) rights[owner] = { ...rights[owner], kingSide: false };
+      if (rights[owner] && cr === this.homeRankOf(owner)) {
+        if (cf === this.cfg.castleRookFiles.queenSide) rights[owner] = { ...rights[owner], queenSide: false };
+        if (cf === this.cfg.castleRookFiles.kingSide) rights[owner] = { ...rights[owner], kingSide: false };
       }
     }
-    if (piece.type === 'rook' && piece.position) {
-      const [f, r] = piece.position.coords as [number, number];
+    if (piece.type === CHESS_PIECES.ROOK && piece.position) {
+      const f = this.fileOf(piece.position);
+      const r = this.rankOf(piece.position);
       const owner = piece.owner;
-      if (rights[owner] && r === this.backRankOf(owner)) {
-        if (f === 0) rights[owner] = { ...rights[owner], queenSide: false };
-        if (f === 7) rights[owner] = { ...rights[owner], kingSide: false };
+      if (rights[owner] && r === this.homeRankOf(owner)) {
+        if (f === this.cfg.castleRookFiles.queenSide) rights[owner] = { ...rights[owner], queenSide: false };
+        if (f === this.cfg.castleRookFiles.kingSide) rights[owner] = { ...rights[owner], kingSide: false };
       }
     }
 
     // En passant target: set only after a double pawn push
     let enPassantTarget: Position | null = null;
-    if (piece.type === 'pawn') {
-      const [, fromRank] = move.from.coords as [number, number];
-      const [, toRank] = move.to.coords as [number, number];
+    if (piece.type === CHESS_PIECES.PAWN) {
+      const fromRank = this.rankOf(move.from);
+      const toRank = this.rankOf(move.to);
       if (Math.abs(toRank - fromRank) === 2) {
-        enPassantTarget = pos(move.to.coords[0] as number, (fromRank + toRank) / 2);
+        enPassantTarget = pos(this.fileOf(move.to), (fromRank + toRank) / 2);
       }
     }
 
@@ -374,7 +352,7 @@ export class ChessRuleSet implements RuleSet {
 
     const advanced = applyMove(state, move, board, captured, newMetadata);
     // Fix halfmove clock: core applyMove cannot know about pawn moves (see its TODO)
-    const resets = !!captured || piece.type === 'pawn';
+    const resets = !!captured || piece.type === CHESS_PIECES.PAWN;
     return Object.freeze({
       ...advanced,
       halfmoveClock: resets ? 0 : advanced.halfmoveClock
@@ -385,7 +363,7 @@ export class ChessRuleSet implements RuleSet {
 
   isInCheck(state: GameState, player: PlayerId): boolean {
     const king = [...state.board.pieces.values()]
-      .find(p => p.type === 'king' && p.owner === player && p.position);
+      .find(p => this.isRoyal(p.type) && p.owner === player && p.position);
     if (!king) return false;
     if (this.kingsAreFacing(state)) return true;
     return this.getAttackedPositions(state, this.opponent(player))
@@ -394,9 +372,11 @@ export class ChessRuleSet implements RuleSet {
 
   /** True when the two kings share an unobstructed line (illegal in chess). */
   private kingsAreFacing(state: GameState): boolean {
-    const kings = [...state.board.pieces.values()].filter(p => p.type === 'king' && p.position);
+    const kings = [...state.board.pieces.values()]
+      .filter(p => this.isRoyal(p.type) && p.position);
     if (kings.length < 2) return false;
-    const [[f1, r1], [f2, r2]] = kings.map(k => k.position!.coords as [number, number]);
+    const f1 = this.fileOf(kings[0].position!), r1 = this.rankOf(kings[0].position!);
+    const f2 = this.fileOf(kings[1].position!), r2 = this.rankOf(kings[1].position!);
     if (f1 !== f2 && r1 !== r2 && Math.abs(f1 - f2) !== Math.abs(r1 - r2)) return false;
     const df = Math.sign(f2 - f1), dr = Math.sign(r2 - r1);
     let f = f1 + df, r = r1 + dr;
@@ -413,18 +393,13 @@ export class ChessRuleSet implements RuleSet {
     const pieces = [...state.board.pieces.values()].filter(p => p.owner === player && p.position);
 
     for (const piece of pieces) {
-      if (piece.type === 'pawn') {
-        const dir = piece.owner === WHITE ? 1 : -1;
-        for (const df of [-1, 1]) {
-          const t = translatePosition(piece.position!, [df, dir]);
-          if (t && state.board.topology.isValidPosition(t)) attacked.push(t);
-        }
+      if (piece.type === CHESS_PIECES.PAWN) {
+        attacked.push(...this.pawnAttackSquares(state.board, piece));
         continue;
       }
 
-      const patterns = this.patternsForOwner(piece.type, player);
-      for (const pattern of patterns) {
-        for (const t of generatePatternTargets({ board: state.board, piece }, pattern)) {
+      for (const pattern of this.patternsFor(piece.type)) {
+        for (const t of generatePatternTargets(this.movementCtx(state.board, piece), pattern)) {
           // A king attacks adjacent empty/enemy-occupied squares but never
           // squares defended by the enemy king (handled via facing-kings rule).
           attacked.push(t);
@@ -440,48 +415,7 @@ export class ChessRuleSet implements RuleSet {
    * "kings may never face each other" rule without risking infinite recursion.
    */
   isSquareAttackedBy(state: GameState, square: Position, byPlayer: PlayerId): boolean {
-    const pieces = [...state.board.pieces.values()]
-      .filter(p => p.owner === byPlayer && p.position);
-    for (const piece of pieces) {
-      if (piece.type === 'pawn') {
-        const dir = byPlayer === WHITE ? 1 : -1;
-        for (const df of [-1, 1]) {
-          const t = translatePosition(piece.position!, [df, dir]);
-          if (t && positionsEqual(t, square)) return true;
-        }
-        continue;
-      }
-      for (const pattern of this.patternsForOwner(piece.type, byPlayer)) {
-        if (generatePatternTargets({ board: state.board, piece }, pattern)
-            .some(t => positionsEqual(t, square))) {
-          return true;
-        }
-      }
-    }
-    return false;
-  }
-
-  /** True if `square` is attacked by any NON-KING piece of `byPlayer` (pawns included). */
-  isSquareAttackedByNonKing(state: GameState, square: Position, byPlayer: PlayerId): boolean {
-    const pieces = [...state.board.pieces.values()]
-      .filter(p => p.owner === byPlayer && p.position && p.type !== 'king');
-    for (const piece of pieces) {
-      if (piece.type === 'pawn') {
-        const dir = byPlayer === WHITE ? 1 : -1;
-        for (const df of [-1, 1]) {
-          const t = translatePosition(piece.position!, [df, dir]);
-          if (t && positionsEqual(t, square)) return true;
-        }
-        continue;
-      }
-      for (const pattern of this.patternsForOwner(piece.type, byPlayer)) {
-        if (generatePatternTargets({ board: state.board, piece }, pattern)
-            .some(t => positionsEqual(t, square))) {
-          return true;
-        }
-      }
-    }
-    return false;
+    return this.getAttackedPositions(state, byPlayer).some(p => positionsEqual(p, square));
   }
 
   // ------------------------------------------------------------- game over
@@ -527,15 +461,16 @@ export class ChessRuleSet implements RuleSet {
   }
 
   private isInsufficientMaterial(state: GameState): boolean {
-    const nonKings = [...state.board.pieces.values()].filter(p => p.type !== 'king');
-    if (nonKings.length === 0) return true; // K vs K
-    if (nonKings.length === 1) {
-      const t = nonKings[0].type;
-      return t === 'bishop' || t === 'knight'; // lone minor cannot mate
+    const nonRoyal = [...state.board.pieces.values()].filter(p => !this.isRoyal(p.type));
+    if (nonRoyal.length === 0) return true; // lone royals only
+    if (nonRoyal.length === 1) {
+      const t = nonRoyal[0].type;
+      return t === CHESS_PIECES.BISHOP || t === CHESS_PIECES.KNIGHT; // lone minor cannot mate
     }
-    if (nonKings.length === 2 && nonKings.every(p => p.type === 'bishop')) {
-      const colors = nonKings.map(p => {
-        const [f, r] = p.position!.coords as [number, number];
+    if (nonRoyal.length === 2 && nonRoyal.every(p => p.type === CHESS_PIECES.BISHOP)) {
+      const colors = nonRoyal.map(p => {
+        const f = this.fileOf(p.position!);
+        const r = this.rankOf(p.position!);
         return (f + r) % 2;
       });
       if (colors[0] === colors[1]) return true; // same-color bishops
@@ -550,8 +485,8 @@ export class ChessRuleSet implements RuleSet {
     piece: Piece,
     isPromotion: boolean
   ): ReadonlyArray<{ promotionType?: PieceType } | undefined> {
-    if (!isPromotion || piece.type !== 'pawn') return [undefined];
-    return ['queen', 'rook', 'bishop', 'knight'].map(t => ({ promotionType: t as PieceType }));
+    if (!isPromotion || piece.type !== CHESS_PIECES.PAWN) return [undefined];
+    return this.cfg.promotionTargets.map(t => ({ promotionType: t }));
   }
 
   /** Moves match when piece/from/to agree; promotion type must agree too. */
@@ -562,12 +497,74 @@ export class ChessRuleSet implements RuleSet {
       a.metadata?.promotionType === b.metadata?.promotionType;
   }
 
-  private opponent(player: PlayerId): PlayerId {
-    return player === WHITE ? BLACK : WHITE;
+  private isFirstPlayer(player: PlayerId): boolean {
+    return player === this.cfg.orientation.firstPlayer;
   }
 
-  private backRankOf(player: PlayerId): number {
-    return player === WHITE ? 0 : 7;
+  private opponent(player: PlayerId): PlayerId {
+    return this.isFirstPlayer(player) ? this.cfg.orientation.secondPlayer : this.cfg.orientation.firstPlayer;
+  }
+
+  private isRoyal(type: PieceType): boolean {
+    return this.cfg.royalTypes.includes(type);
+  }
+
+  private homeRankOf(player: PlayerId): number {
+    if (this.orientation) return this.orientation.homeRankOf(player);
+    return this.isFirstPlayer(player)
+      ? this.cfg.orientation.homeRankFirst
+      : this.cfg.orientation.homeRankSecond;
+  }
+
+  private pawnStartRankOf(player: PlayerId): number {
+    if (this.orientation) return this.orientation.pawnStartRankOf(player);
+    return this.isFirstPlayer(player)
+      ? this.cfg.orientation.pawnStartRankFirst
+      : this.cfg.orientation.pawnStartRankSecond;
+  }
+
+  /** Pawns promote on the opposing side's home rank. */
+  private promotionRankOf(player: PlayerId): number {
+    return this.homeRankOf(this.opponent(player));
+  }
+
+  private forwardDelta(player: PlayerId): readonly number[] {
+    if (this.orientation) return this.orientation.forwardOf(player);
+    const delta: number[] = [];
+    for (let i = 0; i <= this.cfg.orientation.rankIndex; i++) delta.push(0);
+    delta[this.cfg.orientation.rankIndex] = this.isFirstPlayer(player) ? 1 : -1;
+    return delta;
+  }
+
+  /** Squares a pawn attacks (diagonally ahead), orientation-aware. */
+  private pawnAttackSquares(board: Board, piece: Piece): Position[] {
+    const fwd = this.forwardDelta(piece.owner);
+    const fileAxis = this.cfg.orientation.rankIndex === 1 ? 0 : 1;
+    const out: Position[] = [];
+    for (const df of [-1, 1]) {
+      const delta = [...fwd];
+      delta[fileAxis] = df;
+      const t = translatePosition(piece.position!, delta);
+      if (t && board.topology.isValidPosition(t)) out.push(t);
+    }
+    return out;
+  }
+
+  private rankOf(position: Position): number {
+    const value = position.coords[this.cfg.orientation.rankIndex];
+    if (typeof value !== 'number') {
+      throw new Error(`Non-numeric rank in position [${position.coords}]`);
+    }
+    return value;
+  }
+
+  private fileOf(position: Position): number {
+    const fileIndex = this.cfg.orientation.rankIndex === 1 ? 0 : 1;
+    const value = position.coords[fileIndex];
+    if (typeof value !== 'number') {
+      throw new Error(`Non-numeric file in position [${position.coords}]`);
+    }
+    return value;
   }
 }
 
