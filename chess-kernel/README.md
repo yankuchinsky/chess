@@ -149,6 +149,14 @@ class CrazyhouseRuleSet extends ChessRuleSet {
 }
 ```
 
+## Package Documentation
+
+Per-directory docs describe each layer's responsibility, contracts and dependency rules:
+
+- [`src/README.md`](./src/README.md) — map of all source directories
+- [`src/core/`](./src/core/README.md) · [`src/topology/`](./src/topology/README.md) · [`src/state/`](./src/state/README.md) · [`src/rulesets/`](./src/rulesets/README.md) · [`src/rulesets/chess/`](./src/rulesets/chess/README.md)
+- [`docs/specs/`](./docs/specs) — architectural RFC-style specifications (RCS-xxx)
+
 ## Core Concepts
 
 ### Position & Coordinates
