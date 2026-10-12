@@ -1,7 +1,26 @@
-import { Position, createPosition } from '../core/types';
+import { Position, PlayerId, createPosition } from '../core/types';
 import { Piece } from '../core/piece';
 import { Board, getPieceAt } from '../topology/board';
 import { MovementPattern } from '../core/ruleset';
+
+/**
+ * Direction remapping hook.
+ *
+ * The generic generator knows nothing about piece semantics; a ruleset can
+ * supply its own mapper to translate an abstract direction delta into board
+ * deltas for a given owner (e.g. "forward"/"backward" for pawns on a
+ * rectangular board). Without a mapper, deltas are used as-is — which is the
+ * natural behavior for symmetric pieces and non-rectangular topologies.
+ */
+export type DirectionMapper = (
+  delta: readonly number[],
+  owner: PlayerId
+) => readonly number[];
+
+/**
+ * Identity mapper: directions are absolute board deltas.
+ */
+export const identityDirectionMapper: DirectionMapper = (delta) => delta;
 
 /**
  * Generic movement-pattern generator.
@@ -17,6 +36,8 @@ export interface MovementContext {
   piece: Piece;
   /** Extra blocked positions supplied by the ruleset (e.g. castling path). */
   extraBlocked?: readonly Position[];
+  /** Ruleset-provided remapping of abstract direction deltas (see above). */
+  mapDirection?: DirectionMapper;
 }
 
 /**
@@ -55,12 +76,15 @@ export function generatePatternTargets(ctx: MovementContext, pattern: MovementPa
   for (const spec of pattern.directions) {
     const minSteps = spec.minSteps ?? 1;
     const maxSteps = spec.maxSteps ?? (pattern.isSliding ? Number.MAX_SAFE_INTEGER : 1);
+    const delta = ctx.mapDirection
+      ? ctx.mapDirection(spec.delta, ctx.piece.owner)
+      : spec.delta;
 
     let current: Position | null = ctx.piece.position ?? null;
     if (!current) continue;
 
     for (let step = 1; step <= maxSteps; step++) {
-      current = translatePosition(current, spec.delta);
+      current = translatePosition(current, delta);
       if (!current) break;
       if (!ctx.board.topology.isValidPosition(current)) break;
 
