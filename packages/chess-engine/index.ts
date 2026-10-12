@@ -1,7 +1,11 @@
 import ChessEngine from './ChessEngine';
-import Pieces from './pieces/Pieces';
-import Board from './Board';
-import PieceRenderer from './renderers/PieceRenderer';
-import Piece from './pieces/Piece';
+import BasePiecesStore from './pieces/PiecesStore/BasePiecesStore';
+import AbstractBoard from './AbstractBoard';
+import AbstractPiece from './pieces/AbstractPiece';
 
-export { ChessEngine, Pieces, Board, PieceRenderer, Piece };
+import type { TColor, TPiece, TPieceType } from './types'
+
+
+export { ChessEngine, BasePiecesStore, AbstractBoard, AbstractPiece };
+
+export { TColor, TPiece, TPieceType };

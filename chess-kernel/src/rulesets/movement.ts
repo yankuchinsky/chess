@@ -34,6 +34,12 @@ export const identityDirectionMapper: DirectionMapper = (delta) => delta;
 export interface MovementContext {
   board: Board;
   piece: Piece;
+  /**
+   * Optional override of the piece used for generation. Used by attack maps:
+   * a pawn attacks diagonally even though it moves forward, so probing its
+   * attacked squares requires pretending it is a different (symmetric) piece.
+   */
+  pieceOverride?: Piece;
   /** Extra blocked positions supplied by the ruleset (e.g. castling path). */
   extraBlocked?: readonly Position[];
   /** Ruleset-provided remapping of abstract direction deltas (see above). */
@@ -72,15 +78,16 @@ function isBlockedExtra(ctx: MovementContext, target: Position): boolean {
  */
 export function generatePatternTargets(ctx: MovementContext, pattern: MovementPattern): Position[] {
   const results: Position[] = [];
+  const piece = ctx.pieceOverride ?? ctx.piece;
 
   for (const spec of pattern.directions) {
     const minSteps = spec.minSteps ?? 1;
     const maxSteps = spec.maxSteps ?? (pattern.isSliding ? Number.MAX_SAFE_INTEGER : 1);
     const delta = ctx.mapDirection
-      ? ctx.mapDirection(spec.delta, ctx.piece.owner)
+      ? ctx.mapDirection(spec.delta, piece.owner)
       : spec.delta;
 
-    let current: Position | null = ctx.piece.position ?? null;
+    let current: Position | null = piece.position ?? null;
     if (!current) continue;
 
     for (let step = 1; step <= maxSteps; step++) {
@@ -92,7 +99,7 @@ export function generatePatternTargets(ctx: MovementContext, pattern: MovementPa
       if (isBlockedExtra(ctx, current)) break;
 
       if (occupant) {
-        const isEnemy = occupant.owner !== ctx.piece.owner;
+        const isEnemy = occupant.owner !== piece.owner;
         if (step >= minSteps && isEnemy && pattern.canCapture) {
           results.push(current);
         }

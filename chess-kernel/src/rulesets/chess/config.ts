@@ -36,6 +36,13 @@ export interface ChessRuleSetConfig {
   readonly royalTypes?: readonly PieceType[];
   /** Piece types a "step-2" pawn may promote to. */
   readonly promotionTargets?: readonly PieceType[];
+  /**
+   * Piece type whose movement pattern is reused as the pawn attack probe
+   * (one step diagonally ahead). Defaults to 'king' — the standard chess
+   * king steps exactly one square in every direction, and the dedicated
+   * `PAWN_ATTACK_PROBE` pattern restricts it to the two forward diagonals.
+   */
+  readonly attackProbeType?: PieceType;
   /** Files of the rooks eligible for castling. */
   readonly castleRookFiles?: { readonly kingSide: number; readonly queenSide: number };
 }
@@ -46,7 +53,8 @@ export const DEFAULT_CHESS_CONFIG: Required<Omit<ChessRuleSetConfig, 'orientatio
   requiredTopology: 'rect-8x8',
   royalTypes: ['king'],
   promotionTargets: ['queen', 'rook', 'bishop', 'knight'],
-  castleRookFiles: { kingSide: 7, queenSide: 0 }
+  castleRookFiles: { kingSide: 7, queenSide: 0 },
+  attackProbeType: 'king'
 };
 
 export const DEFAULT_ORIENTATION: ChessOrientation = {
@@ -67,6 +75,7 @@ export function resolveConfig(config: ChessRuleSetConfig = {}): {
   readonly requiredTopology: string;
   readonly royalTypes: readonly PieceType[];
   readonly promotionTargets: readonly PieceType[];
+  readonly attackProbeType: PieceType;
   readonly castleRookFiles: { kingSide: number; queenSide: number };
   readonly orientation: ChessOrientation;
   readonly extents: BoardExtents;

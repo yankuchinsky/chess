@@ -1,9 +1,19 @@
-import Piece from './Piece';
-import { Position, getPositionByCoordinates, getCoordinatesByPosition } from '../helpers';
+import RegularPiece from './RegularPiece';
+import AbstractPiece from './AbstractPiece';
+import { getPositionByCoordinates, getCoordinatesByPosition } from '../helpers';
+import Position from '../helpers/Position';
 
-class Knight<T> extends Piece<T> {
+class Knight<T> extends AbstractPiece<T> {
 
   calculateAvailableCels() {
+    this.availableCellsToMove = this.calculateCells();
+  };
+
+  calculateCellsToCapture() {
+    this.cellsToCapture = this.getAvailableCells();
+  }
+
+  calculateCells() {
     const curr = this.getCurrentPosition();
     const coordinates = getCoordinatesByPosition(curr);
     
@@ -33,8 +43,8 @@ class Knight<T> extends Piece<T> {
     });
     const positions = filteredCoordinates.map(c => getPositionByCoordinates(c));
 
-    this.availableCellsToMove = positions;
-  };
+    return positions;
+  }
 };
 
 export default Knight;

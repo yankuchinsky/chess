@@ -25,7 +25,7 @@ import {
   BACK_RANK_LAYOUT,
   KING_FILE
 } from './chess/pieces';
-import { STANDARD_PATTERNS, PAWN_PUSH, PAWN_CAPTURE, FORWARD } from './chess/patterns';
+import { STANDARD_PATTERNS, PAWN_PUSH, PAWN_CAPTURE, PAWN_ATTACK_PROBE, FORWARD } from './chess/patterns';
 import { ChessRuleSetConfig, resolveConfig } from './chess/config';
 
 /**
@@ -194,27 +194,21 @@ export class ChessRuleSet implements RuleSet {
 
         if (pattern === PAWN_CAPTURE) {
           const promoRank = this.promotionRankOf(piece.owner);
-          for (const to of targets) {
-            const captured = getPieceAt(state.board, to)!;
-            const isPromotion = this.rankOf(to) === promoRank;
-            for (const promo of this.promotionOptions(piece, isPromotion)) {
-              moves.push(createMove(nextId(), piece.id, piece.position!, to, captured.id, promo));
-            }
-          }
-
-          // En passant: diagonal onto the (empty) target square behind an enemy pawn
           const ep = meta.enPassantTarget;
-          if (ep) {
-            const pf = this.fileOf(piece.position!);
-            const pr = this.rankOf(piece.position!);
-            const ef = this.fileOf(ep);
-            const er = this.rankOf(ep);
-            const fwdSign = Math.sign(this.forwardDelta(piece.owner)[this.cfg.orientation.rankIndex]);
-            if (Math.abs(ef - pf) === 1 && er === pr + fwdSign) {
-              const victim = getPieceAt(state.board, pos(ef, pr));
-              if (victim && victim.owner !== player) {
-                moves.push(createMove(nextId(), piece.id, piece.position!, ep, victim.id, { isEnPassant: true }));
-              }
+          for (const to of targets) {
+            // A diagonal push onto an *empty* square is only legal as en passant.
+            if (!getPieceAt(state.board, to) && !this.isEnPassantSquare(state, piece, to, ep)) {
+              continue;
+            }
+            const captured = getPieceAt(state.board, to) ?? this.enPassantVictim(state, piece, to, ep);
+            const isPromotion = this.rankOf(to) === promoRank;
+            const isEp = !!captured && !positionsEqual(captured.position!, to);
+            for (const promo of this.promotionOptions(piece, isPromotion)) {
+              moves.push(createMove(
+                nextId(), piece.id, piece.position!, to,
+                captured?.id,
+                { ...(promo ?? {}), ...(isEp ? { isEnPassant: true } : {}) }
+              ));
             }
           }
           continue;
@@ -393,8 +387,15 @@ export class ChessRuleSet implements RuleSet {
     const pieces = [...state.board.pieces.values()].filter(p => p.owner === player && p.position);
 
     for (const piece of pieces) {
+      // Pawns attack one step diagonally ahead. Reuse the generic generator by
+      // overriding the piece type to a symmetric one-step diagonal stepper and
+      // relaxing `canMoveEmpty`, so empty squares still count as attacked.
       if (piece.type === CHESS_PIECES.PAWN) {
-        attacked.push(...this.pawnAttackSquares(state.board, piece));
+        const probe: Piece = { ...piece, type: this.cfg.attackProbeType };
+        const ctx = this.movementCtx(state.board, probe);
+        for (const t of generatePatternTargets(ctx, PAWN_ATTACK_PROBE)) {
+          attacked.push(t);
+        }
         continue;
       }
 
@@ -451,9 +452,10 @@ export class ChessRuleSet implements RuleSet {
   private moveIsSafe(state: GameState, player: PlayerId, move: Move): boolean {
     if (move.capturedPieceId) {
       const victim = state.board.pieces.get(move.capturedPieceId);
-      if (!victim || !victim.position || !positionsEqual(victim.position, move.to)) {
-        return false; // stale move object from another state
-      }
+      if (!victim || !victim.position) return false;
+      // Normal captures land on the victim; en passant captures it beside the target.
+      const landsOnVictim = positionsEqual(victim.position, move.to);
+      if (!landsOnVictim && !move.metadata?.isEnPassant) return false;
     } else if (getPieceAt(state.board, move.to)) {
       return false;
     }
@@ -536,18 +538,34 @@ export class ChessRuleSet implements RuleSet {
     return delta;
   }
 
-  /** Squares a pawn attacks (diagonally ahead), orientation-aware. */
-  private pawnAttackSquares(board: Board, piece: Piece): Position[] {
-    const fwd = this.forwardDelta(piece.owner);
-    const fileAxis = this.cfg.orientation.rankIndex === 1 ? 0 : 1;
-    const out: Position[] = [];
-    for (const df of [-1, 1]) {
-      const delta = [...fwd];
-      delta[fileAxis] = df;
-      const t = translatePosition(piece.position!, delta);
-      if (t && board.topology.isValidPosition(t)) out.push(t);
-    }
-    return out;
+  /** True when `to` is the en-passant target square for pawn `piece`. */
+  private isEnPassantSquare(
+    _state: GameState,
+    piece: Piece,
+    to: Position,
+    ep: Position | null
+  ): boolean {
+    if (!ep || !positionsEqual(to, ep)) return false;
+    const pf = this.fileOf(piece.position!);
+    const pr = this.rankOf(piece.position!);
+    const ef = this.fileOf(ep);
+    const er = this.rankOf(ep);
+    const fwdSign = Math.sign(this.forwardDelta(piece.owner)[this.cfg.orientation.rankIndex]);
+    // The target must sit one rank ahead of the pawn and beside it in file —
+    // i.e. exactly what a double push would have crossed through.
+    return Math.abs(ef - pf) === 1 && er === pr + fwdSign;
+  }
+
+  /** The pawn standing beside the en-passant target (the captured victim). */
+  private enPassantVictim(
+    state: GameState,
+    piece: Piece,
+    to: Position,
+    ep: Position | null
+  ): Piece | undefined {
+    if (!this.isEnPassantSquare(state, piece, to, ep)) return undefined;
+    const victim = getPieceAt(state.board, pos(this.fileOf(to), this.rankOf(piece.position!)));
+    return victim && victim.owner !== piece.owner ? victim : undefined;
   }
 
   private rankOf(position: Position): number {

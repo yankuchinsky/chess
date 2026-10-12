@@ -83,6 +83,19 @@ export const KING_MOVE: MovementPattern = {
 };
 
 /**
+ * Attack-probe pattern: one step diagonally ahead, landing on empty squares
+ * allowed. Used by the generic movement generator to compute pawn attack maps
+ * without hand-rolled coordinate math (see `getAttackedPositions`).
+ */
+export const PAWN_ATTACK_PROBE: MovementPattern = {
+  id: 'pawn-attack-probe',
+  directions: [[-1, FORWARD], [1, FORWARD]].map(delta => ({ delta })),
+  isSliding: false,
+  canCapture: true,
+  canMoveEmpty: true
+};
+
+/**
  * Registry mapping piece-type strings to their movement patterns.
  * Variant rulesets can build their own registry (`{ ...STANDARD_PATTERNS,
  * [MY_PIECE]: MY_PATTERN }`) without modifying this module.

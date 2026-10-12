@@ -1,0 +1,31 @@
+{
+  "name": "@chess-kernel/rules-chess-standard",
+  "version": "0.1.0",
+  "description": "Standard chess ruleset implementation for chess-kernel",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "keywords": ["chess", "ruleset", "standard-chess", "chess-kernel"],
+  "license": "MIT",
+  "peerDependencies": {
+    "@chess-kernel/core": "^0.1.0"
+  },
+  "devDependencies": {
+    "@chess-kernel/core": "^0.1.0",
+    "typescript": "^5.4.0",
+    "vitest": "^1.4.0",
+    "@types/node": "^20.11.0"
+  }
+}
