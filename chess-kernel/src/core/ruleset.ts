@@ -1,8 +1,7 @@
 import { PlayerId, PieceType } from '../core/types';
-import { Piece } from '../core/piece';
 import { Position } from '../core/types';
 import { Board, Topology } from '../topology/board';
-import { Move, GameState, GameStateMetadata, GameResult } from '../state/game-state';
+import { Move, GameState, GameResult } from '../state/game-state';
 
 /**
  * Definition of a piece type

@@ -10,13 +10,19 @@ import {
 import {
   GameState,
   GameResult,
-  GameStateMetadata,
+  StateMetadata,
   Move,
   createGameState,
   createMove,
   applyMove
 } from '../state/game-state';
 import { MovementPattern, PieceDefinition, RuleSet } from '../core/ruleset';
+import { ChessMoveMetadata } from './chess/move';
+import {
+  ChessStateMetadata,
+  ChessCastlingRights,
+  readChessStateMetadata
+} from './chess/state';
 import { generatePatternTargets, translatePosition, MovementContext } from './movement';
 import { hasOrientation, OrientedBoard } from './geometry';
 import {
@@ -48,17 +54,31 @@ import { ChessRuleSetConfig, resolveConfig } from './chess/config';
 const WHITE = 'white';
 const BLACK = 'black';
 
-interface ChessMeta {
-  castlingRights: Record<string, { kingSide: boolean; queenSide: boolean }>;
-  enPassantTarget?: Position | null;
+/**
+ * Read chess-specific move metadata from an opaque kernel `Move`. The kernel
+ * stores `metadata` as a plain data bag; only this ruleset knows its shape.
+ */
+function chessMetaOf(move: Move): ChessMoveMetadata {
+  return (move.metadata ?? {}) as ChessMoveMetadata;
 }
 
-function readMeta(state: GameState): ChessMeta {
-  const m = (state.metadata ?? {}) as Record<string, unknown>;
-  return {
-    castlingRights: (m.castlingRights as ChessMeta['castlingRights']) ?? {},
-    enPassantTarget: (m.enPassantTarget as Position | null | undefined) ?? null
-  };
+/** Read the chess state bag from the opaque kernel `GameState.metadata`. */
+function readMeta(state: GameState): ChessStateMetadata {
+  return readChessStateMetadata(state.metadata);
+}
+
+/**
+ * Promotion fan-out: one entry per legal promotion target (or a single
+ * `undefined` entry when the move is not a promotion).
+ */
+function expandPromotions(
+  base: ChessMoveMetadata,
+  piece: Piece,
+  isPromotion: boolean,
+  targets: readonly PieceType[]
+): ChessMoveMetadata[] {
+  if (!isPromotion || piece.type !== CHESS_PIECES.PAWN) return [base];
+  return targets.map(t => ({ ...base, promotionType: t }));
 }
 
 function pos(file: number, rank: number): Position {
@@ -118,7 +138,7 @@ export class ChessRuleSet implements RuleSet {
 
     const board = createBoard(topology, pieces);
 
-    const metadata: GameStateMetadata = {
+    const metadata: ChessStateMetadata = {
       castlingRights: {
         [white]: { kingSide: true, queenSide: true },
         [black]: { kingSide: true, queenSide: true }
@@ -163,7 +183,10 @@ export class ChessRuleSet implements RuleSet {
     const moves: Move[] = [];
     const meta = readMeta(state);
     let moveId = 0;
-    const nextId = () => `${state.id}-ply${state.moveHistory.length}-${moveId++}`;
+    // Ply number is snapshotted once: generateMoves() runs against a single
+    // immutable state, so every candidate belongs to the same ply.
+    const ply = state.moveHistory.length;
+    const nextId = () => `${state.id}-ply${ply}-${moveId++}`;
 
     const ownPieces = [...state.board.pieces.values()].filter(p => p.owner === player && p.position);
 
@@ -185,7 +208,7 @@ export class ChessRuleSet implements RuleSet {
           });
           for (const to of targets) {
             const isPromotion = this.rankOf(to) === promoRank;
-            for (const promo of this.promotionOptions(piece, isPromotion)) {
+            for (const promo of expandPromotions({}, piece, isPromotion, this.cfg.promotionTargets)) {
               moves.push(createMove(nextId(), piece.id, piece.position!, to, undefined, promo));
             }
           }
@@ -203,11 +226,12 @@ export class ChessRuleSet implements RuleSet {
             const captured = getPieceAt(state.board, to) ?? this.enPassantVictim(state, piece, to, ep);
             const isPromotion = this.rankOf(to) === promoRank;
             const isEp = !!captured && !positionsEqual(captured.position!, to);
-            for (const promo of this.promotionOptions(piece, isPromotion)) {
+            const base: ChessMoveMetadata = isEp ? { isEnPassant: true } : {};
+            for (const promo of expandPromotions(base, piece, isPromotion, this.cfg.promotionTargets)) {
               moves.push(createMove(
                 nextId(), piece.id, piece.position!, to,
                 captured?.id,
-                { ...(promo ?? {}), ...(isEp ? { isEnPassant: true } : {}) }
+                promo
               ));
             }
           }
@@ -266,11 +290,33 @@ export class ChessRuleSet implements RuleSet {
     if (!piece.position || !positionsEqual(piece.position, move.from)) return false;
     if (!state.board.topology.isValidPosition(move.to)) return false;
 
+    // Fast path: the caller's move object was produced by `generateMoves`
+    // against this very (immutable) state — it already carries the full
+    // chess metadata (promotion piece, castling rook id, en passant flag),
+    // so re-generating and matching is unnecessary.
+    if (this.isGeneratedForState(state, move)) {
+      return this.moveIsSafe(state, state.currentPlayer, move);
+    }
+
     const pseudo = this.generateMoves(state, state.currentPlayer);
     const match = pseudo.find(m => this.sameMove(m, move));
     if (!match) return false;
 
     return this.moveIsSafe(state, state.currentPlayer, match);
+  }
+
+  /**
+   * True when `move` looks like an output of `generateMoves(state, …)` for
+   * this exact state: its id embeds the state id, the ply number that was
+   * current while generating, and a non-negative sequence index. Because
+   * states are immutable and ids are deterministic per ply, such a move is
+   * guaranteed to have been generated from `state` itself.
+   */
+  private isGeneratedForState(state: GameState, move: Move): boolean {
+    const prefix = `${state.id}-ply${state.moveHistory.length}-`;
+    if (!move.id.startsWith(prefix)) return false;
+    const seq = move.id.slice(prefix.length);
+    return /^\d+$/.test(seq);
   }
 
   executeMove(state: GameState, move: Move): GameState {
@@ -284,31 +330,32 @@ export class ChessRuleSet implements RuleSet {
     const piece = state.board.pieces.get(move.pieceId)!;
     const captured = move.capturedPieceId ? state.board.pieces.get(move.capturedPieceId) : undefined;
     const meta = readMeta(state);
+    const moveMeta = chessMetaOf(move);
 
     let board = movePieceOnBoard(state.board, move.pieceId, move.to);
     if (!board) throw new Error('Cannot execute move: bad positions');
 
     // En passant: physically remove the pawn standing beside the mover
-    if (move.metadata?.isEnPassant && captured?.position) {
+    if (moveMeta.isEnPassant && captured?.position) {
       board = removePieceFromBoard(board, captured.id) ?? board;
       board = clearCell(board, captured.position); // drop stale cell mapping too
     }
 
     // Castling: move the rook too
-    if (move.metadata?.isCastling && move.metadata.castlingRookId) {
+    if (moveMeta.isCastling && moveMeta.castlingRookId) {
       const rank = this.rankOf(move.to);
       const rookToFile = this.fileOf(move.to) === 6 ? 5 : 3;
-      board = movePieceOnBoard(board, move.metadata.castlingRookId, pos(rookToFile, rank)) ?? board;
+      board = movePieceOnBoard(board, moveMeta.castlingRookId, pos(rookToFile, rank)) ?? board;
     }
 
     // Promotion
-    if (move.metadata?.promotionType && piece.type === CHESS_PIECES.PAWN) {
-      const promoted = transformPiece(piece, move.metadata.promotionType as PieceType);
+    if (moveMeta.promotionType && piece.type === CHESS_PIECES.PAWN) {
+      const promoted = transformPiece(piece, moveMeta.promotionType as PieceType);
       board = replacePieceOnBoard(board, promoted);
     }
 
     // Update castling rights
-    const rights: ChessMeta['castlingRights'] = JSON.parse(JSON.stringify(meta.castlingRights));
+    const rights: Record<string, ChessCastlingRights> = JSON.parse(JSON.stringify(meta.castlingRights));
     const loseAll = (owner: PlayerId) => {
       if (rights[owner]) rights[owner] = { kingSide: false, queenSide: false };
     };
@@ -342,15 +389,12 @@ export class ChessRuleSet implements RuleSet {
       }
     }
 
-    const newMetadata: GameStateMetadata = { castlingRights: rights, enPassantTarget };
+    const newMetadata: ChessStateMetadata = { castlingRights: rights, enPassantTarget };
 
-    const advanced = applyMove(state, move, board, captured, newMetadata);
-    // Fix halfmove clock: core applyMove cannot know about pawn moves (see its TODO)
-    const resets = !!captured || piece.type === CHESS_PIECES.PAWN;
-    return Object.freeze({
-      ...advanced,
-      halfmoveClock: resets ? 0 : advanced.halfmoveClock
-    }) as GameState;
+    // The kernel's applyMove only resets the halfmove clock on captures;
+    // chess additionally resets it on pawn moves, injected via options.
+    const resetsHalfmoveClock = piece.type === CHESS_PIECES.PAWN;
+    return applyMove(state, move, board, captured, newMetadata, { resetsHalfmoveClock });
   }
 
   // ---------------------------------------------------------------- checks
@@ -455,7 +499,7 @@ export class ChessRuleSet implements RuleSet {
       if (!victim || !victim.position) return false;
       // Normal captures land on the victim; en passant captures it beside the target.
       const landsOnVictim = positionsEqual(victim.position, move.to);
-      if (!landsOnVictim && !move.metadata?.isEnPassant) return false;
+      if (!landsOnVictim && !chessMetaOf(move).isEnPassant) return false;
     } else if (getPieceAt(state.board, move.to)) {
       return false;
     }
@@ -482,21 +526,12 @@ export class ChessRuleSet implements RuleSet {
 
   // --------------------------------------------------------------- helpers
 
-  /** Promotion fan-out: a promoting pawn move expands into one move per piece. */
-  private promotionOptions(
-    piece: Piece,
-    isPromotion: boolean
-  ): ReadonlyArray<{ promotionType?: PieceType } | undefined> {
-    if (!isPromotion || piece.type !== CHESS_PIECES.PAWN) return [undefined];
-    return this.cfg.promotionTargets.map(t => ({ promotionType: t }));
-  }
-
   /** Moves match when piece/from/to agree; promotion type must agree too. */
   private sameMove(a: Move, b: Move): boolean {
     return a.pieceId === b.pieceId &&
       positionsEqual(a.from, b.from) &&
       positionsEqual(a.to, b.to) &&
-      a.metadata?.promotionType === b.metadata?.promotionType;
+      chessMetaOf(a).promotionType === chessMetaOf(b).promotionType;
   }
 
   private isFirstPlayer(player: PlayerId): boolean {

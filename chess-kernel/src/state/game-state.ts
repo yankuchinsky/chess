@@ -3,6 +3,26 @@ import { Piece } from '../core/piece';
 import { Board } from '../topology/board';
 
 /**
+ * Opaque, ruleset-defined payload attached to a move.
+ *
+ * The kernel never interprets it — it only stores and replays it as part of
+ * the move history. Each ruleset declares its own typed shape (e.g.
+ * `ChessMoveMetadata` in `rulesets/chess/move.ts`) and casts at the boundary.
+ */
+export type MoveMetadata = Record<string, unknown>;
+
+/**
+ * Opaque, ruleset-defined state bag carried by `GameState`.
+ *
+ * Like `MoveMetadata`, the kernel treats this as a plain data container:
+ * game-specific fields (castling rights, en-passant targets, hands for
+ * Crazyhouse, …) are declared and interpreted exclusively by the ruleset
+ * layer. Rulesets may define a typed alias for their own bag, e.g.
+ * `ChessStateMetadata` in `rulesets/chess/state.ts`.
+ */
+export type StateMetadata = Record<string, unknown>;
+
+/**
  * Represents a single move in the game
  * Engine doesn't know if this move is valid - ruleset validates
  */
@@ -12,20 +32,7 @@ export interface Move {
   readonly from: Position;
   readonly to: Position;
   readonly capturedPieceId?: EntityId;
-  readonly metadata?: MoveMetadata; // Ruleset-specific data (promotion type, en passant, etc.)
-}
-
-/**
- * Metadata for special moves
- * Ruleset defines what fields are meaningful
- */
-export interface MoveMetadata {
-  readonly promotionType?: string;
-  readonly isEnPassant?: boolean;
-  readonly isCastling?: boolean;
-  readonly castlingRookId?: EntityId;
-  readonly dropFromHand?: boolean; // For Crazyhouse-style games
-  [key: string]: unknown;
+  readonly metadata?: MoveMetadata; // Ruleset-specific data (opaque to the kernel)
 }
 
 /**
@@ -73,21 +80,11 @@ export interface GameState {
   readonly players: readonly PlayerId[];
   readonly phase: GamePhase;
   readonly result: GameResult;
-  readonly halfmoveClock: number; // Moves since last capture/pawn move (for 50-move rule)
+  readonly halfmoveClock: number; // Generic ply counter since last reset; ruleset decides when to reset (via applyMove options)
   readonly fullmoveNumber: number;
   readonly moveHistory: readonly Move[];
   readonly capturedPieces: readonly Piece[]; // Pieces captured during game
-  readonly metadata?: GameStateMetadata; // Ruleset-specific state (castling rights, hands, etc.)
-}
-
-/**
- * Ruleset-specific metadata
- */
-export interface GameStateMetadata {
-  readonly castlingRights?: ReadonlySet<string>;
-  readonly enPassantTarget?: Position;
-  readonly playerHands?: Map<PlayerId, readonly Piece[]>; // For Crazyhouse
-  [key: string]: unknown;
+  readonly metadata?: StateMetadata; // Ruleset-specific state (opaque to the kernel)
 }
 
 /**
@@ -98,7 +95,7 @@ export function createGameState(
   board: Board,
   players: readonly PlayerId[],
   startingPlayer: PlayerId,
-  metadata?: GameStateMetadata
+  metadata?: StateMetadata
 ): GameState {
   return Object.freeze({
     id,
@@ -116,6 +113,19 @@ export function createGameState(
 }
 
 /**
+ * Options bag for `applyMove`. Everything game-specific (like resetting the
+ * halfmove clock on a pawn push) is injected by the ruleset; the kernel only
+ * applies generic bookkeeping.
+ */
+export interface ApplyMoveOptions {
+  /**
+   * When true, the halfmove clock resets even though no piece was captured
+   * (e.g. a pawn advance in chess). Defaults to false.
+   */
+  readonly resetsHalfmoveClock?: boolean;
+}
+
+/**
  * Applies a move to game state, returning new state
  * Does NOT validate the move - ruleset must validate before calling
  */
@@ -124,12 +134,15 @@ export function applyMove(
   move: Move,
   newBoard: Board,
   capturedPiece?: Piece,
-  newMetadata?: GameStateMetadata
+  newMetadata?: StateMetadata,
+  options?: ApplyMoveOptions
 ): GameState {
   const isCapture = !!capturedPiece;
-  const isPawnMove = false; // Ruleset should determine this
-  
-  const newHalfmoveClock = (isCapture || isPawnMove) ? 0 : state.halfmoveClock + 1;
+  // Game-specific resets (pawn moves, etc.) are decided by the ruleset and
+  // passed through `options`; the kernel itself knows nothing about them.
+  const resetClock = isCapture || options?.resetsHalfmoveClock === true;
+
+  const newHalfmoveClock = resetClock ? 0 : state.halfmoveClock + 1;
   const newFullmoveNumber = state.currentPlayer === state.players[0] 
     ? state.fullmoveNumber + 1 
     : state.fullmoveNumber;
