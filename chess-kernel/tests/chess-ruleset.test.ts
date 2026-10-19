@@ -14,6 +14,9 @@ import {
   getPieceAt,
   positionsEqual
 } from '../src/index';
+import { readChessStateMetadata } from '../src/rulesets/chess/state';
+import type { ChessStateMetadata } from '../src/rulesets/chess/state';
+import type { ChessMoveMetadata } from '../src/rulesets/chess/move';
 
 const ruleset = new ChessRuleSet();
 const board88 = new RectangularTopology(8, 8);
@@ -204,7 +207,7 @@ describe('castling', () => {
     return createGameState('castle', createBoard(board88, pieces), ['white', 'black'], 'white', {
       castlingRights: { white: { kingSide: true, queenSide: true }, black: { kingSide: true, queenSide: true } },
       enPassantTarget: null
-    });
+    } satisfies ChessStateMetadata);
   }
 
   it('generates O-O when path clear and safe', () => {

@@ -10,7 +10,7 @@ import {
 import {
   GameState,
   GameResult,
-  GameStateMetadata,
+  StateMetadata,
   Move,
   createGameState,
   createMove,
@@ -18,6 +18,11 @@ import {
 } from '../state/game-state';
 import { MovementPattern, PieceDefinition, RuleSet } from '../core/ruleset';
 import { ChessMoveMetadata } from './chess/move';
+import {
+  ChessStateMetadata,
+  ChessCastlingRights,
+  readChessStateMetadata
+} from './chess/state';
 import { generatePatternTargets, translatePosition, MovementContext } from './movement';
 import { hasOrientation, OrientedBoard } from './geometry';
 import {
@@ -49,17 +54,17 @@ import { ChessRuleSetConfig, resolveConfig } from './chess/config';
 const WHITE = 'white';
 const BLACK = 'black';
 
-interface ChessMeta {
-  castlingRights: Record<string, { kingSide: boolean; queenSide: boolean }>;
-  enPassantTarget?: Position | null;
-}
-
 /**
  * Read chess-specific move metadata from an opaque kernel `Move`. The kernel
  * stores `metadata` as a plain data bag; only this ruleset knows its shape.
  */
 function chessMetaOf(move: Move): ChessMoveMetadata {
   return (move.metadata ?? {}) as ChessMoveMetadata;
+}
+
+/** Read the chess state bag from the opaque kernel `GameState.metadata`. */
+function readMeta(state: GameState): ChessStateMetadata {
+  return readChessStateMetadata(state.metadata);
 }
 
 /**
@@ -74,14 +79,6 @@ function expandPromotions(
 ): ChessMoveMetadata[] {
   if (!isPromotion || piece.type !== CHESS_PIECES.PAWN) return [base];
   return targets.map(t => ({ ...base, promotionType: t }));
-}
-
-function readMeta(state: GameState): ChessMeta {
-  const m = (state.metadata ?? {}) as Record<string, unknown>;
-  return {
-    castlingRights: (m.castlingRights as ChessMeta['castlingRights']) ?? {},
-    enPassantTarget: (m.enPassantTarget as Position | null | undefined) ?? null
-  };
 }
 
 function pos(file: number, rank: number): Position {
@@ -141,7 +138,7 @@ export class ChessRuleSet implements RuleSet {
 
     const board = createBoard(topology, pieces);
 
-    const metadata: GameStateMetadata = {
+    const metadata: ChessStateMetadata = {
       castlingRights: {
         [white]: { kingSide: true, queenSide: true },
         [black]: { kingSide: true, queenSide: true }
@@ -293,11 +290,33 @@ export class ChessRuleSet implements RuleSet {
     if (!piece.position || !positionsEqual(piece.position, move.from)) return false;
     if (!state.board.topology.isValidPosition(move.to)) return false;
 
+    // Fast path: the caller's move object was produced by `generateMoves`
+    // against this very (immutable) state — it already carries the full
+    // chess metadata (promotion piece, castling rook id, en passant flag),
+    // so re-generating and matching is unnecessary.
+    if (this.isGeneratedForState(state, move)) {
+      return this.moveIsSafe(state, state.currentPlayer, move);
+    }
+
     const pseudo = this.generateMoves(state, state.currentPlayer);
     const match = pseudo.find(m => this.sameMove(m, move));
     if (!match) return false;
 
     return this.moveIsSafe(state, state.currentPlayer, match);
+  }
+
+  /**
+   * True when `move` looks like an output of `generateMoves(state, …)` for
+   * this exact state: its id embeds the state id, the ply number that was
+   * current while generating, and a non-negative sequence index. Because
+   * states are immutable and ids are deterministic per ply, such a move is
+   * guaranteed to have been generated from `state` itself.
+   */
+  private isGeneratedForState(state: GameState, move: Move): boolean {
+    const prefix = `${state.id}-ply${state.moveHistory.length}-`;
+    if (!move.id.startsWith(prefix)) return false;
+    const seq = move.id.slice(prefix.length);
+    return /^\d+$/.test(seq);
   }
 
   executeMove(state: GameState, move: Move): GameState {
@@ -336,7 +355,7 @@ export class ChessRuleSet implements RuleSet {
     }
 
     // Update castling rights
-    const rights: ChessMeta['castlingRights'] = JSON.parse(JSON.stringify(meta.castlingRights));
+    const rights: Record<string, ChessCastlingRights> = JSON.parse(JSON.stringify(meta.castlingRights));
     const loseAll = (owner: PlayerId) => {
       if (rights[owner]) rights[owner] = { kingSide: false, queenSide: false };
     };
@@ -370,15 +389,12 @@ export class ChessRuleSet implements RuleSet {
       }
     }
 
-    const newMetadata: GameStateMetadata = { castlingRights: rights, enPassantTarget };
+    const newMetadata: ChessStateMetadata = { castlingRights: rights, enPassantTarget };
 
-    const advanced = applyMove(state, move, board, captured, newMetadata);
-    // Fix halfmove clock: core applyMove cannot know about pawn moves (see its TODO)
-    const resets = !!captured || piece.type === CHESS_PIECES.PAWN;
-    return Object.freeze({
-      ...advanced,
-      halfmoveClock: resets ? 0 : advanced.halfmoveClock
-    }) as GameState;
+    // The kernel's applyMove only resets the halfmove clock on captures;
+    // chess additionally resets it on pawn moves, injected via options.
+    const resetsHalfmoveClock = piece.type === CHESS_PIECES.PAWN;
+    return applyMove(state, move, board, captured, newMetadata, { resetsHalfmoveClock });
   }
 
   // ---------------------------------------------------------------- checks
