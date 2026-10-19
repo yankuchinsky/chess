@@ -3,6 +3,15 @@ import { Piece } from '../core/piece';
 import { Board } from '../topology/board';
 
 /**
+ * Opaque, ruleset-defined payload attached to a move.
+ *
+ * The kernel never interprets it — it only stores and replays it as part of
+ * the move history. Each ruleset declares its own typed shape (e.g.
+ * `ChessMoveMetadata` in `rulesets/chess/move.ts`) and casts at the boundary.
+ */
+export type MoveMetadata = Record<string, unknown>;
+
+/**
  * Represents a single move in the game
  * Engine doesn't know if this move is valid - ruleset validates
  */
@@ -12,20 +21,7 @@ export interface Move {
   readonly from: Position;
   readonly to: Position;
   readonly capturedPieceId?: EntityId;
-  readonly metadata?: MoveMetadata; // Ruleset-specific data (promotion type, en passant, etc.)
-}
-
-/**
- * Metadata for special moves
- * Ruleset defines what fields are meaningful
- */
-export interface MoveMetadata {
-  readonly promotionType?: string;
-  readonly isEnPassant?: boolean;
-  readonly isCastling?: boolean;
-  readonly castlingRookId?: EntityId;
-  readonly dropFromHand?: boolean; // For Crazyhouse-style games
-  [key: string]: unknown;
+  readonly metadata?: MoveMetadata; // Ruleset-specific data (opaque to the kernel)
 }
 
 /**
